@@ -9,7 +9,6 @@ import { determineBlindIndices } from './utils/bet.js'
 import { renderPhaseStatement } from './utils/ui.js';
 import Spinner from './Spinner'
 
-// ((0 - 3) % arr.len) + arr.len = moving backwards
 class App extends Component {
   state = {
     players: null,
@@ -31,21 +30,21 @@ class App extends Component {
       phase: 'initialDeal',
       deck: shuffle(fullDeck),
       dealerIndex,
-      activePlayerIndex: handleOverflowIndex(blindIndicies.bigBlindIndex, 1, players.length, 'up'),
+      activePlayerIndex: dealerIndex,
       blindIndex: {
         big: blindIndicies.bigBlindIndex,
         small: blindIndicies.smallBlindIndex,
       }
     })
+    console.log(this.state.deck)
     this.runGameLoop()
   }
 
   renderPlayers = () => {
-    console.log("Calling renderplayers")
+    // Reverse Players Array for the sake of taking turns counter-clockwise.
     const reversedPlayers = this.state.players.reduce((result, player, index) => {
-      console.log("Index, activePlayerIndex:", index, this.state.activePlayerIndex)
       result.unshift(
-        <div className='flex-centered-column' style={{margin: '0 16px', backgroundColor: `${(index === this.state.activePlayerIndex) ? 'rgba(136, 124, 175, 0.25)' : null}`}}>
+        <div className='flex-centered-column' style={{margin: '0 16px', backgroundColor: `${(index === this.state.activePlayerIndex) ? 'rgba(136, 124, 175, 0.25)' : 'transparent'}`}}>
           <div className='player-avatar-container'>
             <img className='player-avatar-image' src={player.avatarURL} />
               {(this.state.dealerIndex === index) && 
@@ -106,7 +105,7 @@ class App extends Component {
       this.dealInitialCards()
     }
     while (this.state.phase === 'betting1') {
-      return console.log("time to bet boiii")
+      return console.log(this.state)
     }
   }
 
