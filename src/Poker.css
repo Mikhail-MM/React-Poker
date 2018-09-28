@@ -1,0 +1,74 @@
+img {
+	width: 100%;
+	height: 100%;
+}
+.centered-flex-row {
+	display: flex;
+	justify-content: center;
+	width: auto;
+	height: auto;
+}
+
+.spinner-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	height: 200px;
+	width: 200px;
+
+	animation: App-logo-spin infinite 20s linear;
+}
+
+.flex-centered-column {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	width: auto;
+	height: auto;
+}
+
+.player-avatar-container {
+	position: relative;
+
+	height: 100px;
+	width: 100px;
+	border-radius: 100px;
+}
+
+.playing-card {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+
+	height: 50px;
+	width: 50px;
+
+
+	opacity: 0;
+	animation: fade-in-up 0.5s;
+	animation-fill-mode: forwards;
+}
+
+@keyframes fade-in-up {
+	0% {
+		opacity: 0;
+		transform: translateY(-100%)
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0%);
+	}
+}
+
+.dealer-chip-icon-container {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+
+	height: 25px;
+	width: 25px;
+	z-index: 100;
+}
