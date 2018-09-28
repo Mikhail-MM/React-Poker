@@ -19,6 +19,8 @@ class App extends Component {
     phase: 'loading',
   }
 
+  cardAnimationDelay = 0
+
   async componentDidMount() {
     const players = await generateTable();
     const dealerIndex = Math.floor(Math.random() * Math.floor(players.length));
@@ -72,7 +74,7 @@ class App extends Component {
   renderPlayerCards = (index) => {
     return this.state.players[index].cards.map(card => {
       return(
-        <div className='playing-card'>
+        <div className='playing-card' style={{animationDelay: `${card.animationDelay}ms`}}>
           <h6> {`${card.cardFace}${card.suit[0]}`}</h6>
         </div>
       )
@@ -88,6 +90,8 @@ class App extends Component {
         })
       } else if (prevState.players[prevState.activePlayerIndex].cards.length < 2) {
           const { mutableDeckCopy, chosenCards } = popCards(prevState.deck, 1)
+          chosenCards.animationDelay = this.cardAnimationDelay
+          this.cardAnimationDelay = this.cardAnimationDelay + 350
           const newDeck = [...mutableDeckCopy]
           const newPlayersInstance = [...prevState.players]
             newPlayersInstance[prevState.activePlayerIndex].cards.push(chosenCards)
