@@ -44,8 +44,9 @@ img {
 	align-items: center;
 
 	height: 50px;
-	width: 50px;
-
+	width: 40px;
+	margin: 0 1px;
+	border: 1px solid gray;
 
 	opacity: 0;
 	animation: fade-in-up 0.5s;
