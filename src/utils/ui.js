@@ -1,11 +1,17 @@
 const renderPhaseStatement = (phase) => {
-	if (phase === 'loading') {
-		return "Finding a Table..."
-	} else if (phase === 'initialDeal') {
-		return  "Dealing out the cards!"
-	} else {
-		return "Houston, we have a problem! (Unknown Error! Ruh-roh)"
+	switch(phase) {
+		case('loading'): return 'Finding a Table, Please Wait'
+		case('initialDeal'): return 'Dealing out the cards'
+		case('betting1'): return 'Place Initial Bets'
 	}
 }
 
-export { renderPhaseStatement }
+const renderUnicodeSuitSymbol = (suit) => {
+	switch(suit) {
+		case('Heart'): return '\u2665'
+		case('Diamond'): return '\u2666'
+		case('Spade'): return '\u2660'
+		case('Club'): return '\u2663'
+	}
+}
+export { renderPhaseStatement, renderUnicodeSuitSymbol }

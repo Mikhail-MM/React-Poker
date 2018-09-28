@@ -6,7 +6,7 @@ import './Poker.css';
 import { fullDeck, shuffle, popCards} from './utils/cards.js';
 import { generateTable, handleOverflowIndex } from './utils/players.js';
 import { determineBlindIndices } from './utils/bet.js'
-import { renderPhaseStatement } from './utils/ui.js';
+import { renderPhaseStatement, renderUnicodeSuitSymbol } from './utils/ui.js';
 import Spinner from './Spinner'
 
 class App extends Component {
@@ -75,7 +75,7 @@ class App extends Component {
     return this.state.players[index].cards.map(card => {
       return(
         <div className='playing-card' style={{animationDelay: `${card.animationDelay}ms`}}>
-          <h6> {`${card.cardFace}${card.suit[0]}`}</h6>
+          <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
         </div>
       )
     })
@@ -91,7 +91,7 @@ class App extends Component {
       } else if (prevState.players[prevState.activePlayerIndex].cards.length < 2) {
           const { mutableDeckCopy, chosenCards } = popCards(prevState.deck, 1)
           chosenCards.animationDelay = this.cardAnimationDelay
-          this.cardAnimationDelay = this.cardAnimationDelay + 350
+          this.cardAnimationDelay = this.cardAnimationDelay + 250
           const newDeck = [...mutableDeckCopy]
           const newPlayersInstance = [...prevState.players]
             newPlayersInstance[prevState.activePlayerIndex].cards.push(chosenCards)
