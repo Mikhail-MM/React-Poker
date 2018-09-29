@@ -14,4 +14,6 @@ const renderUnicodeSuitSymbol = (suit) => {
 		case('Club'): return '\u2663'
 	}
 }
+
+
 export { renderPhaseStatement, renderUnicodeSuitSymbol }

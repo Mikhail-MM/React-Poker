@@ -34,6 +34,25 @@ const determineBlindIndices = (dealerIndex, numPlayers) => {
 	return({
 		bigBlindIndex: (dealerIndex + 2) % numPlayers,
 		smallBlindIndex: (dealerIndex + 1) % numPlayers
-	})
+	});
 }
-export { determineBlindIndices }
+
+const anteUpBlinds = (players, blindIndices, minBet) => {
+
+	const { bigBlindIndex, smallBlindIndex } = blindIndices;
+	players[bigBlindIndex].bet = minBet;
+	players[bigBlindIndex].chips = players[bigBlindIndex].chips - minBet
+	players[smallBlindIndex].bet = minBet / 2;
+	players[smallBlindIndex].chips = players[smallBlindIndex].chips - (minBet / 2)
+		return players
+}
+
+const determineMinBet = (highBet, playerChips) => {
+	if (playerChips < highBet) {
+		return playerChips;
+	} else {
+		return highBet;
+	}
+}
+
+export { determineBlindIndices, anteUpBlinds, determineMinBet }
