@@ -1,3 +1,8 @@
+/*
+Create "ValidateBet" Util for Forms
+
+*/
+
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
@@ -18,7 +23,9 @@ import {
 import { 
   determineBlindIndices, 
   anteUpBlinds, 
-  determineMinBet, 
+  determineMinBet,
+  handleBet,
+  handleFold, 
 } from './utils/bet.js';
 
 import { 
@@ -26,18 +33,23 @@ import {
   renderUnicodeSuitSymbol 
 } from './utils/ui.js';
 
+import { cloneDeep } from 'lodash';
 
 class App extends Component {
   state = {
-    players: null,
-    dealerIndex: null,
-    activePlayerIndex: null,
-    deck: null,
     loading: true,
+    players: null,
+    numPlayersActive: null,
+    numPlayersFolded: null,
+    numPlayersAllIn: null,
+    activePlayerIndex: null,
+    dealerIndex: null,
+    blindIndex: null,
+    deck: null,
+    communityCards: [],
     pot: null,
     highBet: null,
     betInputValue: null,
-    communityCards: [],
     phase: 'loading',
   }
 
@@ -52,19 +64,63 @@ class App extends Component {
     this.setState({
       loading: false,
       players: playersBoughtIn,
-      phase: 'initialDeal',
-      deck: shuffle(fullDeck),
-      dealerIndex,
+      numPlayersActive: 6,
+      numPlayersFolded: 0,
+      numPlayersAllIn: 0,
       activePlayerIndex: dealerIndex,
-      pot: 0,
-      highBet: this.minBet,
-      betInputValue: this.minBet,
+      dealerIndex,
       blindIndex: {
         big: blindIndicies.bigBlindIndex,
         small: blindIndicies.smallBlindIndex,
-      }
+      },
+      deck: shuffle(fullDeck),
+      pot: 0,
+      highBet: this.minBet,
+      betInputValue: this.minBet,
+      phase: 'initialDeal',
     })
     this.runGameLoop();
+  }
+
+  dealInitialCards = () => {
+    // TODO: Implement as Util Function, Separate Business Logic From Main React Component
+    this.setState(prevState => {
+      if (prevState.players[prevState.activePlayerIndex].cards.length === 2) {
+        return({
+          activePlayerIndex: handleOverflowIndex(prevState.blindIndex.big, 1, prevState.players.length, 'up'),
+          phase: 'betting1',
+        })
+      } else if (prevState.players[prevState.activePlayerIndex].cards.length < 2) {
+          const { mutableDeckCopy, chosenCards } = popCards(prevState.deck, 1)
+          chosenCards.animationDelay = this.cardAnimationDelay;
+          this.cardAnimationDelay = this.cardAnimationDelay + 250;
+          const newDeck = [...mutableDeckCopy];
+          const newPlayersInstance = [...prevState.players];
+            newPlayersInstance[prevState.activePlayerIndex].cards.push(chosenCards);
+              return({
+                players: newPlayersInstance,
+                activePlayerIndex: handleOverflowIndex(prevState.activePlayerIndex, 1, prevState.players.length, 'up'),
+                deck: newDeck,
+              });
+      }
+    });
+  }
+
+  handleBetInputChange = (val, min, max) => {
+    if (val === '') val = min
+    if (val > max) val = max
+      this.setState({
+        betInputValue: val,
+      });
+  }
+  
+  handleBet = (bet, min, max) => {
+    const newState = handleBet(cloneDeep(this.state), parseInt(bet), parseInt(min), parseInt(max));
+      this.setState(newState);
+  }
+  handleFold = () => {
+    const newState = handleFold(cloneDeep(this.state));
+      this.setState(newState)
   }
 
   renderPlayers = () => {
@@ -85,6 +141,7 @@ class App extends Component {
           <h5> {player.name} </h5>
           <h5> {`Chips: ${player.chips}`} </h5>
           <h5> {`Bet: ${player.bet}`} </h5>
+          <h5> {`betReconciled: ${player.betReconciled}`} </h5>
           <div className='centered-flex-row'>
             { this.renderPlayerCards(index) }
           </div>
@@ -98,7 +155,9 @@ class App extends Component {
   }
 
   renderPlayerCards = (index) => {
-    return this.state.players[index].cards.map(card => {
+    const { players } = this.state
+    if (players[index].folded) return <div> Folded. </div>
+    return players[index].cards.map(card => {
       return(
         <div className='playing-card' style={{animationDelay: `${card.animationDelay}ms`}}>
           <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
@@ -106,6 +165,7 @@ class App extends Component {
       );
     });
   }
+
   renderCommunityCards = () => {
     return this.state.communityCards.map(card => {
       return(
@@ -115,44 +175,32 @@ class App extends Component {
       );
     });
   }
-
-  dealInitialCards = () => {
-    this.setState(prevState => {
-      if (prevState.players[prevState.activePlayerIndex].cards.length === 2) {
-        return({
-          phase: 'betting1',
-          activePlayerIndex: handleOverflowIndex(prevState.blindIndex.big, 1, prevState.players.length, 'up'),
-        })
-      } else if (prevState.players[prevState.activePlayerIndex].cards.length < 2) {
-          const { mutableDeckCopy, chosenCards } = popCards(prevState.deck, 1)
-          chosenCards.animationDelay = this.cardAnimationDelay;
-          this.cardAnimationDelay = this.cardAnimationDelay + 250;
-          const newDeck = [...mutableDeckCopy];
-          const newPlayersInstance = [...prevState.players];
-            newPlayersInstance[prevState.activePlayerIndex].cards.push(chosenCards);
-              return({
-                deck: newDeck,
-                players: newPlayersInstance,
-                activePlayerIndex: handleOverflowIndex(prevState.activePlayerIndex, 1, prevState.players.length, 'up'),
-              });
-      }
-    });
-  }
-
-  handleBetInputChange = (val, min, max) => {
-    if (val === '') val = min
-    if (val > max) val = max
-
-    this.setState({
-      betInputValue: val,
-    });
-  }
   
-  handleBet = (bet, min, max) => {
-    console.log("Implementation TBA");
-  }
-  handleFold = () => {
-    console.log("Implementation TBA")
+  renderActionMenu = () => {
+    const { highBet, players, activePlayerIndex, phase } = this.state
+    const min = determineMinBet(highBet, players[activePlayerIndex].chips)
+    const max = players[activePlayerIndex].chips + players[activePlayerIndex].bet
+    return(
+      (phase === 'betting1' || phase === 'betting2' || phase === 'betting3' || phase === 'betting4') ? (
+        <React.Fragment>
+          <input 
+            type='number'
+            min={min}
+            max={players[activePlayerIndex].chips + players[activePlayerIndex].bet}
+            value={this.state.betInputValue}
+            onChange={(e) => this.handleBetInputChange(e.target.value, min, max)}
+          />
+          <button
+            onClick={() => this.handleBet(this.state.betInputValue, min, max)}>
+              { this.renderActionButtonText() }
+          </button>
+          <button
+            onClick={() => this.handleFold()}>
+            Fold
+          </button>
+        </React.Fragment>
+      ) : null
+    )
   }
 
   renderActionButtonText() {
@@ -163,31 +211,6 @@ class App extends Component {
     } else {
       return 'Bet'
     }
-  }
-
-  renderActionMenu = () => {
-    const { highBet, players, activePlayerIndex } = this.state
-    const min = determineMinBet(highBet, players[activePlayerIndex].chips)
-    console.log(players, activePlayerIndex)
-    return(
-      <React.Fragment>
-        <input 
-          type='number'
-          min={min}
-          max={players[activePlayerIndex].chips}
-          value={this.state.betInputValue}
-          onChange={(e) => this.handleBetInputChange(e.target.value, min, players[activePlayerIndex].chips)}
-        />
-        <button
-          onClick={this.handleBet(this.state.betInputValue)}>
-            { this.renderActionButtonText() }
-        </button>
-        <button
-          onClick={this.handleFold()}>
-          Fold
-        </button>
-      </React.Fragment>
-    )
   }
 
   runGameLoop = () => {
@@ -206,6 +229,9 @@ class App extends Component {
           <h1 className="App-title">Texas Hold 'Em</h1>
         </header>
           <h2 style={{margin: '16px 0'}}> {renderPhaseStatement(this.state.phase)} </h2>
+          <h6> {`Active Players: ${this.state.numPlayersActive}`} </h6>
+          <h6> {`All-In Players: ${this.state.numPlayersAllIn}`} </h6>
+          <h6> {`Folded Players: ${this.state.numPlayersFolded}`} </h6>
           <h1> Community Cards </h1>
         <div className='centered-flex-row' style={{minHeight: '50px'}}>
         </div>

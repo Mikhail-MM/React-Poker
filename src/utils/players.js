@@ -8,7 +8,7 @@ const generateTable = async () => {
 		chips: 2000,
 		bet: 0,
 		betReconciled: false,
-		didFold: false,
+		folded: false,
 	}];
 
 	const response = await axios.get(`https://randomuser.me/api/?results=5&nat=us,gb,fr`);
@@ -20,7 +20,7 @@ const generateTable = async () => {
 			chips: 2000,
 			bet: 0,
 			betReconciled: false,
-			didFold: false,
+			folded: false,
 		}))
 		.forEach(user => users.push(user))
 

@@ -30,10 +30,12 @@ const determineBlindIndices = (dealerIndex, numPlayers) => {
 }
 */
 
+import { handleOverflowIndex } from './players.js';
+
 const determineBlindIndices = (dealerIndex, numPlayers) => {
 	return({
 		bigBlindIndex: (dealerIndex + 2) % numPlayers,
-		smallBlindIndex: (dealerIndex + 1) % numPlayers
+		smallBlindIndex: (dealerIndex + 1) % numPlayers,
 	});
 }
 
@@ -41,9 +43,9 @@ const anteUpBlinds = (players, blindIndices, minBet) => {
 
 	const { bigBlindIndex, smallBlindIndex } = blindIndices;
 	players[bigBlindIndex].bet = minBet;
-	players[bigBlindIndex].chips = players[bigBlindIndex].chips - minBet
+	players[bigBlindIndex].chips = players[bigBlindIndex].chips - minBet;
 	players[smallBlindIndex].bet = minBet / 2;
-	players[smallBlindIndex].chips = players[smallBlindIndex].chips - (minBet / 2)
+	players[smallBlindIndex].chips = players[smallBlindIndex].chips - (minBet / 2);
 		return players
 }
 
@@ -54,5 +56,92 @@ const determineMinBet = (highBet, playerChips) => {
 		return highBet;
 	}
 }
+const handleBet = (state, bet, min, max) => {
+	console.log(min)
+	console.log(max)
+	if (bet < min) return console.log("Invalid Bet")
+	if (bet > max) return console.log("Invalid Bet")
 
-export { determineBlindIndices, anteUpBlinds, determineMinBet }
+	if (bet > state.highBet) {
+		// minbet and highbet may be condensed to a single property
+		state.highBet = bet;
+		state.minBet = state.highBet;
+		for (let player of state.players) {
+			if (!player.folded || !player.chips === 0) {
+				player.betReconciled = false;
+			}
+		}
+	}
+
+	const activePlayer = state.players[state.activePlayerIndex];
+		const subtractableChips = bet - activePlayer.bet;
+		activePlayer.bet = bet;
+		activePlayer.chips = activePlayer.chips - subtractableChips;
+		if (activePlayer.chips === 0) {
+			state.numPlayersAllIn++
+		}
+		activePlayer.betReconciled = true;
+	
+
+	determineNextActivePlayer(state)
+	return state
+}
+
+const handleFold = (state) => {
+	const activePlayer = state.players[state.activePlayerIndex];
+		activePlayer.folded = true;
+		activePlayer.betReconciled = true;
+		state.numPlayersFolded++
+		state.numPlayersActive--
+
+		determineNextActivePlayer(state)
+		return state
+}
+
+const determineNextActivePlayer = (state) => {
+	state.activePlayerIndex = handleOverflowIndex(state.activePlayerIndex, 1, state.players.length, 'up')
+	if (state.players[state.activePlayerIndex].folded) {
+		return determineNextActivePlayer(state);
+	}
+	if (state.players[state.activePlayerIndex].chips === 0) {
+		if (state.numPlayersAllIn === state.numPlayersActive) {
+			// TODO: Ensure Community Cards Are Distributed Properly!
+			state.phase = 'showdown';
+			return state
+		} else {
+			return determineNextActivePlayer(state);
+		}
+	}
+	if (state.players[state.activePlayerIndex].betReconciled) {
+		return handlePhaseShift(state);
+	}
+}
+
+const handlePhaseShift = (state) => {
+	switch(state.phase) {
+		case('betting1'): {
+			state.phase = 'flop';
+			return state;
+		}
+		case('betting2'): {
+			state.phase = 'turn';
+			return state;
+		}
+		case('betting3'): {
+			state.phase = 'river'
+			return state;
+		}
+		case('betting4'): {
+			state.phase = 'showdown'
+			return state;
+		}
+	}
+}
+
+export { 
+	determineBlindIndices, 
+	anteUpBlinds, 
+	determineMinBet,
+	handleBet,
+	handleFold,
+}
