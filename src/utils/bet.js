@@ -58,8 +58,6 @@ const determineMinBet = (highBet, playerChips) => {
 	}
 }
 const handleBet = (state, bet, min, max) => {
-	console.log(min)
-	console.log(max)
 	if (bet < min) return console.log("Invalid Bet")
 	if (bet > max) return console.log("Invalid Bet")
 
@@ -151,7 +149,8 @@ const reconcilePot = (state) => {
 	}
 	state.minBet = 0;
 	state.highBet = 0;
-	return state
+	state.betInputValue = 0;
+		return state
 }
 
 export { 

@@ -183,6 +183,7 @@ class App extends Component {
 
   renderActionButtonText() {
     // Move to UI Utils
+    // TODO: Add logic for CALL, RAISE
     if ((this.state.betInputValue === this.state.highBet) && (this.state.players[this.state.activePlayerIndex].bet == this.state.highBet)) {
       return 'Check'
     } else {

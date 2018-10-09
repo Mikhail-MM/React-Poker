@@ -5,7 +5,10 @@ const generateTable = async () => {
 		name: 'Scarface Bojangles',
 		avatarURL: '/assets/boy.svg',
 		cards: [],
-		showDownHand: null,
+		showDownHand: {
+			hand: [],
+			histogram: {},
+		},
 		chips: 2000,
 		potChipLimit: 2000,
 		bet: 0,
@@ -21,7 +24,10 @@ const generateTable = async () => {
 			cards: [],
 			chips: 2000,
 			potChipLimit: 2000,
-			showDownHand: null
+			showDownHand: {
+				hand: [],
+				histogram: {},
+			},
 			bet: 0,
 			betReconciled: false,
 			folded: false,

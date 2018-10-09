@@ -3,6 +3,22 @@ import { handleOverflowIndex } from './players.js';
 const totalNumCards = 52;
 const suits = ['Heart', 'Spade', 'Club', 'Diamond'];
 const cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+const VALUE_MAP = {
+	2:1,
+	3:2,
+	4:3,
+	5:4,
+	6:5,
+	7:6,
+	8:7,
+	9:8,
+	10:9,
+	J:10,
+	Q:11,
+	K:12,
+	A:13,
+
+};
 
 const randomizePosition = (min, max) => {
 	min = Math.ceil(min);
@@ -18,7 +34,8 @@ const generateDeckOfCards = () => {
 		for (let card of cards) {
 			deck.push({
 				cardFace: card,
-				suit: suit
+				suit: suit,
+				value: VALUE_MAP[card]
 			})
 		}
 	}
@@ -151,7 +168,20 @@ const dealRiver = (state) => {
 }
 
 const showDown = (state) => {
-	console.log("SHOWDOWN!")
+	for (let player of state.players) {
+		player.showDownHand.hand = player.cards.concat(state.communityCards).sort((a,b) => b.value - a.value);
+		player.showDownHand.histogram = {};
+		player.showDownHand.hand.forEach(card => {
+			player.showDownHand.histogram[card.cardFace] = (player.showDownHand.histogram[card.cardFace] + 1 || 1)
+		})
+		/*
+			hand.reduce((prev = {}, next) => {
+   			 prev[next] = (prev[next] || 0) + 1;
+    		return prev;
+			});
+		*/
+	}
+		return state
 }
 
 
