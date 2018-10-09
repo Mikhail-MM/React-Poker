@@ -13,6 +13,7 @@ import {
   fullDeck, 
   shuffle, 
   popCards,
+  dealPrivateCards,
   dealFlop,
 } from './utils/cards.js';
 
@@ -51,18 +52,18 @@ class App extends Component {
     pot: null,
     highBet: null,
     betInputValue: null,
+    minBet: 20,
     phase: 'loading',
   }
 
   cardAnimationDelay = 0;
-  minBet = 20;
 
   async componentDidMount() {
     const players = await generateTable();
     const dealerIndex = Math.floor(Math.random() * Math.floor(players.length));
     const blindIndicies = determineBlindIndices(dealerIndex, players.length);
-    const playersBoughtIn = anteUpBlinds(players, blindIndicies, this.minBet);
-    this.setState({
+    const playersBoughtIn = anteUpBlinds(players, blindIndicies, this.state.minBet);
+    this.setState(prevState => ({
       loading: false,
       players: playersBoughtIn,
       numPlayersActive: 6,
@@ -76,42 +77,18 @@ class App extends Component {
       },
       deck: shuffle(fullDeck),
       pot: 0,
-      highBet: this.minBet,
-      betInputValue: this.minBet,
+      highBet: prevState.minBet,
+      betInputValue: prevState.minBet,
       phase: 'initialDeal',
-    })
+    }))
     this.runGameLoop();
-  }
-
-  dealInitialCards = () => {
-    // TODO: Implement as Util Function, Separate Business Logic From Main React Component
-    this.setState(prevState => {
-      if (prevState.players[prevState.activePlayerIndex].cards.length === 2) {
-        return({
-          activePlayerIndex: handleOverflowIndex(prevState.blindIndex.big, 1, prevState.players.length, 'up'),
-          phase: 'betting1',
-        })
-      } else if (prevState.players[prevState.activePlayerIndex].cards.length < 2) {
-          const { mutableDeckCopy, chosenCards } = popCards(prevState.deck, 1)
-          chosenCards.animationDelay = this.cardAnimationDelay;
-          this.cardAnimationDelay = this.cardAnimationDelay + 250;
-          const newDeck = [...mutableDeckCopy];
-          const newPlayersInstance = [...prevState.players];
-            newPlayersInstance[prevState.activePlayerIndex].cards.push(chosenCards);
-              return({
-                players: newPlayersInstance,
-                activePlayerIndex: handleOverflowIndex(prevState.activePlayerIndex, 1, prevState.players.length, 'up'),
-                deck: newDeck,
-              });
-      }
-    });
   }
 
   handleBetInputChange = (val, min, max) => {
     if (val === '') val = min
     if (val > max) val = max
       this.setState({
-        betInputValue: val,
+        betInputValue: parseInt(val),
       });
   }
   
@@ -206,8 +183,7 @@ class App extends Component {
 
   renderActionButtonText() {
     // Move to UI Utils
-    const { highBet } = this.state
-    if ((this.state.betInputValue === 0) && (highBet === 0)) {
+    if ((this.state.betInputValue === this.state.highBet) && (this.state.players[this.state.activePlayerIndex].bet == this.state.highBet)) {
       return 'Check'
     } else {
       return 'Bet'
@@ -215,8 +191,9 @@ class App extends Component {
   }
 
   runGameLoop = () => {
-    while (this.state.phase === 'initialDeal') {
-      this.dealInitialCards()
+    if (this.state.phase === 'initialDeal') {
+      const newState = dealPrivateCards(cloneDeep(this.state))
+        this.setState(newState)
     }
     if (this.state.phase === 'flop') {
       const newState = dealFlop(cloneDeep(this.state));
@@ -236,8 +213,6 @@ class App extends Component {
           <h6> {`Folded Players: ${this.state.numPlayersFolded}`} </h6>
           <h4> {`POT: ${this.state.pot}`} </h4>
           <h1> Community Cards </h1>
-        <div className='centered-flex-row' style={{minHeight: '50px'}}>
-        </div>
         <div className='centered-flex-row'> 
           { this.renderCommunityCards() }
         </div>

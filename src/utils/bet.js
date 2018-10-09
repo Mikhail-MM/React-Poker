@@ -1,3 +1,4 @@
+import { dealFlop, dealTurn, dealRiver, showDown } from './cards.js';
 /*
 const determineBlindIndices = (dealerIndex, numPlayers) => {
 	let bigBlindIndex;
@@ -123,29 +124,33 @@ const handlePhaseShift = (state) => {
 	switch(state.phase) {
 		case('betting1'): {
 			state.phase = 'flop';
-			break;
+			return dealFlop(reconcilePot(state));
 		}
 		case('betting2'): {
 			state.phase = 'turn';
-			break;
+			return dealTurn(reconcilePot(state));
 		}
 		case('betting3'): {
 			state.phase = 'river'
-			break;
+			return dealRiver(reconcilePot(state));
 		}
 		case('betting4'): {
 			state.phase = 'showdown'
-			break;
+			return showDown(reconcilePot(state));
 		}
 	}
 	return reconcilePot(state)
 }
 
 const reconcilePot = (state) => {
+	// TODO: ENSURE that bet matches up with side pot - do not exceed low bet input when have a player betting 500 and one betting 1000
 	for (let player of state.players) {
 		state.pot = state.pot + player.bet;
 		player.bet = 0;
+		player.betReconciled = false;
 	}
+	state.minBet = 0;
+	state.highBet = 0;
 	return state
 }
 

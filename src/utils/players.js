@@ -5,7 +5,9 @@ const generateTable = async () => {
 		name: 'Scarface Bojangles',
 		avatarURL: '/assets/boy.svg',
 		cards: [],
+		showDownHand: null,
 		chips: 2000,
+		potChipLimit: 2000,
 		bet: 0,
 		betReconciled: false,
 		folded: false,
@@ -14,10 +16,12 @@ const generateTable = async () => {
 	const response = await axios.get(`https://randomuser.me/api/?results=5&nat=us,gb,fr`);
 	let randomUsers = response.data.results
 		.map(user => ({ 
-			name: `${user.name.first} ${user.name.last}`,
+			name: `${user.name.first.charAt(0).toUpperCase()}${user.name.first.slice(1)} ${user.name.last.charAt(0).toUpperCase()}${user.name.last.slice(1)}`,
 			avatarURL: user.picture.large,
 			cards: [],
 			chips: 2000,
+			potChipLimit: 2000,
+			showDownHand: null
 			bet: 0,
 			betReconciled: false,
 			folded: false,
