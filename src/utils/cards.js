@@ -65,6 +65,9 @@ const popCards = (deck, numToPop) => {
 		return { mutableDeckCopy, chosenCards }
 }
 
+const dealFlop = (state) => {
+	
+}
 
 
-export { fullDeck, shuffle, popCards }
+export { fullDeck, shuffle, popCards, dealFlop }

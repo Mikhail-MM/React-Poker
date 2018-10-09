@@ -12,7 +12,8 @@ import Spinner from './Spinner';
 import { 
   fullDeck, 
   shuffle, 
-  popCards
+  popCards,
+  dealFlop,
 } from './utils/cards.js';
 
 import { 
@@ -217,8 +218,9 @@ class App extends Component {
     while (this.state.phase === 'initialDeal') {
       this.dealInitialCards()
     }
-    while (this.state.phase === 'betting1') {
-      return console.log(this.state)
+    if (this.state.phase === 'flop') {
+      const newState = dealFlop(cloneDeep(this.state));
+        this.setState(newState);
     }
   }
 
@@ -232,6 +234,7 @@ class App extends Component {
           <h6> {`Active Players: ${this.state.numPlayersActive}`} </h6>
           <h6> {`All-In Players: ${this.state.numPlayersAllIn}`} </h6>
           <h6> {`Folded Players: ${this.state.numPlayersFolded}`} </h6>
+          <h4> {`POT: ${this.state.pot}`} </h4>
           <h1> Community Cards </h1>
         <div className='centered-flex-row' style={{minHeight: '50px'}}>
         </div>

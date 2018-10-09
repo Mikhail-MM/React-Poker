@@ -94,12 +94,13 @@ const handleFold = (state) => {
 		state.numPlayersFolded++
 		state.numPlayersActive--
 
-		determineNextActivePlayer(state)
-		return state
+		const nextState = determineNextActivePlayer(state)
+		return nextState
 }
 
 const determineNextActivePlayer = (state) => {
 	state.activePlayerIndex = handleOverflowIndex(state.activePlayerIndex, 1, state.players.length, 'up')
+	// TODO: Automatically give pot to last player if numActivePlayers === 1;
 	if (state.players[state.activePlayerIndex].folded) {
 		return determineNextActivePlayer(state);
 	}
@@ -115,27 +116,37 @@ const determineNextActivePlayer = (state) => {
 	if (state.players[state.activePlayerIndex].betReconciled) {
 		return handlePhaseShift(state);
 	}
+	return state
 }
 
 const handlePhaseShift = (state) => {
 	switch(state.phase) {
 		case('betting1'): {
 			state.phase = 'flop';
-			return state;
+			break;
 		}
 		case('betting2'): {
 			state.phase = 'turn';
-			return state;
+			break;
 		}
 		case('betting3'): {
 			state.phase = 'river'
-			return state;
+			break;
 		}
 		case('betting4'): {
 			state.phase = 'showdown'
-			return state;
+			break;
 		}
 	}
+	return reconcilePot(state)
+}
+
+const reconcilePot = (state) => {
+	for (let player of state.players) {
+		state.pot = state.pot + player.bet;
+		player.bet = 0;
+	}
+	return state
 }
 
 export { 
