@@ -169,11 +169,14 @@ const dealRiver = (state) => {
 
 const showDown = (state) => {
 	for (let player of state.players) {
+	// perhaps sort only after writing the histogram
+		console.log(player)
 		player.showDownHand.hand = player.cards.concat(state.communityCards).sort((a,b) => b.value - a.value);
-		player.showDownHand.histogram = {};
 		player.showDownHand.hand.forEach(card => {
-			player.showDownHand.histogram[card.cardFace] = (player.showDownHand.histogram[card.cardFace] + 1 || 1)
+			player.showDownHand.histogram.faces[card.cardFace] = (player.showDownHand.histogram.faces[card.cardFace] + 1 || 1);
+			player.showDownHand.histogram.suits[card.suit] = (player.showDownHand.histogram.suits[card.suit] + 1 || 1);
 		})
+
 		/*
 			hand.reduce((prev = {}, next) => {
    			 prev[next] = (prev[next] || 0) + 1;
@@ -185,5 +188,18 @@ const showDown = (state) => {
 }
 
 
+
 export { fullDeck, shuffle, popCards, dealPrivateCards, dealFlop, dealTurn, dealRiver, showDown }
 
+// Straight: Divide array into frames: 0-4, 1-5, 2-6, 
+// For a straight, converting to a SET may help
+// Array.from(new Set([2, 2, 3, 4, 5, 5]));
+// So, this fails when it's an array of objects, but we can try to do a reduce
+
+/*
+[{face: A, value: 13}].reduce[(cur, acc) => {
+	if (cur does not contain our cardFace yet) {
+	throw it in there...
+	}
+}, []]
+*/
