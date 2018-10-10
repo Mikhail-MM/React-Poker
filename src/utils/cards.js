@@ -136,6 +136,7 @@ const dealFlop = (state) => {
 		}
 
 		state.deck = mutableDeckCopy;
+		// TODO: This is BUGGY - The next index after the big blind might be FOLDED! Go around the CIRCLE with our other determineNextPlayer fn in bet.js - But don't trigger a PHASE SHIFT!
 		state.activePlayerIndex = handleOverflowIndex(state.blindIndex.big, 1, state.players.length, 'up');
 		// Maybe move this minbet stuff to reconcile pot?
 		state.phase = 'betting2';
@@ -149,6 +150,7 @@ const dealTurn = (state) => {
 		
 		state.communityCards.push(chosenCards);
 		state.deck = mutableDeckCopy;
+		// TODO: This is BUGGY - The next index after the big blind might be FOLDED! Go around the CIRCLE with our other determineNextPlayer fn in bet.js - But don't trigger a PHASE SHIFT!
 		state.activePlayerIndex = handleOverflowIndex(state.blindIndex.big, 1, state.players.length, 'up');
 		state.phase = 'betting3'
 
@@ -161,6 +163,7 @@ const dealRiver = (state) => {
 		
 		state.communityCards.push(chosenCards);
 		state.deck = mutableDeckCopy;
+		// TODO: This is BUGGY - The next index after the big blind might be FOLDED! Go around the CIRCLE with our other determineNextPlayer fn in bet.js - But don't trigger a PHASE SHIFT!
 		state.activePlayerIndex = handleOverflowIndex(state.blindIndex.big, 1, state.players.length, 'up');
 		state.phase = 'betting4'
 
@@ -169,13 +172,47 @@ const dealRiver = (state) => {
 
 const showDown = (state) => {
 	for (let player of state.players) {
-	// perhaps sort only after writing the histogram
-		console.log(player)
-		player.showDownHand.hand = player.cards.concat(state.communityCards).sort((a,b) => b.value - a.value);
-		player.showDownHand.hand.forEach(card => {
-			player.showDownHand.histogram.faces[card.cardFace] = (player.showDownHand.histogram.faces[card.cardFace] + 1 || 1);
-			player.showDownHand.histogram.suits[card.suit] = (player.showDownHand.histogram.suits[card.suit] + 1 || 1);
+		
+		const frequencyHistogram = {};
+		const suitHistogram = {};
+
+		player.showDownHand.hand = player.cards.concat(state.communityCards);
+		player.showDownHand.descendingSortHand = player.showDownHand.hand.sort((a,b) => b.value - a.value);
+
+		player.showDownHand.descendingSortHand.forEach(card => {
+			frequencyHistogram[card.cardFace] = (frequencyHistogram[card.cardFace] + 1 || 1);
+			suitHistogram[card.suit] = (suitHistogram[card.suit] + 1 || 1);
 		})
+
+		const valueSet = buildValueSet(player.showDownHand.descendingSortHand);
+
+		const { isFlush, flushedSuit } = checkFlush(suitHistogram);
+		const flushMatchCards = isFlush ? player.showDownHand.descendingSortHand.filter(card => card.suit === flushedSuit) : null
+
+		const isRoyalFlush = isFlush ? checkRoyalFlush(flushMatchCards) : false;
+		const isStraightFlush = isFlush ? checkStraightFlush(flushMatchCards) : false;
+		const isFourOfAKind = checkFourOfAKind(frequencyHistogram);
+		const isFullHouse = checkFullHouse(frequencyHistogram);
+		const isStraight = checkStraight(valueSet);
+		const isThreeOfAKind = checkThreeOfAKind(frequencyHistogram);
+		const isTwoPair = checkTwoPair(frequencyHistogram);
+		const isPair = checkPair(frequencyHistogram);
+		player.showDownHand.bools = {
+			isRoyalFlush,
+			isStraightFlush,
+			isFourOfAKind,
+			isFullHouse,
+			isStraight,
+			isThreeOfAKind,
+			isTwoPair,
+			isPair,
+		}
+		// can build ranking by putting these in an array and find indexOf(true) 
+		// In a group of players, this will map to who has the first highest rank
+		// Can easily determine winner with who has the closest rank (index 0 = highest rank if we order the obj props from high ranking down)
+
+
+
 
 		/*
 			hand.reduce((prev = {}, next) => {
@@ -188,6 +225,133 @@ const showDown = (state) => {
 }
 
 
+const checkFlush = (suitHistogram) => {
+	let isFlush;
+	let flushedSuit;
+	for (let suit in suitHistogram) {
+		if (suitHistogram[suit] >= 5) {
+			return { 
+				isFlush: true,
+				flushedSuit: suit,
+			}
+		} else { 
+			return {
+				isFlush: false,
+				flushedSuit: null,
+			}
+		}
+	}
+}
+const checkRoyalFlush = (flushMatchCards) => {
+	if ((flushMatchCards[0].value === 13) &&
+		(flushMatchCards[1].value === 12) &&
+		(flushMatchCards[2].value === 11) &&
+		(flushMatchCards[3].value === 10) &&
+		(flushMatchCards[4].value === 10)) { 
+			return true 
+		} else { return false } 
+}
+
+const checkStraightFlush = (flushMatchCards) => {
+	const valueSet = buildValueSet(flushMatchCards);
+	return checkStraight(valueSet);
+}
+
+const checkFourOfAKind = (frequencyHistogram) => {
+	for (let cardFace in frequencyHistogram) {
+		if (frequencyHistogram[cardFace] === 4) {
+			return true
+		}
+	}
+		return false
+}
+const checkFullHouse = (frequencyHistogram) => {
+	let numPairs = 0;
+	let numThreeKind = 0;
+	for (let cardFace in frequencyHistogram) {
+		if (frequencyHistogram[cardFace] === 3) numThreeKind++;
+		if (frequencyHistogram[cardFace] === 2) numPairs++
+	}
+
+	if ((numThreeKind >= 2) || (numPairs >= 1 && numThreeKind >=1)) {
+		return true
+	} else {
+		return false
+	}
+}
+
+const checkStraight = (valueSet) => {
+	if (valueSet.length < 5) return false
+	if (valueSet[0] === 13) {
+		const isLowStraight = checkLowStraight([...valueSet])
+		if (isLowStraight) return true
+	}
+	let concurrentCards = 0;
+	for (let i = 1; i < valueSet.length; i++) {
+		if (concurrentCards === 5) {
+			// Return early if we have 5 concurrent cards instead of checking next index and possibly breakign the streak
+			return true
+		}
+		if ((valueSet[i] - valueSet[i - 1]) === -1) {
+			if(i === 1) {
+				concurrentCards = 2
+			} else { concurrentCards++ }
+		} else { concurrentCards = 0 }
+	}
+	if (concurrentCards >= 5) {
+		return true
+	} else { return false }
+}
+
+const checkLowStraight = (valueSetCopy) => {
+	let concurrentCards = 0;
+	valueSetCopy[0] = 0; // Convert Ace High Value (13) to Low Wildcard Value (0)
+	valueSetCopy.sort((a,b) => a - b) // Sort in Ascending Order 
+	// Basically look for [0, 1, 2, 3, 4,] AKA [A, 2, 3, 4, 5]
+	for (let i = 1; i < 5; i++) {
+		if((valueSetCopy[i] - valueSetCopy[i - 1]) === 1 ) {
+			if (i === 1) {
+				concurrentCards = 2
+			} else { concurrentCards++ }
+		} else { concurrentCards = 0 }
+	}
+	if (concurrentCards === 5) {
+		return true
+	} else { return false }
+}
+
+const checkThreeOfAKind = (frequencyHistogram) => {
+	for (let cardFace in frequencyHistogram) {
+		if (frequencyHistogram[cardFace] === 3) return true
+	}
+		return false
+}
+const checkTwoPair = (frequencyHistogram) => {
+	let numPairs = 0;
+	for (let cardFace in frequencyHistogram) {
+		if (frequencyHistogram[cardFace] == 2) {
+			numPairs++
+		}
+	}
+	if (numPairs >= 2) {
+		return true
+	} else { return false }
+}
+const checkPair = (frequencyHistogram) => {
+	let numPairs = 0;
+	for (let cardFace in frequencyHistogram) {
+		if (frequencyHistogram[cardFace] == 2) {
+			numPairs++
+		}
+	}
+	if (numPairs >= 1) {
+		return true
+	} else { return false }
+}
+
+const buildValueSet = (hand) => {
+	return Array.from(new Set(hand.map(cardInfo => cardInfo.value)))
+}
 
 export { fullDeck, shuffle, popCards, dealPrivateCards, dealFlop, dealTurn, dealRiver, showDown }
 

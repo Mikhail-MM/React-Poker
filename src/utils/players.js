@@ -7,10 +7,7 @@ const generateTable = async () => {
 		cards: [],
 		showDownHand: {
 			hand: [],
-			histogram: {
-				faces: {},
-				suits: {},
-			},
+			descendingSortHand: [], 
 		},
 		chips: 2000,
 		potChipLimit: 2000,
@@ -29,10 +26,7 @@ const generateTable = async () => {
 			potChipLimit: 2000,
 			showDownHand: {
 				hand: [],
-				histogram: {
-					faces: {},
-					suits: {},
-				},
+				descendingSortHand: [],
 			},
 			bet: 0,
 			betReconciled: false,
