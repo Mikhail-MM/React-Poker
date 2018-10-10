@@ -329,7 +329,7 @@ const checkThreeOfAKind = (frequencyHistogram) => {
 const checkTwoPair = (frequencyHistogram) => {
 	let numPairs = 0;
 	for (let cardFace in frequencyHistogram) {
-		if (frequencyHistogram[cardFace] == 2) {
+		if (frequencyHistogram[cardFace] === 2) {
 			numPairs++
 		}
 	}
@@ -340,7 +340,7 @@ const checkTwoPair = (frequencyHistogram) => {
 const checkPair = (frequencyHistogram) => {
 	let numPairs = 0;
 	for (let cardFace in frequencyHistogram) {
-		if (frequencyHistogram[cardFace] == 2) {
+		if (frequencyHistogram[cardFace] === 2) {
 			numPairs++
 		}
 	}
