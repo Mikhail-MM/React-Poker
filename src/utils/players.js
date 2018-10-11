@@ -62,6 +62,9 @@ const determinePhaseStartActivePlayer = (state, recursion = false) => {
 		if (state.players[state.activePlayerIndex].folded) {
 			return determinePhaseStartActivePlayer(state, true)
 		}
+		if (state.players[state.activePlayerIndex].chips === 0) {
+			return determinePhaseStartActivePlayer(state, true)
+		}
 				return state
 }
 
