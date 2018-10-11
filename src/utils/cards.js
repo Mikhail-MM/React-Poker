@@ -263,9 +263,44 @@ const showDown = (state) => {
 			When we find a contains - 
 
 		*/
+
+		state = rankPlayerHands(state);
 		return state
 }
 
+const rankPlayerHands = (state) => {
+	/*
+
+		bpfToday at 2:25 PM
+		also I do this for readability
+		new Map(Object.entries({
+		  'Royal Flush': [],
+		  // etc.
+		}));
+	*/
+
+	const rankMap = new Map([
+		['Royal Flush', []], 
+		['Straight Flush', []],
+		['Four Of A Kind', []],
+		['Full House', []],
+		['Flush', []],
+		['Straight', []],
+		['Three Of A Kind', []],
+		['Two Pair', []],
+		['Pair', []],
+		['No Pair', []]
+	]);
+	for (let player of state.players) {
+		rankMap.get(player.showDownHand.bestHandRank).push(player.name);
+	}
+	state.rankMap = rankMap;
+		return state;
+}
+
+const battleRoyale = (state) => {
+
+}
 const checkFlush = (suitHistogram) => {
 	let isFlush;
 	let flushedSuit;
@@ -486,4 +521,10 @@ When the Map is established, I will iterate with forEach() - First array with le
 When a winner is established, can pluck him out of the array with filter. He will receive maxWinnings * activePlayers chips from the pot. If there is still money left in da pot, will recurse the function to calculate next winner
 i think this might work
 
+
+Connor's Approach: 
+
+{
+    [["2C", "3C", "4C", "5C", "6C"].toString()]: getBestHand(["2C", "3C", "4C", "5C", "6C"].)
+}
 */
