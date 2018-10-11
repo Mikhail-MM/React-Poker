@@ -180,6 +180,10 @@ const showDown = (state) => {
 			suitHistogram[card.suit] = (suitHistogram[card.suit] + 1 || 1);
 		})
 
+		// For Debugging
+		player.frequencyHistogram = frequencyHistogram;
+		player.suitHistogram = suitHistogram;
+
 		const valueSet = buildValueSet(player.showDownHand.descendingSortHand);
 
 		const { isFlush, flushedSuit } = checkFlush(suitHistogram);
@@ -187,12 +191,10 @@ const showDown = (state) => {
 
 		const isRoyalFlush = isFlush ? checkRoyalFlush(flushMatchCards) : false;
 		const isStraightFlush = isFlush ? checkStraightFlush(flushMatchCards) : false;
-		const isFourOfAKind = checkFourOfAKind(frequencyHistogram);
-		const isFullHouse = checkFullHouse(frequencyHistogram);
 		const isStraight = checkStraight(valueSet);
-		const isThreeOfAKind = checkThreeOfAKind(frequencyHistogram);
-		const isTwoPair = checkTwoPair(frequencyHistogram);
-		const isPair = checkPair(frequencyHistogram);
+		const { isFourOfAKind, isFullHouse, isThreeOfAKind, isTwoPair, isPair, metaData } = analyzeHistogram(frequencyHistogram);
+		const isNoPair = ((!isRoyalFlush) && (!isStraightFlush) && (!isFourOfAKind) && (!isFullHouse) && (!isFlush) && (!isStraight) && (!isThreeOfAKind) && (!isTwoPair) && (!isPair))
+		
 		player.showDownHand.bools = {
 			isRoyalFlush,
 			isStraightFlush,
@@ -203,7 +205,48 @@ const showDown = (state) => {
 			isThreeOfAKind,
 			isTwoPair,
 			isPair,
+			isNoPair,
 		}
+
+		player.showDownHand.heldRankHierarchy = [{
+			name: 'Royal Flush',
+			match: isRoyalFlush,
+		}, {
+			name: 'Straight Flush',
+			match: isStraightFlush
+		}, {
+			name: 'Four Of A Kind',
+			match: isFourOfAKind,
+		}, {
+			name: 'Full House',
+			match: isFullHouse,
+		}, {
+			name: 'Flush',
+			match: isFlush,
+		}, {
+			name: 'Straight',
+			match: isStraight,
+		}, {
+			name: 'Three Of A Kind',
+			match: isThreeOfAKind,
+		}, {
+			name: 'Two Pair',
+			match: isTwoPair,
+		}, {
+			name: 'Pair',
+			match: isPair,
+		}, {
+			name: 'No Pair',
+			match: isNoPair
+		}];
+
+		player.metaData = metaData;
+
+		const highRankPosition = player.showDownHand.heldRankHierarchy.findIndex(el => el.match === true);
+		player.showDownHand.bestHandRank = player.showDownHand.heldRankHierarchy[highRankPosition].name;
+		// IGNORE ALL WHO ARE FOLDED...
+
+
 		// can build ranking by putting these in an array and find indexOf(true) 
 		// In a group of players, this will map to who has the first highest rank
 		// Can easily determine winner with who has the closest rank (index 0 = highest rank if we order the obj props from high ranking down)
@@ -254,28 +297,55 @@ const checkStraightFlush = (flushMatchCards) => {
 	return checkStraight(valueSet);
 }
 
-const checkFourOfAKind = (frequencyHistogram) => {
+const analyzeHistogram = (frequencyHistogram) => {
+	let isFourOfAKind = false;
+	let isFullHouse = false
+	let isThreeOfAKind = false;
+	let isTwoPair = false;
+	let isPair = false;
+	let numTripples = 0;
+	let numPairs = 0;
+	let metaData = {
+		pairs: [],
+		tripples: [],
+		quads: [],
+	}
 	for (let cardFace in frequencyHistogram) {
 		if (frequencyHistogram[cardFace] === 4) {
-			return true
+			isFourOfAKind = true
+				metaData.quads.push(cardFace)
+		}
+		if (frequencyHistogram[cardFace] === 3) {
+			isThreeOfAKind = true
+			numTripples++
+				metaData.tripples.push(cardFace)
+		}
+		if (frequencyHistogram[cardFace] === 2) {
+			isPair = true
+			numPairs++
+				metaData.pairs.push(cardFace)
 		}
 	}
-		return false
-}
-const checkFullHouse = (frequencyHistogram) => {
-	let numPairs = 0;
-	let numThreeKind = 0;
-	for (let cardFace in frequencyHistogram) {
-		if (frequencyHistogram[cardFace] === 3) numThreeKind++;
-		if (frequencyHistogram[cardFace] === 2) numPairs++
+	// can just check metadata length and omit the counters
+	if((numTripples >= 2) || (numPairs >= 1 && numTripples >=1)) {
+		isFullHouse = true
+	}
+	if(numPairs >= 2) {
+		isTwoPair = true
 	}
 
-	if ((numThreeKind >= 2) || (numPairs >= 1 && numThreeKind >=1)) {
-		return true
-	} else {
-		return false
-	}
+		return {
+			isFourOfAKind,
+			isFullHouse,
+			isThreeOfAKind,
+			isTwoPair,
+			isPair,
+			metaData
+		}
+
 }
+
+
 
 const checkStraight = (valueSet) => {
 	if (valueSet.length < 5) return false
@@ -317,6 +387,52 @@ const checkLowStraight = (valueSetCopy) => {
 	} else { return false }
 }
 
+
+
+const buildValueSet = (hand) => {
+	return Array.from(new Set(hand.map(cardInfo => cardInfo.value)))
+}
+
+export { fullDeck, shuffle, popCards, dealPrivateCards, dealFlop, dealTurn, dealRiver, showDown }
+
+// Straight: Divide array into frames: 0-4, 1-5, 2-6, 
+// For a straight, converting to a SET may help
+// Array.from(new Set([2, 2, 3, 4, 5, 5]));
+// So, this fails when it's an array of objects, but we can try to do a reduce
+
+/*
+[{face: A, value: 13}].reduce[(cur, acc) => {
+	if (cur does not contain our cardFace yet) {
+	throw it in there...
+	}
+}, []]
+*/
+/*
+
+OLD CHECKS
+
+const checkFourOfAKind = (frequencyHistogram) => {
+	for (let cardFace in frequencyHistogram) {
+		if (frequencyHistogram[cardFace] === 4) {
+			return true
+		}
+	}
+		return false
+}
+const checkFullHouse = (frequencyHistogram) => {
+	let numPairs = 0;
+	let numThreeKind = 0;
+	for (let cardFace in frequencyHistogram) {
+		if (frequencyHistogram[cardFace] === 3) numThreeKind++;
+		if (frequencyHistogram[cardFace] === 2) numPairs++
+	}
+
+	if ((numThreeKind >= 2) || (numPairs >= 1 && numThreeKind >=1)) {
+		return true
+	} else {
+		return false
+	}
+}
 const checkThreeOfAKind = (frequencyHistogram) => {
 	for (let cardFace in frequencyHistogram) {
 		if (frequencyHistogram[cardFace] === 3) return true
@@ -346,21 +462,4 @@ const checkPair = (frequencyHistogram) => {
 	} else { return false }
 }
 
-const buildValueSet = (hand) => {
-	return Array.from(new Set(hand.map(cardInfo => cardInfo.value)))
-}
-
-export { fullDeck, shuffle, popCards, dealPrivateCards, dealFlop, dealTurn, dealRiver, showDown }
-
-// Straight: Divide array into frames: 0-4, 1-5, 2-6, 
-// For a straight, converting to a SET may help
-// Array.from(new Set([2, 2, 3, 4, 5, 5]));
-// So, this fails when it's an array of objects, but we can try to do a reduce
-
-/*
-[{face: A, value: 13}].reduce[(cur, acc) => {
-	if (cur does not contain our cardFace yet) {
-	throw it in there...
-	}
-}, []]
 */
