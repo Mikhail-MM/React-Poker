@@ -313,17 +313,26 @@ const analyzeHistogram = (frequencyHistogram) => {
 	for (let cardFace in frequencyHistogram) {
 		if (frequencyHistogram[cardFace] === 4) {
 			isFourOfAKind = true
-				metaData.quads.push(cardFace)
+				metaData.quads.push({
+					face: cardFace,
+					value: VALUE_MAP[cardFace]
+				})
 		}
 		if (frequencyHistogram[cardFace] === 3) {
 			isThreeOfAKind = true
 			numTripples++
-				metaData.tripples.push(cardFace)
+				metaData.tripples.push({
+					face: cardFace,
+					value: VALUE_MAP[cardFace]
+				})
 		}
 		if (frequencyHistogram[cardFace] === 2) {
 			isPair = true
 			numPairs++
-				metaData.pairs.push(cardFace)
+				metaData.pairs.push({
+					face: cardFace,
+					value: VALUE_MAP[cardFace]
+				})
 		}
 	}
 	// can just check metadata length and omit the counters
