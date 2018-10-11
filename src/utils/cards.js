@@ -244,14 +244,7 @@ const showDown = (state) => {
 
 		const highRankPosition = player.showDownHand.heldRankHierarchy.findIndex(el => el.match === true);
 		player.showDownHand.bestHandRank = player.showDownHand.heldRankHierarchy[highRankPosition].name;
-		// IGNORE ALL WHO ARE FOLDED...
-
-
-		// can build ranking by putting these in an array and find indexOf(true) 
-		// In a group of players, this will map to who has the first highest rank
-		// Can easily determine winner with who has the closest rank (index 0 = highest rank if we order the obj props from high ranking down)
-
-
+		// TODO: IGNORE ALL WHO ARE FOLDED...
 
 
 		/*
@@ -261,9 +254,17 @@ const showDown = (state) => {
 			});
 		*/
 	}
+		
+		/* 
+			Rank Table (obj - MAP)
+			Hands as Keys
+			Arrays hold Player ID/Name
+			Go down forEach
+			When we find a contains - 
+
+		*/
 		return state
 }
-
 
 const checkFlush = (suitHistogram) => {
 	let isFlush;
@@ -282,6 +283,7 @@ const checkFlush = (suitHistogram) => {
 		}
 	}
 }
+
 const checkRoyalFlush = (flushMatchCards) => {
 	if ((flushMatchCards[0].value === 13) &&
 		(flushMatchCards[1].value === 12) &&
@@ -354,8 +356,6 @@ const analyzeHistogram = (frequencyHistogram) => {
 
 }
 
-
-
 const checkStraight = (valueSet) => {
 	if (valueSet.length < 5) return false
 	if (valueSet[0] === 13) {
@@ -395,7 +395,6 @@ const checkLowStraight = (valueSetCopy) => {
 		return true
 	} else { return false }
 }
-
 
 
 const buildValueSet = (hand) => {
@@ -470,5 +469,21 @@ const checkPair = (frequencyHistogram) => {
 		return true
 	} else { return false }
 }
+
+
+MikeMKToday at 12:23 AM
+I am kind of dreading making the recursive function that should properly deal out pot winnings to all players and take into account side pots. Each player will have maxWinnings which would be set to their chips at the beginning of each round. 
+After player hands are eval'd, and it is determined for every player what their Best Hand is - I would need to create a Map which contains arrays of players organized by their strongest possible hand.
+{
+    'Royal Flush': [],
+    'Full House': [Player 1, Player 2],
+    'Four of A Kind': [Player 3],
+    ...
+}
+
+When the Map is established, I will iterate with forEach() - First array with length 1 will be a winner. If the length is >1, will need to compare all player hands to determine a winner (need different comparator functions for each hand type..., though logic can be reused)
+
+When a winner is established, can pluck him out of the array with filter. He will receive maxWinnings * activePlayers chips from the pot. If there is still money left in da pot, will recurse the function to calculate next winner
+i think this might work
 
 */
