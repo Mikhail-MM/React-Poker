@@ -1,3 +1,4 @@
+import { handlePhaseShift } from './bet.js';
 const axios = require('axios')
 
 const generateTable = async () => {
@@ -52,4 +53,37 @@ const handleOverflowIndex = (currentIndex, incrementBy, arrayLength, direction) 
 	}
 }
 
-export { generateTable, handleOverflowIndex }
+const determinePhaseStartActivePlayer = (state, recursion = false) => {
+	if (!recursion) {
+		state.activePlayerIndex = handleOverflowIndex(state.blindIndex.big, 1, state.players.length, 'up');
+	} else if (recursion) {
+		state.activePlayerIndex = handleOverflowIndex(state.activePlayerIndex, 1, state.players.length, 'up');
+	}
+		if (state.players[state.activePlayerIndex].folded) {
+			return determinePhaseStartActivePlayer(state, true)
+		}
+				return state
+}
+
+const determineNextActivePlayer = (state) => {
+	state.activePlayerIndex = handleOverflowIndex(state.activePlayerIndex, 1, state.players.length, 'up')
+	// TODO: Automatically give pot to last player if numActivePlayers === 1;
+	if (state.players[state.activePlayerIndex].folded) {
+		return determineNextActivePlayer(state);
+	}
+	if (state.players[state.activePlayerIndex].chips === 0) {
+		if (state.numPlayersAllIn === state.numPlayersActive) {
+			// TODO: Ensure Community Cards Are Distributed Properly!
+			state.phase = 'showdown';
+			return state
+		} else {
+			return determineNextActivePlayer(state);
+		}
+	}
+	if (state.players[state.activePlayerIndex].betReconciled) {
+		return handlePhaseShift(state);
+	}
+			return state
+}
+
+export { generateTable, handleOverflowIndex, determineNextActivePlayer, determinePhaseStartActivePlayer }

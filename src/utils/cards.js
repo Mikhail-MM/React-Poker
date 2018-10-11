@@ -1,4 +1,4 @@
-import { handleOverflowIndex } from './players.js';
+import { handleOverflowIndex, determinePhaseStartActivePlayer } from './players.js';
 
 const totalNumCards = 52;
 const suits = ['Heart', 'Spade', 'Club', 'Diamond'];
@@ -136,25 +136,22 @@ const dealFlop = (state) => {
 		}
 
 		state.deck = mutableDeckCopy;
-		// TODO: This is BUGGY - The next index after the big blind might be FOLDED! Go around the CIRCLE with our other determineNextPlayer fn in bet.js - But don't trigger a PHASE SHIFT!
-		state.activePlayerIndex = handleOverflowIndex(state.blindIndex.big, 1, state.players.length, 'up');
-		// Maybe move this minbet stuff to reconcile pot?
+		state = determinePhaseStartActivePlayer(state)
 		state.phase = 'betting2';
 			
-			return state;
+		return state;
 }
 
 const dealTurn = (state) => {
 	const { mutableDeckCopy, chosenCards } = popCards(state.deck, 1);
 	chosenCards.animationDelay = 0;
 		
-		state.communityCards.push(chosenCards);
-		state.deck = mutableDeckCopy;
-		// TODO: This is BUGGY - The next index after the big blind might be FOLDED! Go around the CIRCLE with our other determineNextPlayer fn in bet.js - But don't trigger a PHASE SHIFT!
-		state.activePlayerIndex = handleOverflowIndex(state.blindIndex.big, 1, state.players.length, 'up');
-		state.phase = 'betting3'
+	state.communityCards.push(chosenCards);
+	state.deck = mutableDeckCopy;
+	state = determinePhaseStartActivePlayer(state)
+	state.phase = 'betting3'
 
-			return state
+		return state
 }
 
 const dealRiver = (state) => {
@@ -163,8 +160,7 @@ const dealRiver = (state) => {
 		
 		state.communityCards.push(chosenCards);
 		state.deck = mutableDeckCopy;
-		// TODO: This is BUGGY - The next index after the big blind might be FOLDED! Go around the CIRCLE with our other determineNextPlayer fn in bet.js - But don't trigger a PHASE SHIFT!
-		state.activePlayerIndex = handleOverflowIndex(state.blindIndex.big, 1, state.players.length, 'up');
+		state = determinePhaseStartActivePlayer(state)
 		state.phase = 'betting4'
 
 			return state
@@ -202,6 +198,7 @@ const showDown = (state) => {
 			isStraightFlush,
 			isFourOfAKind,
 			isFullHouse,
+			isFlush,
 			isStraight,
 			isThreeOfAKind,
 			isTwoPair,

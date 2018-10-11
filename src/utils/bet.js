@@ -1,4 +1,5 @@
 import { dealFlop, dealTurn, dealRiver, showDown } from './cards.js';
+import { handleOverflowIndex, determineNextActivePlayer } from './players.js';
 /*
 const determineBlindIndices = (dealerIndex, numPlayers) => {
 	let bigBlindIndex;
@@ -30,8 +31,6 @@ const determineBlindIndices = (dealerIndex, numPlayers) => {
 	return { bigBlindIndex, smallBlindIndex }	
 }
 */
-
-import { handleOverflowIndex } from './players.js';
 
 const determineBlindIndices = (dealerIndex, numPlayers) => {
 	return({
@@ -97,27 +96,6 @@ const handleFold = (state) => {
 		return nextState
 }
 
-const determineNextActivePlayer = (state) => {
-	state.activePlayerIndex = handleOverflowIndex(state.activePlayerIndex, 1, state.players.length, 'up')
-	// TODO: Automatically give pot to last player if numActivePlayers === 1;
-	if (state.players[state.activePlayerIndex].folded) {
-		return determineNextActivePlayer(state);
-	}
-	if (state.players[state.activePlayerIndex].chips === 0) {
-		if (state.numPlayersAllIn === state.numPlayersActive) {
-			// TODO: Ensure Community Cards Are Distributed Properly!
-			state.phase = 'showdown';
-			return state
-		} else {
-			return determineNextActivePlayer(state);
-		}
-	}
-	if (state.players[state.activePlayerIndex].betReconciled) {
-		return handlePhaseShift(state);
-	}
-	return state
-}
-
 const handlePhaseShift = (state) => {
 	switch(state.phase) {
 		case('betting1'): {
@@ -159,4 +137,5 @@ export {
 	determineMinBet,
 	handleBet,
 	handleFold,
+	handlePhaseShift,
 }
