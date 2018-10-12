@@ -57,6 +57,7 @@ const determineMinBet = (highBet, playerChips) => {
 	}
 }
 const handleBet = (state, bet, min, max) => {
+	console.log(min, max)
 	if (bet < min) return console.log("Invalid Bet")
 	if (bet > max) return console.log("Invalid Bet")
 

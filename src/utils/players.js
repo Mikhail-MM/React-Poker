@@ -10,7 +10,7 @@ const generateTable = async () => {
 			hand: [],
 			descendingSortHand: [], 
 		},
-		chips: 2000,
+		chips: 20000,
 		roundStartChips: 2000,
 		bet: 0,
 		betReconciled: false,
@@ -23,7 +23,7 @@ const generateTable = async () => {
 			name: `${user.name.first.charAt(0).toUpperCase()}${user.name.first.slice(1)} ${user.name.last.charAt(0).toUpperCase()}${user.name.last.slice(1)}`,
 			avatarURL: user.picture.large,
 			cards: [],
-			chips: 2000,
+			chips: Math.floor(Math.random() * (20000 - 2000)) + 2000,
 			roundStartChips: 2000,
 			showDownHand: {
 				hand: [],
