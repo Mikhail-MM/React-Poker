@@ -171,6 +171,7 @@ const showDown = (state) => {
 		
 		const frequencyHistogram = {};
 		const suitHistogram = {};
+		const bestHands = {}
 
 		player.showDownHand.hand = player.cards.concat(state.communityCards);
 		player.showDownHand.descendingSortHand = player.showDownHand.hand.sort((a,b) => b.value - a.value);
@@ -186,13 +187,12 @@ const showDown = (state) => {
 
 		const valueSet = buildValueSet(player.showDownHand.descendingSortHand);
 
-		const { isFlush, flushedSuit } = checkFlush(suitHistogram);
-		const flushMatchCards = isFlush ? player.showDownHand.descendingSortHand.filter(card => card.suit === flushedSuit) : null
-
-		const isRoyalFlush = isFlush ? checkRoyalFlush(flushMatchCards) : false;
-		const isStraightFlush = isFlush ? checkStraightFlush(flushMatchCards) : false;
-		const isStraight = checkStraight(valueSet);
-		const { isFourOfAKind, isFullHouse, isThreeOfAKind, isTwoPair, isPair, metaData } = analyzeHistogram(frequencyHistogram);
+		const { isFlush, flushedSuit } = checkFlush(player.showDownHand.descendingSortHand, suitHistogram);
+		const flushCards = isFlush ? player.showDownHand.descendingSortHand.filter(card => card.suit === flushedSuit) : null
+		const isRoyalFlush = isFlush ? checkRoyalFlush(flushCards) : false;
+		const isStraightFlush = isFlush ? checkStraightFlush(flushCards) : false;
+		const { isStraight, concurrentCardValues } = checkStraight(valueSet);
+		const { isFourOfAKind, isFullHouse, isThreeOfAKind, isTwoPair, isPair, frequencyHistogramMetaData } = analyzeHistogram(player.showDownHand.descendingSortHand, frequencyHistogram);
 		const isNoPair = ((!isRoyalFlush) && (!isStraightFlush) && (!isFourOfAKind) && (!isFullHouse) && (!isFlush) && (!isStraight) && (!isThreeOfAKind) && (!isTwoPair) && (!isPair))
 		
 		player.showDownHand.bools = {
@@ -244,6 +244,7 @@ const showDown = (state) => {
 
 		const highRankPosition = player.showDownHand.heldRankHierarchy.findIndex(el => el.match === true);
 		player.showDownHand.bestHandRank = player.showDownHand.heldRankHierarchy[highRankPosition].name;
+		const bestHand = buildBestHand(player.showDownHand.descendingSortHand, player.showDownHand.bestHandRank, flushedSuit, flushCards, concurrentCardValues)
 		// TODO: IGNORE ALL WHO ARE FOLDED...
 
 
@@ -268,6 +269,48 @@ const showDown = (state) => {
 
 }
 
+const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardValues) => {
+	switch(bestRank) {
+		case('Royal Flush'): {
+			return flushCards.slice(0, 5)
+		}
+		case('Straight Flush'): {
+
+		}
+		case('Four Of A Kind'): {
+
+		}
+		case('Full House'): {
+
+		}
+		case('Flush'): {
+			return flushCards.slice(0, 5)
+		}
+		case('Straight'): {
+			// TODO: Account for LOW STRAIGHT
+			return concurrentCardValues.reduce((acc, cur, index) => {
+				if (index < 5) {
+					acc.push(hand[hand.findIndex(card => card.value === cur)]);
+				}
+					return acc;
+			}, []);
+		}
+		case('Three Of A Kind'): {
+
+		}
+		case('Two Pair'): {
+
+		}
+		case('Pair'): {
+
+		}
+		case('No Pair'): {
+
+		}
+	}
+}
+
+
 const rankPlayerHands = (state) => {
 	/*
 
@@ -291,6 +334,8 @@ const rankPlayerHands = (state) => {
 		['Pair', []],
 		['No Pair', []]
 	]);
+	// THIS WILL WORK > JUST PUSH ONLY THE PLAYERS IN EACH POT CONTEST.
+			// Determine how to mediate a tie, etc, etc...
 	for (let player of state.players) {
 		rankMap.get(player.showDownHand.bestHandRank).push(player.name);
 	}
@@ -333,7 +378,7 @@ const grudgeMatch = (state, winners, handRank) => {
 }
 
 
-const checkFlush = (suitHistogram) => {
+const checkFlush = (hand, suitHistogram) => {
 	let isFlush;
 	let flushedSuit;
 	for (let suit in suitHistogram) {
@@ -357,7 +402,7 @@ const checkRoyalFlush = (flushMatchCards) => {
 		(flushMatchCards[2].value === 11) &&
 		(flushMatchCards[3].value === 10) &&
 		(flushMatchCards[4].value === 10)) { 
-			return true 
+			return true  
 		} else { return false } 
 }
 
@@ -366,7 +411,7 @@ const checkStraightFlush = (flushMatchCards) => {
 	return checkStraight(valueSet);
 }
 
-const analyzeHistogram = (frequencyHistogram) => {
+const analyzeHistogram = (hand, frequencyHistogram) => {
 	let isFourOfAKind = false;
 	let isFullHouse = false
 	let isThreeOfAKind = false;
@@ -374,7 +419,7 @@ const analyzeHistogram = (frequencyHistogram) => {
 	let isPair = false;
 	let numTripples = 0;
 	let numPairs = 0;
-	let metaData = {
+	let frequencyHistogramMetaData = {
 		pairs: [],
 		tripples: [],
 		quads: [],
@@ -418,53 +463,105 @@ const analyzeHistogram = (frequencyHistogram) => {
 			isThreeOfAKind,
 			isTwoPair,
 			isPair,
-			metaData
+			frequencyHistogramMetaData
 		}
 
 }
 
 const checkStraight = (valueSet) => {
 	if (valueSet.length < 5) return false
-	if (valueSet[0] === 13) {
-		const isLowStraight = checkLowStraight([...valueSet])
-		if (isLowStraight) return true
-	}
-	let concurrentCards = 0;
+	let numConcurrentCards = 0;
+	let concurrentCardValues = [];
 	for (let i = 1; i < valueSet.length; i++) {
-		if (concurrentCards === 5) {
-			// Return early if we have 5 concurrent cards instead of checking next index and possibly breakign the streak
-			return true
+		if (numConcurrentCards === 5) {
+			return {
+				isStraight: true,
+				concurrentCardValues
+			}
 		}
 		if ((valueSet[i] - valueSet[i - 1]) === -1) {
 			if(i === 1) {
-				concurrentCards = 2
-			} else { concurrentCards++ }
-		} else { concurrentCards = 0 }
+				numConcurrentCards = 2;
+					concurrentCardValues.push(valueSet[i - 1]);
+					concurrentCardValues.push(valueSet[i]);
+
+			} else { 
+				numConcurrentCards++;
+					concurrentCardValues.push(valueSet[i]);
+			}
+		} else { 
+			numConcurrentCards = 0;
+			concurrentCardValues = []; 
+		}
 	}
-	if (concurrentCards >= 5) {
-		return true
-	} else { return false }
+	if (numConcurrentCards >= 5) {
+		return {
+			isStraight: true,
+			concurrentCardValues
+		}
+	} else {
+		if (valueSet[0] === 13) {
+			let { isLowStraight, concurrentCardValuesLow } = checkLowStraight([...valueSet]);
+			if (isLowStraight) return {
+				isStraight: true,
+				concurrentCardValues: concurrentCardValuesLow,
+			}
+		} 
+		return { 
+			isStraight: false, 
+			concurrentCardValues, 
+		} 
+	}
 }
 
 const checkLowStraight = (valueSetCopy) => {
-	let concurrentCards = 0;
+	let numConcurrentCards = 0;
+	let concurrentCardValuesLow = [];
 	valueSetCopy[0] = 0; // Convert Ace High Value (13) to Low Wildcard Value (0)
-	valueSetCopy.sort((a,b) => a - b) // Sort in Ascending Order 
+	valueSetCopy.sort((a,b) => a - b); // Sort in Ascending Order 
 	// Basically look for [0, 1, 2, 3, 4,] AKA [A, 2, 3, 4, 5]
 	for (let i = 1; i < 5; i++) {
+		if (numConcurrentCards === 5) {
+			return {
+				isLowStraight: true,
+				concurrentCardValuesLow,
+			}
+		}
 		if((valueSetCopy[i] - valueSetCopy[i - 1]) === 1 ) {
 			if (i === 1) {
-				concurrentCards = 2
-			} else { concurrentCards++ }
-		} else { concurrentCards = 0 }
+				numConcurrentCards = 2;
+					concurrentCardValuesLow.push(valueSetCopy[i - 1]);
+					concurrentCardValuesLow.push(valueSetCopy[i]);
+			} else { 
+				numConcurrentCards++;
+				concurrentCardValuesLow.push(valueSetCopy[i]); 
+			}	
+		} else { 
+			numConcurrentCards = 0;
+			concurrentCardValuesLow = [];
+		}
 	}
-	if (concurrentCards === 5) {
-		return true
-	} else { return false }
+	if (numConcurrentCards === 5) {
+		return {
+			isLowStraight: true,
+			concurrentCardValuesLow,
+		}
+	} else { 
+		return {
+			isLowStraight: false,
+			concurrentCardValuesLow,
+		} 
+	}
 }
 
 
 const buildValueSet = (hand) => {
+	/*
+	return hand.reduce((uniqueFaces, card) => {
+
+	}, [])
+	*/
+
 	return Array.from(new Set(hand.map(cardInfo => cardInfo.value)))
 }
 
