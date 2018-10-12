@@ -264,8 +264,8 @@ const showDown = (state) => {
 
 		*/
 
-		state = rankPlayerHands(state);
-		return state
+		 return rankPlayerHands(state);
+
 }
 
 const rankPlayerHands = (state) => {
@@ -295,12 +295,44 @@ const rankPlayerHands = (state) => {
 		rankMap.get(player.showDownHand.bestHandRank).push(player.name);
 	}
 	state.rankMap = rankMap;
-		return state;
+		return battleRoyale(state);
 }
 
 const battleRoyale = (state) => {
+	// val should be an array of player ID or Table Position Index
+	state.rankMap.forEach((val, key, map) => {
+		if (val.length === 1) {
+			// Uncontested Winner (player at val[0])
+				state = payWinner(state, val[0], key) 
+		} else if (val.length > 1) {
+			// Send Contestants to Algo that Determines best hand of same ranks
+			// (val is an array of all contestants)
+				const winner = grudgeMatch(state, val, key)
+					state = payWinner(state, winner, key)
+		}
+	})
 
+		return state
 }
+
+const payWinner = (state, winnerID, key) => {
+	const winner = state.players[state.players.findIndex(el => el.name === winnerID)];
+	// maximumWinnings should be determined at reconcilePot() at the end of a betting round 
+	let maximumWinnings = winner.roundStartChips
+
+	// transfer chips from pot to winner 
+	// determine if he only gets a side-pot based on chips at start of round
+		// If there is a side-pot payout, remove the winner from the next round's consideration
+		// Run battle royale again
+		state.rankMap.set(state.rankMap.get(key).filter(player => player !== winnerID))
+			return battleRoyale(state)
+}
+
+const grudgeMatch = (state, winners, handRank) => {
+	// Determine who wins on the basis of highest pair, card, kicker, etc...
+}
+
+
 const checkFlush = (suitHistogram) => {
 	let isFlush;
 	let flushedSuit;

@@ -52,6 +52,7 @@ class App extends Component {
     pot: null,
     highBet: null,
     betInputValue: null,
+    sidePots: [],
     minBet: 20,
     phase: 'loading',
   }

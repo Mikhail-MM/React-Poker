@@ -119,16 +119,68 @@ const handlePhaseShift = (state) => {
 }
 
 const reconcilePot = (state) => {
-	// TODO: ENSURE that bet matches up with side pot - do not exceed low bet input when have a player betting 500 and one betting 1000
 	for (let player of state.players) {
 		state.pot = state.pot + player.bet;
-		player.bet = 0;
-		player.betReconciled = false;
+		player.sidePotStack = player.bet; // sidePotStack is just a copy of player.bet which can be reference and mutated in side pot calculations
+		player.betReconciled = false; // This is used as a marker to determine whether to adv to next round of betting
 	}
-	state.minBet = 0;
+	state = calculateSidePots(state, state.players)
+
+	for (let player of state.players) {
+		player.bet = 0 // Reset all player bets to 0 for the start of the next round
+	}
+
+	state.minBet = 0; // Reset markers which control min/max bet validation
 	state.highBet = 0;
 	state.betInputValue = 0;
 		return state
+}
+
+
+const calculateSidePots = (state, playerStacks) => {
+	// Filter out all players who either
+	// 		1) Upon first iteration of the function - did not bet this round
+	//		2) Upon subsequent iterations, already had a side pot built for them
+	const investedPlayers = playerStacks.filter(player => player.sidePotStack > 0)
+	if (investedPlayers.length === 0) {
+		// Function completed, exit.
+		return state
+	}
+	if (investedPlayers.length === 1) {
+		// This condition occurs when there is a single player who has bet an excess amount of chips. Refund and exit.
+		const playerToRefund = state.players[state.players.findIndex(player => player.name === investedPlayers[0].name)];
+		playerToRefund.chips = playerToRefund.chips + investedPlayers[0].sidePotStack;
+			return state
+	}
+		// Sort all players, Smallest stack first.
+		const ascBetPlayers = investedPlayers.sort((a,b) => a.sidePotStack - b.sidePotStack);
+		const smallStackValue = ascBetPlayers[0].sidePotStack;
+		
+		const builtSidePot = ascBetPlayers.reduce((acc, cur) => {
+			/***
+				If we have a group of players with this bet configuration
+				[100, 200, 300, 500, 1000]
+					We build a side pot for the player with 100 chips invested, by subtracting 100 from each index and accumulating them.
+					Each player who we subtract from is an eligible contestant
+						We should end up with [0, 100, 300, 500, 100] in the original array
+						And the accumulator will be { potValue: 500, contestants[(all the players in the original array)]}
+						Mutations will be done to the original array to persist changes
+							We can pass this to the next iteration of the function to repeat logic recursively
+			***/
+			if (!cur.folded) {
+				acc.contestants.push(cur.name);
+			}
+			acc.potValue = acc.potValue + smallStackValue;
+			cur.sidePotStack = cur.sidePotStack - smallStackValue
+				return acc
+		}, {
+			contestants: [],
+			potValue: 0,
+		});
+			state.sidePots.push(builtSidePot);
+				return calculateSidePots(state, ascBetPlayers)
+
+				// An issue is that these pots are not consolidated when some players fold out and leave - we will have 2 pots with the same contestants!
 }
 
 export { 
@@ -139,3 +191,22 @@ export {
 	handleFold,
 	handlePhaseShift,
 }
+
+/*
+
+P1		P2		P3		P4
+500		1000	500		300  chip totals
+|		|		|		|	
+all-in     call   	call 	raiseTo
+500		250     250     300		betting
+|		|		|		|
+fold 	fold 	call    |
+				300		|  go to next round
+
+P1		P2		P3		P4
+250		750		200		0
+
+Pot: 1100 Chips
+
+[250, 250, 300, 500]
+*/

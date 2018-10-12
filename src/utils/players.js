@@ -11,7 +11,7 @@ const generateTable = async () => {
 			descendingSortHand: [], 
 		},
 		chips: 2000,
-		potChipLimit: 2000,
+		roundStartChips: 2000,
 		bet: 0,
 		betReconciled: false,
 		folded: false,
@@ -24,7 +24,7 @@ const generateTable = async () => {
 			avatarURL: user.picture.large,
 			cards: [],
 			chips: 2000,
-			potChipLimit: 2000,
+			roundStartChips: 2000,
 			showDownHand: {
 				hand: [],
 				descendingSortHand: [],
