@@ -203,12 +203,39 @@ class App extends Component {
     }
   }
 
+  renderBestHands = () => {
+    const { players } = this.state
+    return players.map(player => {
+      return (
+        <div className='centered-flex-row'> 
+          <h6> {player.name} {`${(player.folded) ? 'Folded' : 'Active'}`}</h6>
+            { 
+               player.showDownHand.bestHand.map(card => {
+                  return(
+                    <div className='playing-card' style={{animationDelay: `0ms`}}>
+                      <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
+                    </div>
+                  )
+              }) 
+            }
+          <h6> {player.showDownHand.bestHandRank} </h6>
+        </div>
+      )
+    })
+  }
+
   render() {
     return (
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">Texas Hold 'Em</h1>
         </header>
+          { (this.state.phase === 'showdown') && 
+            <React.Fragment>
+              <h5> SHOWDOWN TIME! </h5>
+              { this.renderBestHands() }
+            </React.Fragment>
+          }
           <h2 style={{margin: '16px 0'}}> {renderPhaseStatement(this.state.phase)} </h2>
           <h6> {`Active Players: ${this.state.numPlayersActive}`} </h6>
           <h6> {`All-In Players: ${this.state.numPlayersAllIn}`} </h6>

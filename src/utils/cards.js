@@ -192,7 +192,8 @@ const showDown = (state) => {
 		const flushCards = isFlush ? player.showDownHand.descendingSortHand.filter(card => card.suit === flushedSuit) : null
 		const isRoyalFlush = isFlush ? checkRoyalFlush(flushCards) : false;
 		const isStraightFlush = isFlush ? checkStraightFlush(flushCards) : false; // DOES NOT ACCOUNT FOR OUR NEW OBJ STRUCTURE - NEEDS DESTRUCTURING
-		const { isStraight, isLowStraight, concurrentCardValues } = checkStraight(valueSet);
+		const { isStraight, isLowStraight, concurrentCardValues, concurrentCardValuesLow } = checkStraight(valueSet);
+		console.log("Is Low Straight found?", isLowStraight, concurrentCardValuesLow)
 		const { isFourOfAKind, isFullHouse, isThreeOfAKind, isTwoPair, isPair, frequencyHistogramMetaData } = analyzeHistogram(player.showDownHand.descendingSortHand, frequencyHistogram);
 		const isNoPair = ((!isRoyalFlush) && (!isStraightFlush) && (!isFourOfAKind) && (!isFullHouse) && (!isFlush) && (!isStraight) && (!isThreeOfAKind) && (!isTwoPair) && (!isPair))
 		
@@ -245,7 +246,7 @@ const showDown = (state) => {
 
 		const highRankPosition = player.showDownHand.heldRankHierarchy.findIndex(el => el.match === true);
 		player.showDownHand.bestHandRank = player.showDownHand.heldRankHierarchy[highRankPosition].name;
-		player.showDownHand.bestHand = buildBestHand(player.showDownHand.descendingSortHand, player.showDownHand.bestHandRank, flushedSuit, flushCards, concurrentCardValues, isLowStraight, frequencyHistogramMetaData)
+		player.showDownHand.bestHand = buildBestHand(player.showDownHand.descendingSortHand, player.showDownHand.bestHandRank, flushedSuit, flushCards, concurrentCardValues, concurrentCardValuesLow, isLowStraight, frequencyHistogramMetaData)
 
 		// TODO: IGNORE ALL WHO ARE FOLDED...
 
@@ -271,7 +272,7 @@ const showDown = (state) => {
 
 }
 
-const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardValues, isLowStraight, frequencyHistogramMetaData) => {
+const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardValues, concurrentCardValuesLow, isLowStraight, frequencyHistogramMetaData) => {
 	// TODO: LOW STRAGHT, STRAIGHT FLUSH (++ LOW STRAIGHT FLUSH...)
 	switch(bestRank) {
 		case('Royal Flush'): {
@@ -325,13 +326,22 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 			return flushCards.slice(0, 5)
 		}
 		case('Straight'): {
-			// TODO: Account for LOW STRAIGHT
-			return concurrentCardValues.reduce((acc, cur, index) => {
-				if (index < 5) {
-					acc.push(hand[hand.findIndex(card => card.value === cur)]);
-				}
-					return acc;
-			}, []);
+			if (isLowStraight && concurrentCardValues.length < 5) {
+				concurrentCardValuesLow[0] = 13
+				return concurrentCardValuesLow.reduce((acc, cur, index) => {
+					if (index < 5) {
+						acc.push(hand[hand.findIndex(card => card.value === cur)]);
+					}
+						return acc;
+				}, []).reverse();
+			} else {
+				return concurrentCardValues.reduce((acc, cur, index) => {
+					if (index < 5) {
+						acc.push(hand[hand.findIndex(card => card.value === cur)]);
+					}
+						return acc;
+				}, []);
+			}
 		}
 		case('Three Of A Kind'): {
 			const bestHand = [];
@@ -584,11 +594,13 @@ const checkStraight = (valueSet) => {
 		}
 	} else {
 		if (valueSet[0] === 13) {
-			let { isLowStraight, concurrentCardValuesLow } = checkLowStraight([...valueSet]);
+			let { isLowStraight, concurrentCardValuesLow } = checkLowStraight(cloneDeep(valueSet));
+
 			if (isLowStraight) return {
 				isStraight: true,
 				isLowStraight,
-				concurrentCardValues: concurrentCardValuesLow,
+				concurrentCardValues, 
+				concurrentCardValuesLow,
 			}
 		} 
 		return { 
@@ -607,7 +619,7 @@ const checkLowStraight = (valueSetCopy) => {
 	// Basically look for [0, 1, 2, 3, 4,] AKA [A, 2, 3, 4, 5]
 	console.log("Checking for concurrency - WildCard found (Ace) - Value Set is", valueSetCopy)
 	for (let i = 1; i < 5; i++) {
-		if (numConcurrentCards === 5) {
+		if (numConcurrentCards >= 5) {
 			return {
 				isLowStraight: true,
 				concurrentCardValuesLow,
@@ -624,11 +636,12 @@ const checkLowStraight = (valueSetCopy) => {
 				concurrentCardValuesLow.push(valueSetCopy[i]); 
 			}	
 		} else { 
+			console.log("Wildcard Concurrency Broken")
 			numConcurrentCards = 0;
 			concurrentCardValuesLow = [];
 		}
 	}
-	if (numConcurrentCards === 5) {
+	if (numConcurrentCards >= 5) {
 		return {
 			isLowStraight: true,
 			concurrentCardValuesLow,
