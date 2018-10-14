@@ -450,18 +450,8 @@ const battleRoyale = (state, rankMap) => {
 					// state = payWinner(state, val[0], key) 
 					console.log("Uncontested Winner")
 		} else if (val.length > 1) {
-			const comparator = [];
+			const comparator = buildComparator(key, val);
 			// Return Early. Build Truncated Comparators for different pair functions. length 4 for Pair, length 3 for 2 pairs, length 2 for full house/four of a kind, etc.
-			for (let i = 0; i < val.bestHand.length; i++) {
-				comparator[i] = [];
-				for (let contestant of val) {
-					comparator[i].push({
-						card: val.bestHand[i],
-						name: val.name,
-					})
-				}
-			}
-
 			const winners = determineStrongestHand(comparator, key)
 
 
@@ -474,6 +464,89 @@ const battleRoyale = (state, rankMap) => {
 	})
 
 		return state
+}
+
+const buildComparator = (rank, playerData) => {
+	let comparator;
+	switch(rank) {
+		// TODO: Make These MORE DECLARATIVE!
+		case('Four Of A Kind'): {
+			comparator = Array.from({length: 2}, () => Array.from({length: 0}))
+			for (let contestant of playerData) {
+				comparator[0].push({
+					card: playerData.bestHand[0],
+					name: playerData.name,
+				})
+				comparator[1].push({
+					card: playerData.bestHand[4],
+					name: playerData.name,
+				})
+			}
+		}
+		case('Full House') {
+			comparator = Array.from({length: 2}, () => Array.from({length: 0}))
+			for (let contestant of playerData) {
+				comparator[0].push({
+					card: playerData.bestHand[0],
+					name: playerData.name,
+				})
+				comparator[1].push({
+					card: playerData.bestHand[3],
+					name: playerData.name,
+				})
+			}
+		}
+		case('Straight Flush'||'Flush'||'Straight'||'No Pair'): {
+			for (let i = 0; i < playerData.bestHand.length; i++) {
+				comparator[i] = [];
+				for (let contestant of playerData) {
+					comparator[i].push({
+						card: playerData.bestHand[i],
+						name: playerData.name,
+					})
+				}
+			}
+		}
+		case('Two Pair'): {
+			comparator = Array.from({length: 3}, () => Array.from({length: 0}))
+			for (let contestant of playerData) {
+				comparator[0].push({
+					card: playerData.bestHand[0],
+					name: playerData.name,
+				})
+				comparator[1].push({
+					card: playerData.bestHand[2],
+					name: playerData.name,
+				})
+				comparator[2].push({
+					card: playerData.bestHand[4],
+					name: playerData.name,
+				})
+			}
+		}
+		case('Pair'): {
+			comparator = Array.from({length: 2}, () => Array.from({length: 0}))
+			for (let contestant of playerData) {
+				comparator[0].push({
+					card: playerData.bestHand[0],
+					name: playerData.name,
+				});
+				comparator[1].push({
+					card: playerData.bestHand[2],
+					name: playerData.name,
+				});
+				comparator[2].push({
+					card: playerData.bestHand[3],
+					name: playerData.name,
+				});
+				comparator[3].push({
+					card: playerData.bestHand[4],
+					name: playerData.name,
+				});
+			}
+		}
+	}
+	
 }
 
 const determineStrongestHand = (comparator, rank) => {
@@ -837,4 +910,20 @@ Connor's Approach:
 {
     [["2C", "3C", "4C", "5C", "6C"].toString()]: getBestHand(["2C", "3C", "4C", "5C", "6C"].)
 }
+*/
+
+/*
+
+OLD COMPARATOR
+
+			for (let i = 0; i < val.bestHand.length; i++) {
+				comparator[i] = [];
+				for (let contestant of val) {
+					comparator[i].push({
+						card: val.bestHand[i],
+						name: val.name,
+					})
+				}
+			}
+
 */
