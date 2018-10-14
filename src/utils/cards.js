@@ -268,8 +268,12 @@ const showDown = (state) => {
 
 		*/
 
-		 return rankPlayerHands(state);
+		 return beginNextRound(distributeSidePots(state))
 
+}
+
+const beginNextRound = (state) => {
+	return state
 }
 
 const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardValues, concurrentCardValuesLow, isLowStraight, frequencyHistogramMetaData) => {
@@ -394,8 +398,14 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 	}
 }
 
+const distributeSidePots = (state) => {
+	for (let sidePot in state.sidePots) {
+		const rankMap = rankPlayerHands(state, sidePot.contestants);
+			battleRoyale(state, rankMap)
+	}
+}
 
-const rankPlayerHands = (state) => {
+const rankPlayerHands = (state, contestants) => {
 	/*
 
 		bpfToday at 2:25 PM
@@ -418,23 +428,44 @@ const rankPlayerHands = (state) => {
 		['Pair', []],
 		['No Pair', []]
 	]);
-	// THIS WILL WORK > JUST PUSH ONLY THE PLAYERS IN EACH POT CONTEST.
-			// Determine how to mediate a tie, etc, etc...
-	for (let player of state.players) {
-		rankMap.get(player.showDownHand.bestHandRank).push(player.name);
+
+	for (let contestant of contestants) {
+		const playerIndex = state.players.findIndex(player => player.name === contestant);
+		const player = state.players[playerIndex];
+		rankMap.get(player.showDownHand.bestHandRank).push({
+			name: player.name,
+			playerIndex,
+			bestHand: player.showDownHand.bestHand,
+		});
 	}
-	state.rankMap = rankMap;
-		return console.log("Prepare the Grudge Match!")
+		console.log(rankMap);
+		return rankMap;
 		// return battleRoyale(state);
 }
 
-const battleRoyale = (state) => {
-	// val should be an array of player ID or Table Position Index
+const battleRoyale = (state, rankMap) => {
 	state.rankMap.forEach((val, key, map) => {
 		if (val.length === 1) {
 			// Uncontested Winner (player at val[0])
-				state = payWinner(state, val[0], key) 
+					// state = payWinner(state, val[0], key) 
+					console.log("Uncontested Winner")
 		} else if (val.length > 1) {
+			const comparator = [];
+			// Return Early. Build Truncated Comparators for different pair functions. length 4 for Pair, length 3 for 2 pairs, length 2 for full house/four of a kind, etc.
+			for (let i = 0; i < val.bestHand.length; i++) {
+				comparator[i] = [];
+				for (let contestant of val) {
+					comparator[i].push({
+						card: val.bestHand[i],
+						name: val.name,
+					})
+				}
+			}
+
+			const winners = determineStrongestHand(comparator, key)
+
+
+
 			// Send Contestants to Algo that Determines best hand of same ranks
 			// (val is an array of all contestants)
 				const winner = grudgeMatch(state, val, key)
@@ -443,6 +474,56 @@ const battleRoyale = (state) => {
 	})
 
 		return state
+}
+
+const determineStrongestHand = (comparator, rank) => {
+	console.log("Determining best hand amongst comparators(", rank, "): ", comparator);
+	let winners;
+	switch(rank) {
+		case('No Pair'): {
+			for (let i = 0; i < comparator.length; i++) {
+				
+				let highValue = 0;
+				let losersIndex = [];
+				
+				winners = comparator[i].reduce((acc, cur, index) => {
+					if (cur.card.value > highValue) {
+						highValue = cur.card.value;
+						acc = [];
+						acc.push(cur.name);
+						console.log("New High Value Found: ", highValue, "New Winners Array: ", acc);
+						console.log(cur.name, " Has the new high card.");
+							return acc;
+					} else if (cur.card.value = highValue) {
+						acc.push(cur.name);
+						console.log("Adding player at comparatorindex ", index, "To Winners Array")
+						console.log(acc)
+							return acc;
+					} else if (cur.card.value < highValue) {
+						console.log("Player at comparator index ", index, "Has a weaker hand.")
+						losersIndex.push(index)
+						return acc; 
+					}
+				}, [])
+
+				console.log("Winners at card index ", i, " ", winners)
+
+					if(winners.length === 1 || i === comparator.length) {
+						return winners
+					} else if (winners.length > 1) {
+						if (losersIndex.length >= 1) {
+							console.log("Filtering out comparator (BEFORE STATE): ", comparator)
+							losersIndex.forEach(indexToRemove => {
+								comparator = comparator.map(cardsAtEachIndexOfBestHand => cardsAtEachIndexOfBestHand.filter((cards, index) => index !== indexToRemove))
+							})
+							console.log("...Filtering Complete: ", comparator)
+						}
+					}
+			}
+
+		}
+	}
+
 }
 
 const payWinner = (state, winnerID, key) => {
