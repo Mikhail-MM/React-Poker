@@ -401,6 +401,8 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 const distributeSidePots = (state) => {
 	for (let sidePot in state.sidePots) {
 		const rankMap = rankPlayerHands(state, sidePot.contestants);
+		console.log("Evaluating contestants for sidepot: ", sidepot);
+		console.log("Rank Map Built: ", rankMap);
 			battleRoyale(state, rankMap)
 	}
 }
@@ -438,7 +440,6 @@ const rankPlayerHands = (state, contestants) => {
 			bestHand: player.showDownHand.bestHand,
 		});
 	}
-		console.log(rankMap);
 		return rankMap;
 		// return battleRoyale(state);
 }
@@ -546,6 +547,7 @@ const buildComparator = (rank, playerData) => {
 			}
 		}
 	}
+	console.log("Comparator Built: ", comparator)
 	
 }
 

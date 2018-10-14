@@ -125,7 +125,7 @@ const reconcilePot = (state) => {
 		player.sidePotStack = player.bet; // sidePotStack is just a copy of player.bet which can be reference and mutated in side pot calculations
 		player.betReconciled = false; // This is used as a marker to determine whether to adv to next round of betting
 	}
-	state = calculateSidePots(state, state.players)
+	state = condenseSidePots(calculateSidePots(state, state.players));
 
 	for (let player of state.players) {
 		player.bet = 0 // Reset all player bets to 0 for the start of the next round
@@ -184,6 +184,62 @@ const calculateSidePots = (state, playerStacks) => {
 				// An issue is that these pots are not consolidated when some players fold out and leave - we will have 2 pots with the same contestants!
 }
 
+/*
+[{
+	names: ['foo', 'bar', 'baz'],
+	potValue: 100
+}, {
+	names: ['foo', 'bar'],
+	potValue: 50,
+}, {
+	names: ['foo', 'bar', 'baz'],
+	potValue: 200,
+},{
+	names: ['foo', 'bar'],
+	potValue: 100,
+}]
+
+*/
+const condenseSidePots = (state) => {
+	/*
+
+
+acemarkeToday at 3:31 AM
+okay.  so, this may be a bit of a hack, but... what happens if you were to sort an array, and join it as a single string?
+Morg.Today at 3:31 AM
+that's an interesting idea
+acemarkeToday at 3:31 AM
+then use it as a lookup key
+so after that first entry, you'd have, say:
+{
+    "barbazfoo" : { names : ["foo", "bar", "baz"], potValue : 100}
+}
+then all you have to do is check to see if that key exists in the lookup table for later items, and add its value
+
+
+*/
+
+	if (state.sidePots.length > 1) {
+		for (let i = 0; i < state.sidePots.length; i++) {
+			console.log(state.sidePots.length)
+			for (let n = i + 1; n < state.sidePots.length; n++ ) {
+				console.log(state.sidePots.length)
+				if (arrayIdentical(state.sidePots[i].names, state.sidePots[n].names)) {
+					state.sidePots[i].potValue = state.sidePots[i].potValue + state.sidePots[n].potValue;
+					state.sidePots = state.sidePots.filter((el, index) => index !== n);
+					console.log(state.sidePots)
+					console.log(state.sidePots.length)
+				}
+			}
+		}
+	}
+		return state	
+}
+
+const arrayIdentical = (arr1, arr2) => {
+	if (arr1.length !== arr2.length) return false
+		return arr1.map(el => arr2.includes(el)).filter(bool => bool !== true).length !== 0 ? false : true;
+}
 export { 
 	determineBlindIndices, 
 	anteUpBlinds, 
