@@ -288,14 +288,14 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 				concurrentSFCardValuesLow[0] = 13
 				return concurrentSFCardValuesLow.reduce((acc, cur, index) => {
 					if (index < 5) {
-						acc.push(flushCards[flushCards.findIndex(card => card.value === cur)]);
+						acc.push(flushCards[flushCards.findIndex(match => match.value === cur)]);
 					}
 						return acc;
 				}, []).reverse();
 			} else {
 				return concurrentSFCardValues.reduce((acc, cur, index) => {
 					if (index < 5) {
-						acc.push(flushCards[flushCards.findIndex(card => card.value === cur)]);
+						acc.push(flushCards[flushCards.findIndex(match => match.value === cur)]);
 					}
 						return acc;
 				}, []);
@@ -306,9 +306,9 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 			let mutableHand = cloneDeep(hand);
 
 			for (let i = 0; i < 4; i++) {
-				const indexOfQuad = mutableHand.findIndex(card => card.cardFace === frequencyHistogramMetaData.quads[0].face);
+				const indexOfQuad = mutableHand.findIndex(match => match.cardFace === frequencyHistogramMetaData.quads[0].face);
 				bestHand.push(mutableHand[indexOfQuad])
-					mutableHand = mutableHand.filter((card, index) => index !== indexOfQuad)
+					mutableHand = mutableHand.filter((match, index) => index !== indexOfQuad)
 			}
 
 				return bestHand.concat(mutableHand.slice(0, 1))
@@ -318,26 +318,26 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 			let mutableHand = cloneDeep(hand);
 			if (frequencyHistogramMetaData.tripples.length > 1) {
 				for (let i = 0; i < 3; i++) {
-					const indexOfTripple = mutableHand.findIndex(card => card.cardFace === frequencyHistogramMetaData.tripples[0].face);
+					const indexOfTripple = mutableHand.findIndex(match => match.cardFace === frequencyHistogramMetaData.tripples[0].face);
 					bestHand.push(mutableHand[indexOfTripple])
-						mutableHand = mutableHand.filter((card, index) => index !== indexOfTripple)
+						mutableHand = mutableHand.filter((match, index) => index !== indexOfTripple)
 				}
 				for (let i = 0; i < 2; i++) {
-					const indexOfPair = mutableHand.findIndex(card => card.cardFace === frequencyHistogramMetaData.tripples[1].face);
+					const indexOfPair = mutableHand.findIndex(match => match.cardFace === frequencyHistogramMetaData.tripples[1].face);
 					bestHand.push(mutableHand[indexOfPair])
-						mutableHand = mutableHand.filter((card, index) => index !== indexOfPair)
+						mutableHand = mutableHand.filter((match, index) => index !== indexOfPair)
 				}
 					return bestHand
 			} else {
 				for (let i = 0; i < 3; i++) {
-					const indexOfTripple = mutableHand.findIndex(card => card.cardFace === frequencyHistogramMetaData.tripples[0].face);
+					const indexOfTripple = mutableHand.findIndex(match => match.cardFace === frequencyHistogramMetaData.tripples[0].face);
 					bestHand.push(mutableHand[indexOfTripple])
-						mutableHand = mutableHand.filter((card, index) => index !== indexOfTripple)
+						mutableHand = mutableHand.filter((match, index) => index !== indexOfTripple)
 				}
 				for (let i = 0; i < 2; i++) {
-					const indexOfPair = mutableHand.findIndex(card => card.cardFace === frequencyHistogramMetaData.pairs[0].face);
+					const indexOfPair = mutableHand.findIndex(match => match.cardFace === frequencyHistogramMetaData.pairs[0].face);
 					bestHand.push(mutableHand[indexOfPair])
-						mutableHand = mutableHand.filter((card, index) => index !== indexOfPair)
+						mutableHand = mutableHand.filter((match, index) => index !== indexOfPair)
 				}
 					return bestHand
 			}
@@ -350,14 +350,14 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 				concurrentCardValuesLow[0] = 13
 				return concurrentCardValuesLow.reduce((acc, cur, index) => {
 					if (index < 5) {
-						acc.push(hand[hand.findIndex(card => card.value === cur)]);
+						acc.push(hand[hand.findIndex(match => match.value === cur)]);
 					}
 						return acc;
 				}, []).reverse();
 			} else {
 				return concurrentCardValues.reduce((acc, cur, index) => {
 					if (index < 5) {
-						acc.push(hand[hand.findIndex(card => card.value === cur)]);
+						acc.push(hand[hand.findIndex(match => match.value === cur)]);
 					}
 						return acc;
 				}, []);
@@ -368,9 +368,9 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 			let mutableHand = cloneDeep(hand);
 
 			for (let i = 0; i < 3; i++) {
-				const indexOfTripple = mutableHand.findIndex(card => card.cardFace === frequencyHistogramMetaData.tripples[0].face);
+				const indexOfTripple = mutableHand.findIndex(match => match.cardFace === frequencyHistogramMetaData.tripples[0].face);
 				bestHand.push(mutableHand[indexOfTripple])
-					mutableHand = mutableHand.filter((card, index) => index !== indexOfTripple)
+					mutableHand = mutableHand.filter((match, index) => index !== indexOfTripple)
 			}
 
 				return bestHand.concat(mutableHand.slice(0, 2))
@@ -380,15 +380,15 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 			let mutableHand = cloneDeep(hand);
 				
 				for (let i = 0; i < 2; i++) {
-					const indexOfPair = mutableHand.findIndex(card => card.cardFace === frequencyHistogramMetaData.pairs[0].face);
+					const indexOfPair = mutableHand.findIndex(match => match.cardFace === frequencyHistogramMetaData.pairs[0].face);
 					bestHand.push(mutableHand[indexOfPair])
-						mutableHand = mutableHand.filter((card, index) => index !== indexOfPair)
+						mutableHand = mutableHand.filter((match, index) => index !== indexOfPair)
 				}
 				
 				for (let i = 0; i < 2; i++) {
-					const indexOfPair = mutableHand.findIndex(card => card.cardFace === frequencyHistogramMetaData.pairs[1].face);
+					const indexOfPair = mutableHand.findIndex(match => match.cardFace === frequencyHistogramMetaData.pairs[1].face);
 					bestHand.push(mutableHand[indexOfPair])
-						mutableHand = mutableHand.filter((card, index) => index !== indexOfPair)
+						mutableHand = mutableHand.filter((match, index) => index !== indexOfPair)
 				}
 					return bestHand.concat(mutableHand.slice(0, 1))
 
@@ -397,14 +397,19 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 		case('Pair'): {
 			const bestHand = [];
 			let mutableHand = cloneDeep(hand);
+			console.log('Pair Debug fullhand', mutableHand)
 				
 				for (let i = 0; i < 2; i++) {
 					const indexOfPair = mutableHand.findIndex(card => card.cardFace === frequencyHistogramMetaData.pairs[0].face);
 					console.log("Pair debug: ", mutableHand[indexOfPair])
+					// CONSIDER : 
 					bestHand.push(mutableHand[indexOfPair])
 						mutableHand = mutableHand.filter((card, index) => index !== indexOfPair)
+						console.log("After filter: ", mutableHand)
 				}
 				
+				console.log("Slice bug?", mutableHand.slice(0, 3))
+
 					return bestHand.concat(mutableHand.slice(0, 3))
 				
 
@@ -498,7 +503,8 @@ const buildComparator = (rank, playerData) => {
 				comparator.push({
 					name: playerData[index].name,
 				})
-			}) 
+			})
+			break 
 		}
 		case('Four Of A Kind'): {
 			comparator = Array.from({length: 2}, () => Array.from({length: 0}))
@@ -511,7 +517,8 @@ const buildComparator = (rank, playerData) => {
 					card: playerData[index].bestHand[4],
 					name: playerData[index].name,
 				})
-			}) 
+			})
+			break 
 		}
 		case('Full House'): {
 			comparator = Array.from({length: 2}, () => Array.from({length: 0}))
@@ -524,7 +531,8 @@ const buildComparator = (rank, playerData) => {
 					card: playerData[index].bestHand[3],
 					name: playerData[index].name,
 				})
-			}) 
+			})
+			break 
 		}
 		case('Flush'||'No Pair'): {
 			comparator = Array.from({length: 5}, () => Array.from({length: 0}))
@@ -534,8 +542,10 @@ const buildComparator = (rank, playerData) => {
 							card: playerData[index].bestHand[i],
 							name: playerData[index].name,
 						})
+						console.log(comparator)
 					}
 				})
+				break
 		}
 		case('Three Of A Kind'): {
 			comparator = Array.from({length: 3}, () => Array.from({length: 0}))
@@ -552,7 +562,8 @@ const buildComparator = (rank, playerData) => {
 					card: playerData[index].bestHand[4],
 					name: playerData[index].name,
 				});
-			}) 
+			})
+			break 
 		}
 		case('Straight'||'Straight Flush'): {
 			comparator = Array.from({length: 1}, () => Array.from({length: 0}))
@@ -561,7 +572,8 @@ const buildComparator = (rank, playerData) => {
 					card: playerData[index].bestHand[0],
 					name: playerData[index].name,
 				})
-			}) 
+			})
+			break 
 		}
 		case('Two Pair'): {
 			comparator = Array.from({length: 3}, () => Array.from({length: 0}))
@@ -578,7 +590,8 @@ const buildComparator = (rank, playerData) => {
 					card: playerData[index].bestHand[4],
 					name: playerData[index].name,
 				})
-			}) 
+			})
+			break 
 		}
 		case('Pair'): {
 			comparator = Array.from({length: 4}, () => Array.from({length: 0}))
@@ -599,7 +612,8 @@ const buildComparator = (rank, playerData) => {
 					card: playerData[index].bestHand[4],
 					name: playerData[index].name,
 				});
-			}) 
+			})
+			break 
 		}
 	}
 	console.log("Comparator Built: ", comparator)
@@ -641,6 +655,7 @@ const determineWinner = (comparator, rank) => {
 				if(winners.length === 1 || i === comparator.length) {
 					return winners
 				} else if (winners.length > 1) {
+					// THIS IS BROKEN LOGIC...
 					if (losersIndex.length >= 1) {
 						console.log("Filtering out comparator (BEFORE STATE): ", comparator)
 						losersIndex.forEach(indexToRemove => {
@@ -650,6 +665,7 @@ const determineWinner = (comparator, rank) => {
 					}
 				}
 		}
+				return winners
 
 }
 
