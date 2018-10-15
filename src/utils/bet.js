@@ -49,17 +49,39 @@ const anteUpBlinds = (players, blindIndices, minBet) => {
 		return players
 }
 
-const determineMinBet = (highBet, playerChips) => {
-	if (playerChips < highBet) {
-		return playerChips;
+const determineMinBet = (highBet, playerChipsStack, playerBet) => {
+	console.log("highBet: ", highBet, "playerChipsStack: ", playerChipsStack, "playerBet: ", playerBet)
+	const playerTotalChips = playerChipsStack + playerBet
+	console.log(playerTotalChips)
+	if (playerTotalChips < highBet) {
+		return playerTotalChips;
 	} else {
 		return highBet;
 	}
 }
 const handleBet = (state, bet, min, max) => {
+	console.log(state)
+	console.log(bet)
+	/*
+
+			MIN/MAX IS BUGGY!!!!!!!!!!!!!
+		(Well, MIn is)
+
+		Bet is 10000
+		Player has 6794 Chips, and already bet 20.
+		Our calculation for what is min is wrong, as her MIN/ MAX is 6794 6814
+
+		it SHOULD be 6814 6814
+		*/
 	console.log(min, max)
-	if (bet < min) return console.log("Invalid Bet")
-	if (bet > max) return console.log("Invalid Bet")
+	if (bet < min) {
+		state.betInputValue = min;
+		return console.log("Invalid Bet")
+	}
+	if (bet > max) {
+		state.betInputValue = max;
+		return console.log("Invalid Bet")
+	}
 
 	if (bet > state.highBet) {
 		// minbet and highbet may be condensed to a single property
@@ -218,17 +240,16 @@ then all you have to do is check to see if that key exists in the lookup table f
 
 
 */
-
+	console.log("Condensing side pots - ")
 	if (state.sidePots.length > 1) {
 		for (let i = 0; i < state.sidePots.length; i++) {
-			console.log(state.sidePots.length)
+			console.log('length of sidepot array, outer iteration: ', state.sidePots.length)
 			for (let n = i + 1; n < state.sidePots.length; n++ ) {
-				console.log(state.sidePots.length)
-				if (arrayIdentical(state.sidePots[i].names, state.sidePots[n].names)) {
+				console.log('length of sidepot array, inner iteration, pre-call: ', state.sidePots.length)
+				if (arrayIdentical(state.sidePots[i].contestants, state.sidePots[n].contestants)) {
 					state.sidePots[i].potValue = state.sidePots[i].potValue + state.sidePots[n].potValue;
 					state.sidePots = state.sidePots.filter((el, index) => index !== n);
-					console.log(state.sidePots)
-					console.log(state.sidePots.length)
+					console.log("Condesing. New array: ", state.sidePots)
 				}
 			}
 		}

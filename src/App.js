@@ -157,7 +157,7 @@ class App extends Component {
   
   renderActionMenu = () => {
     const { highBet, players, activePlayerIndex, phase } = this.state
-    const min = determineMinBet(highBet, players[activePlayerIndex].chips)
+    const min = determineMinBet(highBet, players[activePlayerIndex].chips, players[activePlayerIndex].bet)
     const max = players[activePlayerIndex].chips + players[activePlayerIndex].bet
     return(
       (phase === 'betting1' || phase === 'betting2' || phase === 'betting3' || phase === 'betting4') ? (
