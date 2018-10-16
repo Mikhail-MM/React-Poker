@@ -18,7 +18,6 @@ const VALUE_MAP = {
 	Q:11,
 	K:12,
 	A:13,
-
 };
 
 const randomizePosition = (min, max) => {
@@ -40,6 +39,10 @@ const generateDeckOfCards = () => {
 			})
 		}
 	}
+		console.log("Funky Debug Monkey Poops :D")
+		console.log(deck)
+		console.log(cloneDeep(deck))
+		console.log(cloneDeep(cloneDeep(deck)))
 		return deck
 }
 
@@ -169,13 +172,13 @@ const dealRiver = (state) => {
 
 const showDown = (state) => {
 	for (let player of state.players) {
-		
+		console.log("Evaluating hand of", player.name)
 		const frequencyHistogram = {};
 		const suitHistogram = {};
 		const bestHands = {}
 
 		player.showDownHand.hand = player.cards.concat(state.communityCards);
-		player.showDownHand.descendingSortHand = player.showDownHand.hand.sort((a,b) => b.value - a.value);
+		player.showDownHand.descendingSortHand = player.showDownHand.hand.map(el => el).sort((a,b) => b.value - a.value); // This mutates showDownHand.hand in place(!!)
 
 		player.showDownHand.descendingSortHand.forEach(card => {
 			frequencyHistogram[card.cardFace] = (frequencyHistogram[card.cardFace] + 1 || 1);
@@ -188,7 +191,7 @@ const showDown = (state) => {
 
 		const valueSet = buildValueSet(player.showDownHand.descendingSortHand);
 
-		const { isFlush, flushedSuit } = checkFlush(player.showDownHand.descendingSortHand, suitHistogram);
+		const { isFlush, flushedSuit } = checkFlush(suitHistogram);
 		const flushCards = (isFlush) && player.showDownHand.descendingSortHand.filter(card => card.suit === flushedSuit);
 		const isRoyalFlush = (isFlush) && checkRoyalFlush(flushCards);
 		const { isStraightFlush, isLowStraightFlush, concurrentSFCardValues, concurrentSFCardValuesLow } = (isFlush) && checkStraightFlush(flushCards)
@@ -377,25 +380,34 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 		}
 		case('Two Pair'): {
 			const bestHand = [];
+			console.log('Pair Debug Pre-Clone', hand)
+			console.log('Pair Debug Shallow Clone: ', [...hand])
 			let mutableHand = cloneDeep(hand);
-				
+				console.log('Pair Debug fullhand', mutableHand)
 				for (let i = 0; i < 2; i++) {
 					const indexOfPair = mutableHand.findIndex(match => match.cardFace === frequencyHistogramMetaData.pairs[0].face);
+					console.log("Pair debug: ", mutableHand[indexOfPair])
 					bestHand.push(mutableHand[indexOfPair])
 						mutableHand = mutableHand.filter((match, index) => index !== indexOfPair)
+						console.log("After filter: ", mutableHand)
 				}
 				
 				for (let i = 0; i < 2; i++) {
+
 					const indexOfPair = mutableHand.findIndex(match => match.cardFace === frequencyHistogramMetaData.pairs[1].face);
+					console.log("Pair debug: ", mutableHand[indexOfPair])
 					bestHand.push(mutableHand[indexOfPair])
 						mutableHand = mutableHand.filter((match, index) => index !== indexOfPair)
+						console.log("After filter: ", mutableHand)
 				}
+					console.log("Slice bug?", mutableHand.slice(0, 1))
 					return bestHand.concat(mutableHand.slice(0, 1))
-
 
 		}
 		case('Pair'): {
 			const bestHand = [];
+			console.log('Pair Debug Pre-Clone', hand)
+			console.log('Pair Debug Shallow Clone: ', [...hand])
 			let mutableHand = cloneDeep(hand);
 			console.log('Pair Debug fullhand', mutableHand)
 				
@@ -426,8 +438,9 @@ const distributeSidePots = (state) => {
 		const rankMap = rankPlayerHands(state, sidePot.contestants);
 		console.log("Evaluating contestants for sidepot: ", sidePot);
 		console.log("Rank Map Built: ", rankMap);
-			battleRoyale(state, rankMap)
+			state = battleRoyale(state, rankMap, sidePot.potValue)
 	}
+				return state
 }
 
 const rankPlayerHands = (state, contestants) => {
@@ -467,33 +480,61 @@ const rankPlayerHands = (state, contestants) => {
 		// return battleRoyale(state);
 }
 
-const battleRoyale = (state, rankMap) => {
+const battleRoyale = (state, rankMap, prize) => {
 	let winnerFound = false;
-	rankMap.forEach((val, key, map) => {
-		if (val.length === 1) {
-			// Uncontested Winner (player at val[0])
-					// state = payWinner(state, val[0], key) 
-					return console.log("Uncontested Winner, ", val[0].name, " , beating out the competition with a ", key)
 
-		} else if (val.length > 1) {
-			console.log(val)
-			// Return Early. Build Truncated Comparators for different pair functions. length 4 for Pair, length 3 for 2 pairs, length 2 for full house/four of a kind, etc.
-			const winners = determineWinner(buildComparator(key, val), key)
-				if (winners.length === 1) {
-					return console.log("Uncontested Winner, ", winners[0], " , beating out the competition with a ", key)
-				} else {
-					return console.log("We have a tie! Split the pot amongst ", winners, " Who will take the pot with their ", key)
-				}
-			// Send Contestants to Algo that Determines best hand of same ranks
-			// (val is an array of all contestants)
-		}
-	})
+	// Map.entries().find(([rank, contestants]) => { logic here })
+	rankMap.forEach((contestants, rank, map) => {
+		if (!winnerFound) {
+			if (contestants.length === 1) {
+				winnerFound = true
+				// Uncontested Winner (player at val[0])
+						// state = payWinner(state, val[0], rank) 
+					   console.log("Uncontested Winner, ", contestants[0].name, " , beating out the competition with a ", rank)
+						state = payWinners(state, contestants, prize)
 
+	
+			} else if (contestants.length > 1) {
+				console.log(contestants)
+				winnerFound = true
+				// Return Early. Build Truncated Comparators for different pair functions. length 4 for Pair, length 3 for 2 pairs, length 2 for full house/four of a kind, etc.
+				const winners = determineWinner(buildComparator(rank, contestants), rank)
+					if (winners.length === 1) {
+					   console.log("Uncontested Winner, ", winners[0], " , beating out the competition with a ", rank)
+						state = payWinners(state, winners, prize)
+					} else {
+					   console.log("We have a tie! Split the pot amongst ", winners, " Who will take the pot with their ", rank)
+						state = payWinners(state, winners, prize)
+					}
+				// Send Contestants to Algo that Determines best hand of same ranks
+				// (contestants is an array of all contestants)
+			}
+		}})
+			return state
+}
+
+const payWinners = (state, winners, prize) => {
+	if(winners.length === 1) {
+		console.log("Transferring ", prize, " chips to ", winners[0].name)
+		state.players[winners[0].playerIndex].chips += prize
+		state.pot -= prize
+	} else if (winners.length > 1) {
+		const overflow = prize % winners.length;
+		const splitPot = Math.floor(prize / winners.length)
+		console.log("Mediating Tie. Total Prize ", prize, " split into ", winners.length, " portions with an overflow of ", overflow)
+		winners.forEach(winner => {
+			console.log()
+			state.players[winner.playerIndex].chips += splitPot
+			state.pot -= splitPot
+		})
+	}
 		return state
 }
 
 const buildComparator = (rank, playerData) => {
 	console.log("Rank and playerData: ", rank, playerData)
+	console.log("WHERE IS NO PAIR??", rank)
+	console.log(rank === 'Flush'||'No Pair' )
 	let comparator;
 	switch(rank) {
 		// TODO: Make These MORE DECLARATIVE!
@@ -512,10 +553,12 @@ const buildComparator = (rank, playerData) => {
 				comparator[0].push({
 					card: playerData[index].bestHand[0],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				})
 				comparator[1].push({
 					card: playerData[index].bestHand[4],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				})
 			})
 			break 
@@ -526,23 +569,26 @@ const buildComparator = (rank, playerData) => {
 				comparator[0].push({
 					card: playerData[index].bestHand[0],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				})
 				comparator[1].push({
 					card: playerData[index].bestHand[3],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				})
 			})
 			break 
 		}
-		case('Flush'||'No Pair'): {
+		case('Flush'):
+		case('No Pair'): {
 			comparator = Array.from({length: 5}, () => Array.from({length: 0}))
 				playerData.forEach((playerShowdownData, index) => {
 					for (let i = 0; i < 5; i++) {
 						comparator[i].push({
 							card: playerData[index].bestHand[i],
 							name: playerData[index].name,
+							playerIndex: playerData[index].playerIndex,
 						})
-						console.log(comparator)
 					}
 				})
 				break
@@ -553,24 +599,29 @@ const buildComparator = (rank, playerData) => {
 				comparator[0].push({
 					card: playerData[index].bestHand[0],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				});
 				comparator[1].push({
 					card: playerData[index].bestHand[3],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				});
 				comparator[2].push({
 					card: playerData[index].bestHand[4],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				});
 			})
 			break 
 		}
-		case('Straight'||'Straight Flush'): {
+		case('Straight'):
+		case('Straight Flush'): {
 			comparator = Array.from({length: 1}, () => Array.from({length: 0}))
 			playerData.forEach((playerShowdownData, index) => {
 				comparator[0].push({
 					card: playerData[index].bestHand[0],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				})
 			})
 			break 
@@ -581,14 +632,17 @@ const buildComparator = (rank, playerData) => {
 				comparator[0].push({
 					card: playerData[index].bestHand[0],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				})
 				comparator[1].push({
 					card: playerData[index].bestHand[2],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				})
 				comparator[2].push({
 					card: playerData[index].bestHand[4],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				})
 			})
 			break 
@@ -599,18 +653,22 @@ const buildComparator = (rank, playerData) => {
 				comparator[0].push({
 					card: playerData[index].bestHand[0],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				});
 				comparator[1].push({
 					card: playerData[index].bestHand[2],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				});
 				comparator[2].push({
 					card: playerData[index].bestHand[3],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				});
 				comparator[3].push({
 					card: playerData[index].bestHand[4],
 					name: playerData[index].name,
+					playerIndex: playerData[index].playerIndex,
 				});
 			})
 			break 
@@ -634,12 +692,18 @@ const determineWinner = (comparator, rank) => {
 				if (cur.card.value > highValue) {
 					highValue = cur.card.value;
 					acc = [];
-					acc.push(cur.name);
+					acc.push({
+						name: cur.name,
+						playerIndex: cur.playerIndex,
+					});
 					console.log("New High Value Found: ", highValue, "New Winners Array: ", acc);
 					console.log(cur.name, " Has the new high card.");
 						return acc;
-				} else if (cur.card.value = highValue) {
-					acc.push(cur.name);
+				} else if (cur.card.value === highValue) {
+					acc.push({
+						name: cur.name,
+						playerIndex: cur.playerIndex,
+					});
 					console.log("Adding player at comparatorindex ", index, "To Winners Array")
 					console.log(acc)
 						return acc;
@@ -669,35 +733,24 @@ const determineWinner = (comparator, rank) => {
 
 }
 
-const payWinner = (state, winnerID, key) => {
-	const winner = state.players[state.players.findIndex(el => el.name === winnerID)];
-	// maximumWinnings should be determined at reconcilePot() at the end of a betting round 
-	let maximumWinnings = winner.roundStartChips
-
-	// transfer chips from pot to winner 
-	// determine if he only gets a side-pot based on chips at start of round
-		// If there is a side-pot payout, remove the winner from the next round's consideration
-		// Run battle royale again
-		state.rankMap.set(state.rankMap.get(key).filter(player => player !== winnerID))
-			return battleRoyale(state)
-}
-
-const checkFlush = (hand, suitHistogram) => {
+const checkFlush = (suitHistogram) => {
 	let isFlush;
 	let flushedSuit;
+	console.log("Checking flush")
 	for (let suit in suitHistogram) {
+		console.log('Suit ', suit, 'has ', suitHistogram[suit], 'entries.')
 		if (suitHistogram[suit] >= 5) {
+			console.log('fush found.')
 			return { 
 				isFlush: true,
 				flushedSuit: suit,
 			}
-		} else { 
+		} 
+	}
 			return {
 				isFlush: false,
 				flushedSuit: null,
 			}
-		}
-	}
 }
 
 const checkRoyalFlush = (flushMatchCards) => {
@@ -760,9 +813,9 @@ const analyzeHistogram = (hand, frequencyHistogram) => {
 		}
 	}
 
-		frequencyHistogramMetaData.pairs = frequencyHistogramMetaData.pairs.sort((a,b) => b.value - a.value)
-		frequencyHistogramMetaData.tripples = frequencyHistogramMetaData.tripples.sort((a,b) => b.value - a.value)
-		frequencyHistogramMetaData.quads = frequencyHistogramMetaData.quads.sort((a,b) => b.value - a.value)
+		frequencyHistogramMetaData.pairs = frequencyHistogramMetaData.pairs.map(el => el).sort((a,b) => b.value - a.value)
+		frequencyHistogramMetaData.tripples = frequencyHistogramMetaData.tripples.map(el => el).sort((a,b) => b.value - a.value)
+		frequencyHistogramMetaData.quads = frequencyHistogramMetaData.quads.map(el => el).sort((a,b) => b.value - a.value)
 	// Ensure histogram arrays are sorted in descending order to build best hand top down
 	// can just check metadata length and omit the counters
 	if((numTripples >= 2) || (numPairs >= 1 && numTripples >=1)) {
@@ -785,7 +838,6 @@ const analyzeHistogram = (hand, frequencyHistogram) => {
 
 const checkStraight = (valueSet) => {
 	if (valueSet.length < 5) return false
-		console.log("Checking Straight for Value Set:", valueSet);
 	let numConcurrentCards = 0;
 	let concurrentCardValues = [];
 	for (let i = 1; i < valueSet.length; i++) {
@@ -796,7 +848,6 @@ const checkStraight = (valueSet) => {
 			}
 		}
 		if ((valueSet[i] - valueSet[i - 1]) === -1) {
-			console.log("Concurrency Found at i=", i)
 			if(numConcurrentCards === 0) {
 				numConcurrentCards = 2;
 					concurrentCardValues.push(valueSet[i - 1]);
@@ -807,7 +858,6 @@ const checkStraight = (valueSet) => {
 					concurrentCardValues.push(valueSet[i]);
 			}
 		} else {
-			console.log("Concurrency Broken") 
 			numConcurrentCards = 0;
 			concurrentCardValues = []; 
 		}
@@ -840,9 +890,8 @@ const checkLowStraight = (valueSetCopy) => {
 	let numConcurrentCards = 0;
 	let concurrentCardValuesLow = [];
 	valueSetCopy[0] = 0; // Convert Ace High Value (13) to Low Wildcard Value (0)
-	valueSetCopy.sort((a,b) => a - b); // Sort in Ascending Order 
+	valueSetCopy.map(el => el).sort((a,b) => a - b); // Sort in Ascending Order 
 	// Basically look for [0, 1, 2, 3, 4,] AKA [A, 2, 3, 4, 5]
-	console.log("Checking for concurrency - WildCard found (Ace) - Value Set is", valueSetCopy)
 	for (let i = 1; i < 5; i++) {
 		if (numConcurrentCards >= 5) {
 			return {
@@ -851,7 +900,6 @@ const checkLowStraight = (valueSetCopy) => {
 			}
 		}
 		if((valueSetCopy[i] - valueSetCopy[i - 1]) === 1 ) {
-			console.log("Concurrency Found at i=", i)
 			if (numConcurrentCards === 0) {
 				numConcurrentCards = 2;
 					concurrentCardValuesLow.push(valueSetCopy[i - 1]);
@@ -861,7 +909,6 @@ const checkLowStraight = (valueSetCopy) => {
 				concurrentCardValuesLow.push(valueSetCopy[i]); 
 			}	
 		} else { 
-			console.log("Wildcard Concurrency Broken")
 			numConcurrentCards = 0;
 			concurrentCardValuesLow = [];
 		}

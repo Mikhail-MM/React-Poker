@@ -234,6 +234,7 @@ class App extends Component {
             <React.Fragment>
               <h5> SHOWDOWN TIME! </h5>
               { this.renderBestHands() }
+              <button> Next Round </button>
             </React.Fragment>
           }
           <h2 style={{margin: '16px 0'}}> {renderPhaseStatement(this.state.phase)} </h2>
