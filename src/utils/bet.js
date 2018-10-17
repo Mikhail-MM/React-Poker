@@ -1,36 +1,5 @@
 import { dealFlop, dealTurn, dealRiver, showDown } from './cards.js';
 import { handleOverflowIndex, determineNextActivePlayer } from './players.js';
-/*
-const determineBlindIndices = (dealerIndex, numPlayers) => {
-	let bigBlindIndex;
-	let smallBlindIndex;
-	/*return({
-		bigBlindIndex: (dealerIndex + 2) % numPlayers,
-		smallBlindIndex: (dealerIndex + 1) % numPlayers
-	})
-
-		This method is unnecessary if we reverse the array of players. The idea is that when we iterate on an array, we move from left to right. However, when determining 
-	the position of the blinds and taking turns in poker, we actually move from right to left. To follow with the rhythm of Poker, we would be iterating the index  of the 
-	active playerDOWN ... leading to issues -
-	since we can go below 0 (If we go over the length of the array, we can return to the start by doing modulo % array.length. However, itertaing down, we will reach -1, and would need to compensate)
-
-
-
-	if ((dealerIndex - 2) < 0) {
-		// Ensure that we cycle around to the other end of the array if moving left of the Dealer chip brings us to a negative 
-		bigBlindIndex = ((dealerIndex - 2) % numPlayers) + numPlayers
-	} else {
-		bigBlindIndex = dealerIndex - 2
-	}	
-	if ((dealerIndex - 1) < 0) {
-		smallBlindIndex = ((dealerIndex - 1) % numPlayers) + numPlayers
-	} else { 
-		smallBlindIndex = dealerIndex - 1
-	}
-	
-	return { bigBlindIndex, smallBlindIndex }	
-}
-*/
 
 const determineBlindIndices = (dealerIndex, numPlayers) => {
 	return({
@@ -50,9 +19,7 @@ const anteUpBlinds = (players, blindIndices, minBet) => {
 }
 
 const determineMinBet = (highBet, playerChipsStack, playerBet) => {
-	console.log("highBet: ", highBet, "playerChipsStack: ", playerChipsStack, "playerBet: ", playerBet)
 	const playerTotalChips = playerChipsStack + playerBet
-	console.log(playerTotalChips)
 	if (playerTotalChips < highBet) {
 		return playerTotalChips;
 	} else {
@@ -60,20 +27,6 @@ const determineMinBet = (highBet, playerChipsStack, playerBet) => {
 	}
 }
 const handleBet = (state, bet, min, max) => {
-	console.log(state)
-	console.log(bet)
-	/*
-
-			MIN/MAX IS BUGGY!!!!!!!!!!!!!
-		(Well, MIn is)
-
-		Bet is 10000
-		Player has 6794 Chips, and already bet 20.
-		Our calculation for what is min is wrong, as her MIN/ MAX is 6794 6814
-
-		it SHOULD be 6814 6814
-		*/
-	console.log(min, max)
 	if (bet < min) {
 		state.betInputValue = min;
 		return console.log("Invalid Bet")
@@ -203,25 +156,8 @@ const calculateSidePots = (state, playerStacks) => {
 			state.sidePots.push(builtSidePot);
 				return calculateSidePots(state, ascBetPlayers)
 
-				// An issue is that these pots are not consolidated when some players fold out and leave - we will have 2 pots with the same contestants!
 }
 
-/*
-[{
-	names: ['foo', 'bar', 'baz'],
-	potValue: 100
-}, {
-	names: ['foo', 'bar'],
-	potValue: 50,
-}, {
-	names: ['foo', 'bar', 'baz'],
-	potValue: 200,
-},{
-	names: ['foo', 'bar'],
-	potValue: 100,
-}]
-
-*/
 const condenseSidePots = (state) => {
 	/*
 
@@ -240,16 +176,12 @@ then all you have to do is check to see if that key exists in the lookup table f
 
 
 */
-	console.log("Condensing side pots - ")
 	if (state.sidePots.length > 1) {
 		for (let i = 0; i < state.sidePots.length; i++) {
-			console.log('length of sidepot array, outer iteration: ', state.sidePots.length)
 			for (let n = i + 1; n < state.sidePots.length; n++ ) {
-				console.log('length of sidepot array, inner iteration, pre-call: ', state.sidePots.length)
 				if (arrayIdentical(state.sidePots[i].contestants, state.sidePots[n].contestants)) {
 					state.sidePots[i].potValue = state.sidePots[i].potValue + state.sidePots[n].potValue;
 					state.sidePots = state.sidePots.filter((el, index) => index !== n);
-					console.log("Condesing. New array: ", state.sidePots)
 				}
 			}
 		}
@@ -268,23 +200,38 @@ export {
 	handleBet,
 	handleFold,
 	handlePhaseShift,
+	reconcilePot
 }
 
+
 /*
+const determineBlindIndices = (dealerIndex, numPlayers) => {
+	let bigBlindIndex;
+	let smallBlindIndex;
+	/*return({
+		bigBlindIndex: (dealerIndex + 2) % numPlayers,
+		smallBlindIndex: (dealerIndex + 1) % numPlayers
+	})
 
-P1		P2		P3		P4
-500		1000	500		300  chip totals
-|		|		|		|	
-all-in     call   	call 	raiseTo
-500		250     250     300		betting
-|		|		|		|
-fold 	fold 	call    |
-				300		|  go to next round
+		This method is unnecessary if we reverse the array of players. The idea is that when we iterate on an array, we move from left to right. However, when determining 
+	the position of the blinds and taking turns in poker, we actually move from right to left. To follow with the rhythm of Poker, we would be iterating the index  of the 
+	active playerDOWN ... leading to issues -
+	since we can go below 0 (If we go over the length of the array, we can return to the start by doing modulo % array.length. However, itertaing down, we will reach -1, and would need to compensate)
 
-P1		P2		P3		P4
-250		750		200		0
 
-Pot: 1100 Chips
 
-[250, 250, 300, 500]
+	if ((dealerIndex - 2) < 0) {
+		// Ensure that we cycle around to the other end of the array if moving left of the Dealer chip brings us to a negative 
+		bigBlindIndex = ((dealerIndex - 2) % numPlayers) + numPlayers
+	} else {
+		bigBlindIndex = dealerIndex - 2
+	}	
+	if ((dealerIndex - 1) < 0) {
+		smallBlindIndex = ((dealerIndex - 1) % numPlayers) + numPlayers
+	} else { 
+		smallBlindIndex = dealerIndex - 1
+	}
+	
+	return { bigBlindIndex, smallBlindIndex }	
+}
 */

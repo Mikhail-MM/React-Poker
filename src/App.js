@@ -10,7 +10,7 @@ import './Poker.css';
 import Spinner from './Spinner';
 
 import { 
-  fullDeck, 
+  generateDeckOfCards, 
   shuffle, 
   popCards,
   dealPrivateCards,
@@ -19,7 +19,8 @@ import {
 
 import { 
   generateTable, 
-  handleOverflowIndex 
+  handleOverflowIndex,
+  beginNextRound, 
 } from './utils/players.js';
 
 import { 
@@ -76,7 +77,7 @@ class App extends Component {
         big: blindIndicies.bigBlindIndex,
         small: blindIndicies.smallBlindIndex,
       },
-      deck: shuffle(fullDeck),
+      deck: shuffle(generateDeckOfCards()),
       pot: 0,
       highBet: prevState.minBet,
       betInputValue: prevState.minBet,
@@ -224,6 +225,10 @@ class App extends Component {
     })
   }
 
+  handleNextRound = () => {
+    const newState = beginNextRound(cloneDeep(this.state))
+      this.setState(newState)
+  }
   render() {
     return (
       <div className="App">
@@ -234,7 +239,7 @@ class App extends Component {
             <React.Fragment>
               <h5> SHOWDOWN TIME! </h5>
               { this.renderBestHands() }
-              <button> Next Round </button>
+              <button onClick={() => this.handleNextRound()}> Next Round </button>
             </React.Fragment>
           }
           <h2 style={{margin: '16px 0'}}> {renderPhaseStatement(this.state.phase)} </h2>
