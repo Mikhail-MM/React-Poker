@@ -13,6 +13,7 @@ const generateTable = async () => {
 			descendingSortHand: [], 
 		},
 		chips: 20000,
+		chipsInvested: 0,
 		roundStartChips: 2000,
 		bet: 0,
 		betReconciled: false,
@@ -26,6 +27,7 @@ const generateTable = async () => {
 			avatarURL: user.picture.large,
 			cards: [],
 			chips: Math.floor(Math.random() * (20000 - 2000)) + 2000,
+			chipsInvested: 0,
 			roundStartChips: 2000,
 			showDownHand: {
 				hand: [],
@@ -34,6 +36,7 @@ const generateTable = async () => {
 			bet: 0,
 			betReconciled: false,
 			folded: false,
+			robot: true,
 		}))
 		.forEach(user => users.push(user))
 
@@ -88,7 +91,8 @@ const determineNextActivePlayer = (state) => {
 	if (state.players[state.activePlayerIndex].betReconciled) {
 		return handlePhaseShift(state);
 	}
-			return state
+
+		return state
 }
 
 const passDealerChip = (state) => {

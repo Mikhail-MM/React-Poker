@@ -36,6 +36,10 @@ import {
   renderUnicodeSuitSymbol 
 } from './utils/ui.js';
 
+import {
+  handleAI
+} from './utils/ai.js';
+
 import { cloneDeep } from 'lodash';
 
 class App extends Component {
@@ -103,6 +107,10 @@ class App extends Component {
       this.setState(newState)
   }
 
+  handleAI = () => {
+    handleAI(cloneDeep(this.state))
+  }
+
   renderPlayers = () => {
     // Reverse Players Array for the sake of taking turns counter-clockwise.
     const reversedPlayers = this.state.players.reduce((result, player, index) => {
@@ -161,7 +169,7 @@ class App extends Component {
     const min = determineMinBet(highBet, players[activePlayerIndex].chips, players[activePlayerIndex].bet)
     const max = players[activePlayerIndex].chips + players[activePlayerIndex].bet
     return(
-      (phase === 'betting1' || phase === 'betting2' || phase === 'betting3' || phase === 'betting4') ? (
+      (phase === 'betting1' || phase === 'betting2' || phase === 'betting3' || phase === 'betting4') ? (players[activePlayerIndex].robot) ? (<button onClick={this.handleAI}> AI Moves </button>) : (
         <React.Fragment>
           <input 
             type='number'

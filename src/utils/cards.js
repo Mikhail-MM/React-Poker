@@ -100,8 +100,6 @@ const dealPrivateCards = (state) => {
 	*/
 
 	// A MORE DECLARATIVE APPROACH WOULD BE MORE ELEGANT AND SAVE PROCESSING POWER
-
-	console.log(state)
 	let animationDelay = 0;
 	while (state.players[state.activePlayerIndex].cards.length < 2) {
 		const { mutableDeckCopy, chosenCards } = popCards(state.deck, 1);

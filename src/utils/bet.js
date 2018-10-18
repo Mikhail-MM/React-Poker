@@ -57,8 +57,8 @@ const handleBet = (state, bet, min, max) => {
 		activePlayer.betReconciled = true;
 	
 
-	determineNextActivePlayer(state)
-	return state
+	
+	return determineNextActivePlayer(state)
 }
 
 const handleFold = (state) => {
