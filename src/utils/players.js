@@ -18,6 +18,7 @@ const generateTable = async () => {
 		bet: 0,
 		betReconciled: false,
 		folded: false,
+		canRaise: true,
 	}];
 
 	const response = await axios.get(`https://randomuser.me/api/?results=5&nat=us,gb,fr`);
@@ -26,7 +27,7 @@ const generateTable = async () => {
 			name: `${user.name.first.charAt(0).toUpperCase()}${user.name.first.slice(1)} ${user.name.last.charAt(0).toUpperCase()}${user.name.last.slice(1)}`,
 			avatarURL: user.picture.large,
 			cards: [],
-			chips: Math.floor(Math.random() * (20000 - 2000)) + 2000,
+			chips: Math.floor(Math.random() * (20000 - 18000)) + 18000,
 			chipsInvested: 0,
 			roundStartChips: 2000,
 			showDownHand: {
@@ -37,10 +38,23 @@ const generateTable = async () => {
 			betReconciled: false,
 			folded: false,
 			robot: true,
+			canRaise: true,
 		}))
 		.forEach(user => users.push(user))
 
 	return users
+}
+
+const generatePersonality = (seed) => {
+	switch(seed) {
+		case (seed > 0.5): 
+			return 'standard'
+		case (seed > 0.35): 
+			return 'aggressive'
+		case (seed > 0):
+		default: 
+			return 'conservative'
+	}
 }
 
 const handleOverflowIndex = (currentIndex, incrementBy, arrayLength, direction) => {

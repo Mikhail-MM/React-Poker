@@ -726,6 +726,7 @@ const checkStraightFlush = (flushMatchCards) => {
 }
 
 const analyzeHistogram = (hand, frequencyHistogram) => {
+	// Is first argument required? - May be unused
 	let isFourOfAKind = false;
 	let isFullHouse = false
 	let isThreeOfAKind = false;

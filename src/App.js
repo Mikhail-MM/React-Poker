@@ -108,7 +108,8 @@ class App extends Component {
   }
 
   handleAI = () => {
-    handleAI(cloneDeep(this.state))
+    const newState = handleAI(cloneDeep(this.state))
+      this.setState(newState)
   }
 
   renderPlayers = () => {
