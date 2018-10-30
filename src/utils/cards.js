@@ -907,7 +907,7 @@ const dealMissingCommunityCards = (state) => {
 	return state
 }
 
-export { generateDeckOfCards, shuffle, popCards, dealPrivateCards, dealFlop, dealTurn, dealRiver, showDown, dealMissingCommunityCards }
+export { generateDeckOfCards, shuffle, popCards, dealPrivateCards, dealFlop, dealTurn, dealRiver, showDown, dealMissingCommunityCards, analyzeHistogram, checkFlush, checkRoyalFlush, checkStraightFlush, checkStraight, buildValueSet }
 
 // Straight: Divide array into frames: 0-4, 1-5, 2-6, 
 // For a straight, converting to a SET may help

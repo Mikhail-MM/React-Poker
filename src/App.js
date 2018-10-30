@@ -109,6 +109,7 @@ class App extends Component {
 
   handleAI = () => {
     const newState = handleAI(cloneDeep(this.state))
+    console.log(newState)
       this.setState(newState)
   }
 

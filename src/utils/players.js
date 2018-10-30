@@ -19,6 +19,7 @@ const generateTable = async () => {
 		betReconciled: false,
 		folded: false,
 		canRaise: true,
+		stackInvestment: 0,
 	}];
 
 	const response = await axios.get(`https://randomuser.me/api/?results=5&nat=us,gb,fr`);
@@ -39,6 +40,7 @@ const generateTable = async () => {
 			folded: false,
 			robot: true,
 			canRaise: true,
+			stackInvestment: 0,
 		}))
 		.forEach(user => users.push(user))
 
