@@ -43,8 +43,11 @@ img {
 	justify-content: center;
 	align-items: center;
 
-	height: 50px;
-	width: 40px;
+	background-color: white;
+	font-size: 1.5em;
+
+	height: 120px;
+	width: 85px;
 	margin: 0 1px;
 	border: 1px solid gray;
 
@@ -89,10 +92,14 @@ img {
  	align-items: center;
  	flex-direction: column;
 
+
  	width: 175px;
  	height: 200px;
+
  	border: 2px solid white;
  	border-radius: 200px;
+
+ 	color: wheat;
  }
 
  .p0 {
@@ -119,4 +126,25 @@ img {
 
  .action {
  	border-color: blue;
+ }
+
+ .community-card-container {
+ 	position: absolute;
+
+ 	top: calc(50% - 60px);
+ 	left: calc(50% - 225px);
+ 	
+ 	display: flex;
+
+ 	width: 450px;
+ 	height: 120px;
+
+ 	border: 1px solid black;
+
+ }
+ .cardbabmock {
+ 	width: 85px;
+ 	margin-left: 5px;
+ 	height: 120px;
+ 	background-color: black;
  }
