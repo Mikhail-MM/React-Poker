@@ -113,12 +113,13 @@ class App extends Component {
       this.setState(newState)
   }
 
-  renderPlayers = () => {
+  renderBoard = () => {
     // Reverse Players Array for the sake of taking turns counter-clockwise.
     const reversedPlayers = this.state.players.reduce((result, player, index) => {
       result.unshift(
-        <div className='flex-centered-column' style={{margin: '0 16px', backgroundColor: `${(index === this.state.activePlayerIndex) ? 'rgba(136, 124, 175, 0.25)' : 'transparent'}`}}>
-          <div className='player-avatar-container'>
+        <React.Fragment>
+        <div className={`p${index}${(index === this.state.activePlayerIndex) ? ' action' : ''}`}>
+          <div className='player-avatar-container' >
             <img className='player-avatar-image' src={player.avatarURL} />
               {(this.state.dealerIndex === index) && 
                 <React.Fragment>
@@ -128,7 +129,7 @@ class App extends Component {
                 </React.Fragment>
             }
           </div>
-          <h5> {player.name} </h5>
+                    <h5> {player.name} </h5>
           <h5> {`Chips: ${player.chips}`} </h5>
           <h5> {`Bet: ${player.bet}`} </h5>
           <h5> {`betReconciled: ${player.betReconciled}`} </h5>
@@ -138,6 +139,8 @@ class App extends Component {
           {(this.state.blindIndex.big === index) && <div style={{marginTop: '8px'}}> Big Blind </div>}
           {(this.state.blindIndex.small === index) && <div style={{marginTop: '8px'}}> Small Blind </div>}
         </div>
+        </React.Fragment>
+
       )
       return result
     }, []);
@@ -263,7 +266,7 @@ class App extends Component {
         </div>
         <h1> Players </h1>
         <div className='centered-flex-row'> 
-          { (this.state.loading) ? <Spinner/> : this.renderPlayers() }
+          { (this.state.loading) ? <Spinner/> : (<div className='poker-players'> { this.renderBoard() }</div>) }
         </div>
         <div className='centered-flex-row' style={{marginTop: '16px'}}> 
           { (!this.state.loading)  && this.renderActionMenu() }

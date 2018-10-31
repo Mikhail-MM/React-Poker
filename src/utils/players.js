@@ -22,7 +22,7 @@ const generateTable = async () => {
 		stackInvestment: 0,
 	}];
 
-	const response = await axios.get(`https://randomuser.me/api/?results=5&nat=us,gb,fr`);
+	const response = await axios.get(`https://randomuser.me/api/?results=4&nat=us,gb,fr`);
 	let randomUsers = response.data.results
 		.map(user => ({ 
 			name: `${user.name.first.charAt(0).toUpperCase()}${user.name.first.slice(1)} ${user.name.last.charAt(0).toUpperCase()}${user.name.last.slice(1)}`,

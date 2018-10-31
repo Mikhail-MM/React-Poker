@@ -73,3 +73,50 @@ img {
 	width: 25px;
 	z-index: 100;
 }
+
+/* GAME BOARD */
+
+.poker-players {
+	position: relative;
+	width: 1400px;
+	height: 962px;
+	background-image: url('/assets/pokerbgbig.svg');
+}
+ .p0, .p1, .p2, .p3, .p4 {
+ 	position: absolute;
+
+ 	display: flex;
+ 	align-items: center;
+ 	flex-direction: column;
+
+ 	width: 175px;
+ 	height: 200px;
+ 	border: 2px solid white;
+ 	border-radius: 200px;
+ }
+
+ .p0 {
+ 	bottom: 8.262%; /* 41px/962px */ /* ADD 2PX TO ALL VETICAL CALCULATIONS - MOVED PLAYERBOARD UP FOR CARD SPACE  (WAS 4.262%)*/
+ 	left: 43.75%; /* 50% - 6.25% (87.5px/1400px) */ 
+ }
+ .p1 {
+ 	bottom: 8.262%;
+ 	left: 24.107143%; /* 50% - 25.892857% (362.5px/1400px) */
+ }
+ .p2 {
+ 	bottom: 21.1518%; /* 165px / 962px */
+ 	left: 6%; /* 50% - 44% (616px/1400px) */ 
+ }
+
+ .p4 {
+ 	bottom: 8.262%;
+ 	right: 24.107143%;
+ }
+ .p3 {
+ 	bottom: 21.1518%;
+ 	right: 6%;
+ }
+
+ .action {
+ 	border-color: blue;
+ }
