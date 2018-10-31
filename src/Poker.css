@@ -145,6 +145,79 @@ img {
  .cardbabmock {
  	width: 85px;
  	margin-left: 5px;
- 	height: 120px;
+ 	height: 100px;
  	background-color: black;
+ }
+
+ .top-game-menu-bar {
+ 	position: absolute;
+ 	left: 0%;
+ 	right: 0%;
+ 	top: 0%;
+ 	height: 86.5px;
+ 	background-color: rgba(0,0,0,0.85);
+ }
+ .bottom-game-menu-bar {
+ 	position: absolute;
+
+ 	display: flex;
+ 	align-items: center;
+
+ 	left: 0%;
+ 	right: 0%;
+ 	bottom: 0%;
+ 	height: 150px;
+ 	background-color: rgba(0,0,0,0.55);
+ }
+
+ .chat-box {
+ 	position: absolute;
+ 	left: 0%;
+ 	width: 70%;
+ 	top: 86.5px;
+ 	height: 35%;
+ 	background-color: rgba(0,0,0,0.25);
+ }
+
+ .abscard {
+ 	position: absolute;
+ 	top: -95px;
+ }
+
+ .action-buttons {
+ 	display: flex;
+ 	align-items: center;
+ 	justify-content: space-around;
+ 	width: 33.33%;
+ 	height: 100%;
+ }
+
+ .slider-boi {
+ 	display: flex;
+ 	align-items: center;
+ 	justify-content: flex-end;
+ 	padding-right: 4%;
+ 	width: 66.66%;
+ 	height: 100%;
+ }
+
+ .fold-btn {
+ 	width: 50px;
+ 	height: 50px;
+ 	border-radius: 100px;
+ 	background-color: red;
+ }
+
+ .call-btn {
+ 	width: 50px;
+ 	height: 50px;
+ 	border-radius: 100px;
+ 	background-color: yellow;
+ }
+
+ .bet-btn {
+ 	width: 50px;
+ 	height: 50px;
+ 	border-radius: 100px;
+ 	background-color: green;
  }

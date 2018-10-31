@@ -169,6 +169,13 @@ class App extends Component {
       });
   }
   
+  changeSliderInput = (val) => {
+    console.log(val)
+    this.setState({
+      betInputValue: val[0]
+    })
+    console.log(this.state.betInputValue)
+  }
   handleBet = (bet, min, max) => {
     const newState = handleBet(cloneDeep(this.state), parseInt(bet), parseInt(min), parseInt(max));
       this.setState(newState);
@@ -204,7 +211,7 @@ class App extends Component {
           <h5> {`Chips: ${player.chips}`} </h5>
           <h5> {`Bet: ${player.bet}`} </h5>
           <h5> {`betReconciled: ${player.betReconciled}`} </h5>
-          <div className='centered-flex-row'>
+          <div className='centered-flex-row abscard'>
             { this.renderPlayerCards(index) }
           </div>
           {(this.state.blindIndex.big === index) && <div style={{marginTop: '8px'}}> Big Blind </div>}
@@ -269,6 +276,8 @@ class App extends Component {
           domain={[min, max]}
           values={[min]}
           step={1}
+
+          onChange={this.changeSliderInput}
             mode={2}
         >
           <Rail>
@@ -393,6 +402,19 @@ class App extends Component {
         <div className='centered-flex-row'> 
           { (this.state.loading) ? <Spinner/> : (
               <div className='poker-players' style={{margin: '50px'}} > 
+                <div className='top-game-menu-bar' />
+                <div className='bottom-game-menu-bar' >
+                  <div className='action-buttons'>
+                    <div className='fold-btn' />
+                    <div className='call-btn' />
+                    <div className='bet-btn' />
+
+                  </div>
+                  <div className='slider-boi'>
+                    { (!this.state.loading)  && this.renderActionMenu() }
+                  </div>
+                </div>
+                <div className='chat-box' />
                 { this.renderBoard() }
                 <div className='community-card-container' >
                   { this.renderCommunityCards() }
@@ -400,9 +422,6 @@ class App extends Component {
               </div>
               ) 
           }
-        </div>
-        <div className='centered-flex-row' style={{marginTop: '16px'}}> 
-          { (!this.state.loading)  && this.renderActionMenu() }
         </div>
       </div>
     );
