@@ -230,7 +230,7 @@ class App extends Component {
     if (players[index].folded) return <div> Folded. </div>
     return players[index].cards.map(card => {
       return(
-        <div className='playing-card' style={{animationDelay: `${card.animationDelay}ms`}}>
+        <div className={`playing-card${(index === 0) ? '' : ' shrinkwrap'}`} style={{animationDelay: `${card.animationDelay}ms`}}>
           <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
         </div>
       );
@@ -379,29 +379,9 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <h1 className="App-title">Texas Hold 'Em</h1>
-        </header>
-          { (this.state.phase === 'showdown') && 
-            <React.Fragment>
-              <h5> SHOWDOWN TIME! </h5>
-              { this.renderBestHands() }
-              <button onClick={() => this.handleNextRound()}> Next Round </button>
-            </React.Fragment>
-          }
-          <h2 style={{margin: '16px 0'}}> {renderPhaseStatement(this.state.phase)} </h2>
-          <h6> {`Active Players: ${this.state.numPlayersActive}`} </h6>
-          <h6> {`All-In Players: ${this.state.numPlayersAllIn}`} </h6>
-          <h6> {`Folded Players: ${this.state.numPlayersFolded}`} </h6>
-          <h4> {`POT: ${this.state.pot}`} </h4>
-          <h1> Community Cards </h1>
-        <div className='centered-flex-row'> 
-          { this.renderCommunityCards() }
-        </div>
-        <h1> Players </h1>
         <div className='centered-flex-row'> 
           { (this.state.loading) ? <Spinner/> : (
-              <div className='poker-players' style={{margin: '50px'}} > 
+              <div className='poker-players'> 
                 <div className='top-game-menu-bar' />
                 <div className='bottom-game-menu-bar' >
                   <div className='action-buttons'>
@@ -423,6 +403,15 @@ class App extends Component {
               ) 
           }
         </div>
+         { (this.state.phase === 'showdown') && 
+            <React.Fragment>
+              <h5> SHOWDOWN TIME! </h5>
+              { this.renderBestHands() }
+              <button onClick={() => this.handleNextRound()}> Next Round </button>
+            </React.Fragment>
+          }
+          <h2 style={{margin: '16px 0'}}> {renderPhaseStatement(this.state.phase)} </h2>
+          <h4> {`POT: ${this.state.pot}`} </h4>
       </div>
     );
   }
