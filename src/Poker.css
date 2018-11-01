@@ -50,10 +50,10 @@ img {
 	align-items: center;
 
 	background-color: white;
-	font-size: 1.5em;
+	font-size: 1em;
 
-	height: 100px;
-	width: 70px;
+	height: 50px;
+	width: 35px;
 	margin: 0 1px;
 	border: 1px solid gray;
 
@@ -102,10 +102,7 @@ img {
  	width: 175px;
  	height: 200px;
 
- 	border: 2px solid white;
  	border-radius: 200px;
-
- 	color: wheat;
  }
 
  .p0 {
@@ -168,6 +165,7 @@ img {
 
  	display: flex;
  	align-items: center;
+ 	justify-content: space-around;
 
  	left: 0%;
  	right: 0%;
@@ -178,16 +176,17 @@ img {
 
  .chat-box {
  	position: absolute;
+ 	display: none;
  	left: 0%;
  	width: 70%;
  	top: 86.5px;
- 	height: 35%;
+ 	height: 100%;
  	background-color: rgba(0,0,0,0.25);
  }
 
  .abscard {
  	position: absolute;
- 	top: -95px;
+ 	top: -80px;
  }
 
  .shrinkwrap {
@@ -198,7 +197,7 @@ img {
  	display: flex;
  	align-items: center;
  	justify-content: space-around;
- 	width: 33.33%;
+ 	width: auto;
  	height: 100%;
  }
 
@@ -206,28 +205,37 @@ img {
  	display: flex;
  	align-items: center;
  	justify-content: flex-end;
- 	padding-right: 4%;
- 	width: 66.66%;
+ 	width: 55%;
  	height: 100%;
  }
 
- .fold-btn {
- 	width: 50px;
- 	height: 50px;
- 	border-radius: 100px;
- 	background-color: red;
- }
-
- .call-btn {
- 	width: 50px;
- 	height: 50px;
- 	border-radius: 100px;
- 	background-color: yellow;
- }
-
- .bet-btn {
- 	width: 50px;
- 	height: 50px;
- 	border-radius: 100px;
+ .action-button {
+ 	height: 85px;
+ 	width: 175px;
+ 	margin: 0 25px;
+ 	background-color: rgba(242, 242, 242, 0.80);
+ 	font-size: 2.5em;
+ 	letter-spacing: .10em;
+ 	color: blue;
  	background-color: green;
+ 	border: none;
+ 	outline: none;
+ }
+ .fold-button {
+ 	height: 85px;
+ 	width: 175px;
+ 	margin: 0 25px;
+ 	background-color: rgba(242, 242, 242, 0.80);
+ 	font-size: 0.95em;
+ 	color: blue;
+ 	border: none;
+ 	outline: none;
+ }
+
+ .player-info-box {
+ 	position: absolute;
+ 	color: white;
+ 	background-color: rgba(0,0,0,0.35);
+ 	font-size: 0.67em;
+ 	top: -25px;
  }

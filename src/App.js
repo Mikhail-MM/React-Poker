@@ -46,7 +46,7 @@ import { cloneDeep } from 'lodash';
 
 const sliderStyle = {
   position: 'relative',
-  width: 600,
+  width: '100%',
   height: 80,
   border: '1px solid steelblue',
 }
@@ -207,15 +207,16 @@ class App extends Component {
                 </React.Fragment>
             }
           </div>
+          <div className='player-info-box'>
                     <h5> {player.name} </h5>
           <h5> {`Chips: ${player.chips}`} </h5>
           <h5> {`Bet: ${player.bet}`} </h5>
-          <h5> {`betReconciled: ${player.betReconciled}`} </h5>
+          {(this.state.blindIndex.big === index) && <div style={{marginTop: '8px'}}> Big Blind </div>}
+          {(this.state.blindIndex.small === index) && <div style={{marginTop: '8px'}}> Small Blind </div>}
+          </div>
           <div className='centered-flex-row abscard'>
             { this.renderPlayerCards(index) }
           </div>
-          {(this.state.blindIndex.big === index) && <div style={{marginTop: '8px'}}> Big Blind </div>}
-          {(this.state.blindIndex.small === index) && <div style={{marginTop: '8px'}}> Small Blind </div>}
         </div>
         </React.Fragment>
 
@@ -376,6 +377,20 @@ class App extends Component {
     const newState = beginNextRound(cloneDeep(this.state))
       this.setState(newState)
   }
+
+  renderActionButtons = () => {
+    return(
+      <React.Fragment>
+      <button className='action-button'>
+          Call
+      </button>
+      <button className='fold-button'>
+        Fold
+      </button>
+      </React.Fragment>
+      )
+  }
+
   render() {
     return (
       <div className="App">
@@ -385,10 +400,7 @@ class App extends Component {
                 <div className='top-game-menu-bar' />
                 <div className='bottom-game-menu-bar' >
                   <div className='action-buttons'>
-                    <div className='fold-btn' />
-                    <div className='call-btn' />
-                    <div className='bet-btn' />
-
+                      { this.renderActionButtons() }
                   </div>
                   <div className='slider-boi'>
                     { (!this.state.loading)  && this.renderActionMenu() }
