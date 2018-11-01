@@ -143,7 +143,7 @@ class App extends Component {
     this.setState(prevState => ({
       loading: false,
       players: playersBoughtIn,
-      numPlayersActive: 6,
+      numPlayersActive: players.length,
       numPlayersFolded: 0,
       numPlayersAllIn: 0,
       activePlayerIndex: dealerIndex,
@@ -379,12 +379,15 @@ class App extends Component {
   }
 
   renderActionButtons = () => {
+    const { highBet, players, activePlayerIndex, phase } = this.state
+    const min = determineMinBet(highBet, players[activePlayerIndex].chips, players[activePlayerIndex].bet)
+    const max = players[activePlayerIndex].chips + players[activePlayerIndex].bet
     return(
       <React.Fragment>
-      <button className='action-button'>
-          Call
+      <button className='action-button' onClick={() => this.handleBet(this.state.betInputValue, min, max)}>
+          {this.renderActionButtonText()}
       </button>
-      <button className='fold-button'>
+      <button className='fold-button' onClick={() => this.handleFold()}>
         Fold
       </button>
       </React.Fragment>
