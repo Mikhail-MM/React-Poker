@@ -161,6 +161,7 @@ class App extends Component {
     this.runGameLoop();
   }
 
+
   handleBetInputChange = (val, min, max) => {
     if (val === '') val = min
     if (val > max) val = max
@@ -189,6 +190,9 @@ class App extends Component {
     const newState = handleAI(cloneDeep(this.state))
     console.log(newState)
       this.setState(newState)
+          this.setState({
+            betInputValue: newState.minBet
+      })
   }
 
   renderBoard = () => {
@@ -334,10 +338,16 @@ class App extends Component {
   renderActionButtonText() {
     // Move to UI Utils
     // TODO: Add logic for CALL, RAISE
-    if ((this.state.betInputValue === this.state.highBet) && (this.state.players[this.state.activePlayerIndex].bet == this.state.highBet)) {
+    const { highBet, betInputValue, players, activePlayerIndex } = this.state
+    const activePlayer = players[activePlayerIndex]
+    if ((highBet === 0) && (betInputValue === 0)) {
       return 'Check'
-    } else {
+    } else if ((highBet === betInputValue)) {
+      return 'Call'
+    } else if ((highBet === 0) && (betInputValue > highBet)) {
       return 'Bet'
+    } else if (betInputValue > highBet) {
+      return 'Raise'
     }
   }
 
