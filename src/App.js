@@ -202,7 +202,7 @@ class App extends Component {
         <React.Fragment>
         <div className={`p${index}${(index === this.state.activePlayerIndex) ? ' action' : ''}`}>
           <div className='player-avatar-container' >
-            <img className='player-avatar-image' src={player.avatarURL} />
+            <img className={`player-avatar-image${(index === this.state.activePlayerIndex) ? ' activePlayer' : ''}`} src={player.avatarURL} />
               {(this.state.dealerIndex === index) && 
                 <React.Fragment>
                   <div className='dealer-chip-icon-container'>
@@ -392,7 +392,7 @@ class App extends Component {
     const { highBet, players, activePlayerIndex, phase } = this.state
     const min = determineMinBet(highBet, players[activePlayerIndex].chips, players[activePlayerIndex].bet)
     const max = players[activePlayerIndex].chips + players[activePlayerIndex].bet
-    return(
+    return (players[activePlayerIndex].robot) ? null : (
       <React.Fragment>
       <button className='action-button' onClick={() => this.handleBet(this.state.betInputValue, min, max)}>
           {this.renderActionButtonText()}

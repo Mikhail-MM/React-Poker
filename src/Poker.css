@@ -38,9 +38,15 @@ img {
 }
 
 .player-avatar-image {
+	box-sizing: content-box;
 	border-radius: 500px;
 	border: 1px solid whitesmoke;
 	background-color: rgba(255,255,255,0.22);
+	transition: border 0.1s ease-out;
+}
+
+.activePlayer {
+	border: 5px solid #277650;
 }
 
 .playing-card {
