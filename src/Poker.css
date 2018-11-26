@@ -37,6 +37,15 @@ img {
 	border-radius: 100px;
 }
 
+.bet-container {
+	display: flex;
+
+	position: absolute;
+	left: 85px;
+	top: -15px;
+	color: white;
+}
+
 .player-avatar-image {
 	box-sizing: content-box;
 	border-radius: 500px;
@@ -65,7 +74,25 @@ img {
 
 	opacity: 0;
 	animation: fade-in-up 0.5s;
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
+}
+.robotcard {
+	background-color: #890808;
+background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='12' viewBox='0 0 20 12'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='charlie-brown' fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M9.8 12L0 2.2V.8l10 10 10-10v1.4L10.2 12h-.4zm-4 0L0 6.2V4.8L7.2 12H5.8zm8.4 0L20 6.2V4.8L12.8 12h1.4zM9.8 0l.2.2.2-.2h-.4zm-4 0L10 4.2 14.2 0h-1.4L10 2.8 7.2 0H5.8z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.folded {
+	animation: fade-in-out 0.5s;
+	animation-fill-mode: both;
+}
+@keyframes fade-in-up {
+	0% {
+		opacity: 1;
+		transform: translateY(0%);
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(100%)
+	}
 }
 
 @keyframes fade-in-up {
@@ -161,6 +188,7 @@ img {
 
  .top-game-menu-bar {
  	display: flex;
+ 	flex-direction: column;
  	justify-content: center;
  	align-items: center;
  	position: absolute;
@@ -229,31 +257,51 @@ img {
  	background-color: rgba(242, 242, 242, 0.80);
  	font-size: 2.5em;
  	letter-spacing: .10em;
- 	color: blue;
- 	background-color: green;
- 	border: none;
+ 	color: white;
+ 	background-color: #2adb2a;
+ 	border: 3px solid white;
  	outline: none;
+ 	transition: background-color 0.4s ease-out, color 0.4s ease-out;
+ }
+ .action-button:hover {
+ 	cursor: pointer;
+ 	background-color: #ffc935;
+	color: #f56132;
  }
  .fold-button {
  	height: 85px;
  	width: 175px;
  	margin: 0 25px;
- 	background-color: rgba(242, 242, 242, 0.80);
- 	font-size: 0.95em;
- 	color: blue;
- 	border: none;
+ 	background-color: rgba(255, 80, 80, 0.8);
+ 	font-size: 2.5em;
+ 	color: white;
  	outline: none;
  	z-index: 100;
+ 	border-radius: 500px;
+ 	border: 3px solid white;
+ 	transition: background-color 0.4s ease-out, color 0.4s ease-out;
+ }
+ .fold-button:hover {
+ 	background-color: rgb(255, 0, 0);
+ 	cursor: pointer;
  }
 
  .player-info-box {
- 	position: absolute;
+ 	display: flex;
+ 	flex-direction: column;
+ 	align-items: center;
  	color: white;
  	background-color: rgba(0,0,0,0.35);
- 	font-size: 0.67em;
- 	top: -25px;
+ 	font-size: 0.87em;
+ 	z-index: 99;
+
+ 	padding: 12px;
+ 	margin-top: 12px;
  }
 
+.player-info-box h5 {
+	margin: 4px 0;
+}
  .showdown-container {
  	display: flex;
  	flex-direction: column;
@@ -277,3 +325,10 @@ img {
  	align-items: center;
  	align-items: center;
  }
+
+.pot-container {
+	position: absolute;
+	top: 350px;
+	left: calc(50% - 22.5px);
+	color: white;
+}

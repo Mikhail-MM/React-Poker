@@ -48,7 +48,6 @@ const sliderStyle = {
   position: 'relative',
   width: '100%',
   height: 80,
-  border: '1px solid steelblue',
 }
 
 const railStyle = {
@@ -170,17 +169,15 @@ class App extends Component {
   }
   
   changeSliderInput = (val) => {
-    console.log(val)
     this.setState({
       betInputValue: val[0]
     })
-    console.log(this.state.betInputValue)
   }
   handleBet = (bet, min, max) => {
     const newState = handleBet(cloneDeep(this.state), parseInt(bet), parseInt(min), parseInt(max));
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), 500)
+          setTimeout(() => this.handleAI(), Math.floor(Math.random() * Math.floor(2200)))
         }
       });
   }
@@ -188,7 +185,7 @@ class App extends Component {
     const newState = handleFold(cloneDeep(this.state));
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), 500)
+          setTimeout(() => this.handleAI(), Math.floor(Math.random() * Math.floor(2200)))
         }
       })
   }
@@ -200,7 +197,7 @@ class App extends Component {
             betInputValue: newState.minBet
       }, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), 500)
+          setTimeout(() => this.handleAI(), Math.floor(Math.random() * Math.floor(2200)))
         }
       })
   }
@@ -212,6 +209,10 @@ class App extends Component {
         <React.Fragment>
         <div className={`p${index}${(index === this.state.activePlayerIndex) ? ' action' : ''}`}>
           <div className='player-avatar-container' >
+            <div className='bet-container'> 
+              <img style={{width: 35, height: 35}} src={'./assets/bet.svg'} />
+              <h5> {`Bet: ${player.bet}`} </h5> 
+            </div>
             <img className={`player-avatar-image${(index === this.state.activePlayerIndex) ? ' activePlayer' : ''}`} src={player.avatarURL} />
               {(this.state.dealerIndex === index) && 
                 <React.Fragment>
@@ -223,10 +224,13 @@ class App extends Component {
           </div>
           <div className='player-info-box'>
                     <h5> {player.name} </h5>
-          <h5> {`Chips: ${player.chips}`} </h5>
-          <h5> {`Bet: ${player.bet}`} </h5>
-          {(this.state.blindIndex.big === index) && <div style={{marginTop: '8px'}}> Big Blind </div>}
-          {(this.state.blindIndex.small === index) && <div style={{marginTop: '8px'}}> Small Blind </div>}
+                    <div style={{display: 'flex', alignItems: 'center'}}>
+                      <img style={{height: 35, width: 35}} src={'./assets/chips.svg'} />
+                      <h5> {`${player.chips}`} </h5>
+                    </div>
+  
+          {/* (this.state.blindIndex.big === index) && <div style={{marginTop: '8px'}}> Big Blind </div> */}
+          {/* (this.state.blindIndex.small === index) && <div style={{marginTop: '8px'}}> Small Blind </div> */}
           </div>
           <div className='centered-flex-row abscard'>
             { this.renderPlayerCards(index) }
@@ -241,15 +245,34 @@ class App extends Component {
   }
 
   renderPlayerCards = (index) => {
-    const { players } = this.state
-    if (players[index].folded) return <div> Folded. </div>
-    return players[index].cards.map(card => {
-      return(
-        <div className={`playing-card${(index === 0) ? '' : ' shrinkwrap'}`} style={{animationDelay: `${card.animationDelay}ms`}}>
-          <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
-        </div>
-      );
-    });
+    const { players, activePlayerIndex } = this.state
+    if (players[index].folded) {
+      return 
+    } else if (players[index].robot) {
+      return players[index].cards.map(card => {
+        if (this.state.phase !== 'showdown') {
+          return(
+            <div className={`playing-card robotcard${(index === 0) ? '' : ' shrinkwrap'}`} style={{animationDelay: `${card.animationDelay}ms`}}>
+            </div>
+          );
+        } else {
+          return(
+            <div className={`playing-card${(index === 0) ? '' : ' shrinkwrap'}`} style={{animationDelay: `${card.animationDelay}ms`}}>
+              <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
+            </div>
+          );
+        }
+      });
+    }
+    else {
+      return players[index].cards.map(card => {
+        return(
+          <div className={`playing-card${(index === 0) ? '' : ' shrinkwrap'}`} style={{animationDelay: `${card.animationDelay}ms`}}>
+            <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
+          </div>
+        );
+      });
+    }
   }
 
   renderCommunityCards = () => {
@@ -366,7 +389,7 @@ class App extends Component {
       const newState = dealPrivateCards(cloneDeep(this.state))
         this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), 500)
+          setTimeout(() => this.handleAI(), Math.floor(Math.random() * Math.floor(2200)))
         }
       })
     }
@@ -382,8 +405,8 @@ class App extends Component {
       if (!player.folded) {
           return (
             <div className='showdown-row'> 
-              <h6 className='player-header'> {player.name} {player.showDownHand.bestHandRank} </h6>
-              <div className='centered-flex-row'>
+              <h6 className='player-header'> {player.name} </h6>
+              <div className='centered-flex-row' style={{alignItems: 'center'}}>
                 { 
                     player.showDownHand.bestHand.map(card => {
                       return(
@@ -394,6 +417,7 @@ class App extends Component {
                   }) 
                 }
               </div>
+              <h6>{player.showDownHand.bestHandRank}</h6>
             </div>
           )
       }
@@ -402,7 +426,11 @@ class App extends Component {
 
   handleNextRound = () => {
     const newState = beginNextRound(cloneDeep(this.state))
-      this.setState(newState)
+      this.setState(newState, () => {
+        if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
+          setTimeout(() => this.handleAI(), Math.floor(Math.random() * Math.floor(2200)))
+        }
+      })
   }
 
   renderActionButtons = () => {
@@ -436,7 +464,11 @@ class App extends Component {
               <div className='poker-players'>
                 { (this.state.phase === 'showdown') && this.renderShowdown() } 
                 <div className='top-game-menu-bar' >
-                    {renderPhaseStatement(this.state.phase)}
+                    <h4> Texas Hold 'Em Poker </h4>
+                </div>
+                <div className='pot-container'>
+                  <img style={{height: 55, width: 55}} src={'./assets/pot.svg'}/>
+                  <h4> {`${this.state.pot}`} </h4>
                 </div>
                 <div className='bottom-game-menu-bar' >
                   <div className='action-buttons'>
@@ -455,7 +487,6 @@ class App extends Component {
               ) 
           }
         </div>
-          <h4> {`POT: ${this.state.pot}`} </h4>
       </div>
     );
   }
