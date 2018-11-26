@@ -161,7 +161,6 @@ class App extends Component {
     this.runGameLoop();
   }
 
-
   handleBetInputChange = (val, min, max) => {
     if (val === '') val = min
     if (val > max) val = max
@@ -179,19 +178,30 @@ class App extends Component {
   }
   handleBet = (bet, min, max) => {
     const newState = handleBet(cloneDeep(this.state), parseInt(bet), parseInt(min), parseInt(max));
-      this.setState(newState);
+      this.setState(newState, () => {
+        if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
+          setTimeout(() => this.handleAI(), 2500)
+        }
+      });
   }
   handleFold = () => {
     const newState = handleFold(cloneDeep(this.state));
-      this.setState(newState)
+      this.setState(newState, () => {
+        if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
+          setTimeout(() => this.handleAI(), 2500)
+        }
+      })
   }
 
   handleAI = () => {
     const newState = handleAI(cloneDeep(this.state))
-    console.log(newState)
-      this.setState(newState)
-          this.setState({
+      this.setState({
+            ...newState,
             betInputValue: newState.minBet
+      }, () => {
+        if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
+          setTimeout(() => this.handleAI(), 2500)
+        }
       })
   }
 
@@ -257,7 +267,7 @@ class App extends Component {
     const min = determineMinBet(highBet, players[activePlayerIndex].chips, players[activePlayerIndex].bet)
     const max = players[activePlayerIndex].chips + players[activePlayerIndex].bet
     return(
-      (phase === 'betting1' || phase === 'betting2' || phase === 'betting3' || phase === 'betting4') ? (players[activePlayerIndex].robot) ? (<button onClick={this.handleAI}> AI Moves </button>) : (
+      (phase === 'betting1' || phase === 'betting2' || phase === 'betting3' || phase === 'betting4') ? (players[activePlayerIndex].robot) ? (<h4> {`Current Move: ${players[activePlayerIndex].name}`}</h4>) : (
         <React.Fragment>
         { /*
           <input 
@@ -354,7 +364,11 @@ class App extends Component {
   runGameLoop = () => {
     if (this.state.phase === 'initialDeal') {
       const newState = dealPrivateCards(cloneDeep(this.state))
-        this.setState(newState)
+        this.setState(newState, () => {
+        if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
+          setTimeout(() => this.handleAI(), 2500)
+        }
+      })
     }
     if (this.state.phase === 'flop') {
       const newState = dealFlop(cloneDeep(this.state));
@@ -366,8 +380,8 @@ class App extends Component {
     const { players } = this.state
     return players.map(player => {
       return (
-        <div className='centered-flex-row'> 
-          <h6> {player.name} {`${(player.folded) ? 'Folded' : 'Active'}`}</h6>
+        <div className='centered-flex-row showdown-row'> 
+          <h6 className='player-header'> {player.name} {`${(player.folded) ? 'Folded' : 'Active'}`}</h6>
             { 
                player.showDownHand.bestHand.map(card => {
                   return(
@@ -403,13 +417,21 @@ class App extends Component {
       </React.Fragment>
       )
   }
-
+  renderShowdown = () => {
+    return(
+      <div className='showdown-container'>
+        { this.renderBestHands() }
+        <button onClick={() => this.handleNextRound()}> Next Round </button>
+      </div>
+    )
+  }
   render() {
     return (
       <div className="App">
         <div className='centered-flex-row'> 
           { (this.state.loading) ? <Spinner/> : (
-              <div className='poker-players'> 
+              <div className='poker-players'>
+                { (this.state.phase === 'showdown') && this.renderShowdown() } 
                 <div className='top-game-menu-bar' />
                 <div className='bottom-game-menu-bar' >
                   <div className='action-buttons'>
@@ -428,13 +450,6 @@ class App extends Component {
               ) 
           }
         </div>
-         { (this.state.phase === 'showdown') && 
-            <React.Fragment>
-              <h5> SHOWDOWN TIME! </h5>
-              { this.renderBestHands() }
-              <button onClick={() => this.handleNextRound()}> Next Round </button>
-            </React.Fragment>
-          }
           <h2 style={{margin: '16px 0'}}> {renderPhaseStatement(this.state.phase)} </h2>
           <h4> {`POT: ${this.state.pot}`} </h4>
       </div>

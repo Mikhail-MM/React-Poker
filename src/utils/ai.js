@@ -48,12 +48,12 @@ const handleAI = (state) => {
 	const descendingSortHand = activePlayer.cards.concat(state.communityCards).sort((a, b) => b.value - a.value)
 	const { frequencyHistogram, suitHistogram } =  generateHistogram(descendingSortHand)
 	const stakes = classifyStakes(investmentRequiredToRemain);
-	console.log("Current Stakes To Remain In Pot: ", stakes)
+	//console.log("Current Stakes To Remain In Pot: ", stakes)
 	const preFlopValues = activePlayer.cards.map(el => el.value)
 	const highCard = Math.max(...preFlopValues)
 	const lowCard = Math.min(...preFlopValues)
 	// We may want to keep track of how much the Ai has already invested into the pot to help determine what action to take.
-	console.log(state.phase)
+	//console.log(state.phase)
 	switch(state.phase) {
 		case('betting1'): { 
 			const suited = Object.entries(suitHistogram).find(keyValuePair => keyValuePair[1] === 2)			
@@ -62,37 +62,37 @@ const handleAI = (state) => {
 			// If good high card and low card, bet lowdraw 
 			// If ++ suited or straight gap, 
 			const { callLimit, raiseChance, raiseRange } = buildPreFlopDeterminant(highCard, lowCard, suited, straightGap)
-			console.log(activePlayer.name, " is ready to call up to", callLimit, " stakes. There is a ", raiseChance, " chance that the AI will raise with one of these possible bets if it has not been met: ", raiseRange)
+			//console.log(activePlayer.name, " is ready to call up to", callLimit, " stakes. There is a ", raiseChance, " chance that the AI will raise with one of these possible bets if it has not been met: ", raiseRange)
 			// Need to fix logic - If 
 			const willCall = (BET_HIERARCHY[stakes] <= BET_HIERARCHY[callLimit])
-			console.log("Will Ai call?", willCall)
+			//console.log("Will Ai call?", willCall)
 			const callValue = (activePlayer.chips >= highBet) ? highBet : activePlayer.chips
 
 			if (willCall) {
 				if (willRaise(raiseChance)) {
-					console.log("AI has decided to bet")
+					//console.log("AI has decided to bet")
 					const determinedRaiseRange = raiseRange[Math.floor(Math.random() * (raiseRange.length - 0)) + 0];
-					console.log("AI's preferred bet state: ", determinedRaiseRange, " stakes.")
+					//console.log("AI's preferred bet state: ", determinedRaiseRange, " stakes.")
 					const wantRaise = (BET_HIERARCHY[stakes] <= BET_HIERARCHY[determinedRaiseRange])
-					console.log("Does the AI need to raise to reach this state? ", wantRaise)
+					//console.log("Does the AI need to raise to reach this state? ", wantRaise)
 						if (wantRaise) {
 
 							// ERROR - Due to the randomization - we may have an issue .... of a raise being lower than a call??
 							let betValue = Math.floor(decideBetProportion(determinedRaiseRange) * activePlayer.chips)
 							if (betValue < highBet) {
-								console.log("AI's decided raise is below current high bet ...")
+								//console.log("AI's decided raise is below current high bet ...")
 								betValue = highBet;
 							}
-							console.log("AI bets ", betValue)
+							//console.log("AI bets ", betValue)
 									activePlayer.canRaise = false
 									return handleBet(state, betValue, min, max);
 						} else {
-							console.log("AI Wants to Call.")
+							//console.log("AI Wants to Call.")
 
 							return handleBet(state, callValue, min, max);
 						}	
 				} else {
-					console.log("AI Wants to Call.")
+					//console.log("AI Wants to Call.")
 						return handleBet(state, callValue, min, max);
 				}
 			} else {
@@ -104,7 +104,7 @@ const handleAI = (state) => {
 		case('betting2'):
 		case('betting3'):
 		case('betting4'):
-			console.log("running AI")
+			//console.log("running AI")
 
 			// Repeated Logic from cards.js, we can possibly export this into a meta method, we can export this elsewhere
 			const { 
@@ -117,9 +117,9 @@ const handleAI = (state) => {
 				frequencyHistogramMetaData, 
 
 			} = analyzeHistogram(descendingSortHand, frequencyHistogram);		
-			console.log("Analyzed Histogram")
+			//console.log("Analyzed Histogram")
 			const valueSet = buildValueSet(descendingSortHand);
-			console.log("Built Value Set")
+			//console.log("Built Value Set")
 			const { 
 
 				isStraight, 
@@ -128,8 +128,8 @@ const handleAI = (state) => {
 				concurrentCardValuesLow, 
 
 			} = checkStraight(valueSet);
-			console.log("Checked Straight")
-			console.log(flushCards)
+			//console.log("Checked Straight")
+			//console.log(flushCards)
 			const { 
 				
 				isFlush, 
@@ -149,11 +149,11 @@ const handleAI = (state) => {
 				concurrentSFCardValuesLow, 
 
 			} = (isFlush) && checkStraightFlush(flushCards);
-			console.log("Checked Straight Flush")
-			console.log("Checked Flush")
+			//console.log("Checked Straight Flush")
+			//console.log("Checked Flush")
 			const isRoyalFlush = (isFlush) && 
 				checkRoyalFlush(flushCards);
-			console.log("Checked Royal Flush")
+			//console.log("Checked Royal Flush")
 			const isNoPair = (
 				(!isRoyalFlush) && 
 				(!isStraightFlush) && 
@@ -164,7 +164,7 @@ const handleAI = (state) => {
 				(!isThreeOfAKind) && 
 				(!isTwoPair) && 
 				(!isPair));
-			console.log("Checked No Pair")
+			//console.log("Checked No Pair")
 		const handHierarchy = [{
 			name: 'Royal Flush',
 			match: isRoyalFlush,
@@ -196,37 +196,37 @@ const handleAI = (state) => {
 			name: 'No Pair',
 			match: isNoPair
 		}];
-		console.log("Matches Done")
+		//console.log("Matches Done")
 		const highRank = handHierarchy[handHierarchy.findIndex(el => el.match === true)].name
 		const { callLimit, raiseChance, raiseRange } = buildGeneralizedDeterminant(descendingSortHand, highRank, frequencyHistogramMetaData)
-		console.log(activePlayer.name, " is ready to call up to", callLimit, " stakes. There is a ", raiseChance, " chance that the AI will raise with one of these possible bets if it has not been met: ", raiseRange)
+		//console.log(activePlayer.name, " is ready to call up to", callLimit, " stakes. There is a ", raiseChance, " chance that the AI will raise with one of these possible bets if it has not been met: ", raiseRange)
 		const willCall = (BET_HIERARCHY[stakes] <= BET_HIERARCHY[callLimit])
-		console.log("Will Ai call?", willCall)
+		//console.log("Will Ai call?", willCall)
 		const callValue = (activePlayer.chips >= highBet) ? highBet : activePlayer.chips
 		if (willCall) {
 				if (willRaise(raiseChance)) {
-					console.log("AI has decided to bet")
+					//console.log("AI has decided to bet")
 					const determinedRaiseRange = raiseRange[Math.floor(Math.random() * (raiseRange.length - 0)) + 0];
-					console.log("AI's preferred bet state: ", determinedRaiseRange, " stakes.")
+					//console.log("AI's preferred bet state: ", determinedRaiseRange, " stakes.")
 					const wantRaise = (BET_HIERARCHY[stakes] <= BET_HIERARCHY[determinedRaiseRange])
-					console.log("Does the AI need to raise to reach this state? ", wantRaise)
+					//console.log("Does the AI need to raise to reach this state? ", wantRaise)
 						if (wantRaise) {
 
 							// ERROR - Due to the randomization - we may have an issue .... of a raise being lower than a call??
 							let betValue = Math.floor(decideBetProportion(determinedRaiseRange) * activePlayer.chips)
 							if (betValue < highBet) {
-								console.log("AI's decided raise is below current high bet ...")
+								//console.log("AI's decided raise is below current high bet ...")
 								betValue = highBet;
 							}
-							console.log("AI bets ", betValue)
+							//console.log("AI bets ", betValue)
 									activePlayer.canRaise = false
 									return handleBet(state, betValue, min, max);
 						} else {
-							console.log("AI Wants to Call.")
+							//console.log("AI Wants to Call.")
 							return handleBet(state, callValue, min, max);
 						}	
 				} else {
-					console.log("AI Wants to Call.")
+					//console.log("AI Wants to Call.")
 						return handleBet(state, callValue, min, max);
 				}
 			} else {
@@ -238,70 +238,70 @@ const handleAI = (state) => {
 // TODO: Programatically determine raise chance AND raise range based on card aggregate value
 const buildGeneralizedDeterminant = (hand, highRank, frequencyHistogramMetaData) => {
 	if (highRank === 'Royal Flush') {
-		console.log("AI Has Royal Flush")
+		//console.log("AI Has Royal Flush")
 		return {
 			callLimit: 'beware',
 			raiseChance: 1,
 			raiseRange: ['beware']
 		}
 	} else if (highRank === 'Straight Flush') {
-		console.log("AI Has Straight Flush")
+		//console.log("AI Has Straight Flush")
 		return {
 			callLimit: 'beware',
 			raiseChance: 1,
 			raiseRange: ['strong','aggro', 'beware']
 		}
 	} else if (highRank === 'Four Of A Kind') {
-		console.log("AI Has 4Kind")
+		//console.log("AI Has 4Kind")
 		return {
 			callLimit: 'beware',
 			raiseChance: 1,
 			raiseRange: ['strong','aggro', 'beware']
 		}
 	} else if (highRank === 'Full House') {
-		console.log("AI Has Full House")
+		//console.log("AI Has Full House")
 		return {
 			callLimit: 'beware',
 			raiseChance: 1,
 			raiseRange: ['hidraw', 'strong', 'aggro', 'beware']
 		}
 	} else if (highRank === 'Flush') {
-		console.log("AI Has Flush")
+		//console.log("AI Has Flush")
 		return {
 			callLimit: 'beware',
 			raiseChange: 1,
 			raiseRange: ['strong', 'aggro', 'beware'],
 		}
 	} else if (highRank === 'Straight') {
-		console.log("AI Has Straight")
+		//console.log("AI Has Straight")
 		return {
 			callLimit: 'beware',
 			raiseChange: 1,
 			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
 		}
 	} else if (highRank === 'Three Of A Kind') {
-		console.log("AI Has Trips")
+		//console.log("AI Has Trips")
 		return {
 			callLimit: 'beware',
 			raiseChange: 1,
 			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
 		}
 	} else if (highRank === 'Two Pair') {
-		console.log("AI Has 2Pair")
+		//console.log("AI Has 2Pair")
 		return {
 			callLimit: 'beware',
 			raiseChange: 0.7,
 			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
 		}
 	} else if (highRank === 'Pair') {
-		console.log("AI Has Pair")
+		//console.log("AI Has Pair")
 		return {
 			callLimit: 'hidraw',
 			raiseChange: 0.5,
 			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
 		}
 	} else if (highRank === 'No Pair') {
-		console.log("AI Has No Pair")
+		//console.log("AI Has No Pair")
 		return {
 			callLimit: 'meddraw',
 			raiseChange: 0.2,
@@ -316,7 +316,7 @@ const buildPreFlopDeterminant = (highCard, lowCard, suited, straightGap) => {
 		// Don't really need a switch...
 		switch(highCard) {
 			case(highCard > 8): {
-				console.log('a')
+				//console.log('a')
 				return {
 					callLimit: 'beware',
 					raiseChance: 0.9,
@@ -324,7 +324,7 @@ const buildPreFlopDeterminant = (highCard, lowCard, suited, straightGap) => {
 				}
 			}
 			case(highCard > 5): {
-				console.log('b')
+				//console.log('b')
 				return {
 					callLimit: 'aggro',
 					raiseChance: 0.75, // If Math.random() is < than this, select a random raiseTarget 
@@ -333,7 +333,7 @@ const buildPreFlopDeterminant = (highCard, lowCard, suited, straightGap) => {
 			}
 			case(highCard < 5):
 			default: {
-				console.log('c')
+				//console.log('c')
 				return {
 					callLimit: 'aggro',
 					raiseChance: 0.5,
@@ -344,14 +344,14 @@ const buildPreFlopDeterminant = (highCard, lowCard, suited, straightGap) => {
 	} else if (highCard > 9 && lowCard > 9) {
 		// Two high cards
 		if (suited) {
-			console.log('d')
+			//console.log('d')
 			return {
 				callLimit: 'beware',
 				raiseChance: 1,
 				raiseRange: ['insignificant', 'lowdraw', 'meddraw', 'hidraw'],
 			}
 		} else {
-			console.log('e')
+			//console.log('e')
 			return {
 				callLimit: 'beware',
 				raiseChance: 0.75,
@@ -361,14 +361,14 @@ const buildPreFlopDeterminant = (highCard, lowCard, suited, straightGap) => {
 	} else if (highCard > 8 && lowCard > 6) {
 		// One high card
 		if (suited) {
-			console.log('f')
+			//console.log('f')
 			return {
 				callLimit: 'beware',
 				raiseChance: 0.65,
 				raiseRange: ['insignificant', 'lowdraw', 'meddraw', 'hidraw'],
 			}
 		} else {
-			console.log('g')
+			//console.log('g')
 			return {
 				callLimit: 'beware',
 				raiseChance: 0.45,
@@ -377,14 +377,14 @@ const buildPreFlopDeterminant = (highCard, lowCard, suited, straightGap) => {
 		}
 	} else if (highCard > 8 && lowCard < 6) {
 		if (suited) {
-			console.log('h')
+			//console.log('h')
 			return {
 				callLimit: 'major',
 				raiseChance: 0.45,
 				raiseRange: ['insignificant', 'lowdraw'],
 			}
 		} else {
-			console.log('i')
+			//console.log('i')
 			return {
 				callLimit: 'aggro',
 				raiseChance: 0.35,
@@ -393,20 +393,20 @@ const buildPreFlopDeterminant = (highCard, lowCard, suited, straightGap) => {
 		}
 	} else if (highCard > 5 && lowCard > 3) {
 		if (suited) {
-			console.log('j')
+			//console.log('j')
 			return{
 				callLimit: 'strong',
 				raiseChance: 0.1,
 				raiseRange: ['insignificant', 'lowdraw'],
 			}
 		} else if (straightGap) {
-			console.log('k')
+			//console.log('k')
 			return {
 				callLimit: 'aggro',
 				raiseChance: 0,
 			}
 		} else {
-			console.log('l')
+			//console.log('l')
 			return {
 				callLimit: 'strong',
 				raiseChance: 0,
@@ -414,20 +414,20 @@ const buildPreFlopDeterminant = (highCard, lowCard, suited, straightGap) => {
 		}
 	} else {
 		if (suited) {
-			console.log('m')
+			//console.log('m')
 			return {
 				callLimit: 'strong',
 				raiseChance: 0.1,
 				raiseRange: ['insignificant'],
 			}
 		} else if (straightGap) {
-			console.log('n')
+			//console.log('n')
 			return {
 				callLimit: 'strong',
 				raiseChance: 0,
 			}
 		} else {
-			console.log('o')
+			//console.log('o')
 			return {
 				callLimit: 'insignificant',
 				raiseChance: 0,

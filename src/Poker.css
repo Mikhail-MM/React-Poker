@@ -46,7 +46,7 @@ img {
 }
 
 .activePlayer {
-	border: 5px solid #277650;
+	border: 5px solid #00ff25;
 }
 
 .playing-card {
@@ -94,8 +94,9 @@ img {
 .poker-players {
 	position: relative;
 	width: 1400px;
-	height: 962px;
-	background-image: url('/assets/pokerbgbig.svg');
+	min-width: 1400px;
+	height: 778.46px;
+	background-image: url('/assets/table.svg');
 }
  .p0, .p1, .p2, .p3, .p4 {
  	position: absolute;
@@ -139,16 +140,16 @@ img {
 
  .community-card-container {
  	position: absolute;
+ 	display: flex;
+ 	justify-content: center;
 
  	top: calc(39.5% - 60px);
- 	left: calc(50% - 225px);
+ 	left: calc(50% - 100px);
  	
  	display: flex;
 
- 	width: 450px;
- 	height: 120px;
-
- 	border: 1px solid black;
+ 	width: 200px;
+ 	height: 60px;
 
  }
  .cardbabmock {
@@ -176,8 +177,9 @@ img {
  	left: 0%;
  	right: 0%;
  	bottom: 0%;
- 	height: 150px;
+ 	height: 100px;
  	background-color: rgba(0,0,0,0.55);
+ 	color: white;
  }
 
  .chat-box {
@@ -236,6 +238,7 @@ img {
  	color: blue;
  	border: none;
  	outline: none;
+ 	z-index: 100;
  }
 
  .player-info-box {
@@ -244,4 +247,25 @@ img {
  	background-color: rgba(0,0,0,0.35);
  	font-size: 0.67em;
  	top: -25px;
+ }
+
+ .showdown-container {
+ 	display: flex;
+ 	flex-direction: column;
+ 	align-items: center;
+ 	position: absolute;
+ 	right: 0;
+ 	top: 86.5px;
+ 	width: auto;
+ 	height: auto;
+
+ 	background-color: rgba(0,0,0,0.35);
+ 	color: white;
+ }
+
+ .showdown-row {
+ 	align-items: center;
+ }
+ .player-header {
+
  }
