@@ -160,12 +160,16 @@ img {
  }
 
  .top-game-menu-bar {
+ 	display: flex;
+ 	justify-content: center;
+ 	align-items: center;
  	position: absolute;
  	left: 0%;
  	right: 0%;
  	top: 0%;
  	height: 86.5px;
  	background-color: rgba(0,0,0,0.85);
+ 	color: white;
  }
  .bottom-game-menu-bar {
  	position: absolute;
@@ -221,6 +225,7 @@ img {
  	height: 85px;
  	width: 175px;
  	margin: 0 25px;
+ 	border-radius: 500px;
  	background-color: rgba(242, 242, 242, 0.80);
  	font-size: 2.5em;
  	letter-spacing: .10em;
@@ -254,18 +259,21 @@ img {
  	flex-direction: column;
  	align-items: center;
  	position: absolute;
- 	right: 0;
- 	top: 86.5px;
- 	width: auto;
+ 	right: calc(50% - 250px);
+ 	top: 150px;
+ 	width: 500px;
  	height: auto;
 
- 	background-color: rgba(0,0,0,0.35);
+ 	background-color: rgba(0,0,0,0.85);
  	color: white;
+
+ 	z-index: 100;
+
  }
 
  .showdown-row {
+ 	display: flex;
+ 	flex-direction: column;
  	align-items: center;
- }
- .player-header {
-
+ 	align-items: center;
  }

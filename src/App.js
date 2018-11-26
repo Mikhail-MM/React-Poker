@@ -180,7 +180,7 @@ class App extends Component {
     const newState = handleBet(cloneDeep(this.state), parseInt(bet), parseInt(min), parseInt(max));
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), 2500)
+          setTimeout(() => this.handleAI(), 500)
         }
       });
   }
@@ -188,7 +188,7 @@ class App extends Component {
     const newState = handleFold(cloneDeep(this.state));
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), 2500)
+          setTimeout(() => this.handleAI(), 500)
         }
       })
   }
@@ -200,7 +200,7 @@ class App extends Component {
             betInputValue: newState.minBet
       }, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), 2500)
+          setTimeout(() => this.handleAI(), 500)
         }
       })
   }
@@ -366,7 +366,7 @@ class App extends Component {
       const newState = dealPrivateCards(cloneDeep(this.state))
         this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), 2500)
+          setTimeout(() => this.handleAI(), 500)
         }
       })
     }
@@ -379,21 +379,24 @@ class App extends Component {
   renderBestHands = () => {
     const { players } = this.state
     return players.map(player => {
-      return (
-        <div className='centered-flex-row showdown-row'> 
-          <h6 className='player-header'> {player.name} {`${(player.folded) ? 'Folded' : 'Active'}`}</h6>
-            { 
-               player.showDownHand.bestHand.map(card => {
-                  return(
-                    <div className='playing-card' style={{animationDelay: `0ms`}}>
-                      <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
-                    </div>
-                  )
-              }) 
-            }
-          <h6> {player.showDownHand.bestHandRank} </h6>
-        </div>
-      )
+      if (!player.folded) {
+          return (
+            <div className='showdown-row'> 
+              <h6 className='player-header'> {player.name} {player.showDownHand.bestHandRank} </h6>
+              <div className='centered-flex-row'>
+                { 
+                    player.showDownHand.bestHand.map(card => {
+                      return(
+                        <div className='playing-card' style={{animationDelay: `0ms`}}>
+                          <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
+                        </div>
+                      )
+                  }) 
+                }
+              </div>
+            </div>
+          )
+      }
     })
   }
 
@@ -432,7 +435,9 @@ class App extends Component {
           { (this.state.loading) ? <Spinner/> : (
               <div className='poker-players'>
                 { (this.state.phase === 'showdown') && this.renderShowdown() } 
-                <div className='top-game-menu-bar' />
+                <div className='top-game-menu-bar' >
+                    {renderPhaseStatement(this.state.phase)}
+                </div>
                 <div className='bottom-game-menu-bar' >
                   <div className='action-buttons'>
                       { this.renderActionButtons() }
@@ -450,7 +455,6 @@ class App extends Component {
               ) 
           }
         </div>
-          <h2 style={{margin: '16px 0'}}> {renderPhaseStatement(this.state.phase)} </h2>
           <h4> {`POT: ${this.state.pot}`} </h4>
       </div>
     );
