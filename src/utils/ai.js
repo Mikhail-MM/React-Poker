@@ -519,6 +519,9 @@ const generateHistogram = (hand) => {
 	console.log("Histogram Generation Called")
 	console.log(hand)
 	return hand.reduce((acc, cur) => {
+		console.log("Reduce Internal")
+		console.log(cur)
+		console.log(acc)
 		acc.frequencyHistogram[cur.cardFace] = (acc.frequencyHistogram[cur.cardFace] || 0) + 1;
 		acc.suitHistogram[cur.suit] = (acc.suitHistogram[cur.suit] || 0) + 1;
 		return acc
