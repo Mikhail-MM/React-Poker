@@ -34,7 +34,7 @@ import {
 } from './utils/ui.js';
 
 import {
-  handleAI
+  handleAI as handleAIUtil
 } from './utils/ai.js';
 
 import { cloneDeep } from 'lodash';
@@ -194,7 +194,7 @@ class App extends Component {
   }
 
   handleAI = () => {
-    const newState = handleAI(cloneDeep(this.state))
+    const newState = handleAIUtil(cloneDeep(this.state))
     console.log("HandleAI pre setTimeout")
       this.setState({
             ...newState,
