@@ -169,6 +169,7 @@ class App extends Component {
     })
   }
   handleBet = (bet, min, max) => {
+    console.log("HandleBet called..by AI?")
     const newState = handleBet(cloneDeep(this.state), parseInt(bet), parseInt(min), parseInt(max));
     console.log("handlebet pre setTimeout")
       this.setState(newState, () => {
