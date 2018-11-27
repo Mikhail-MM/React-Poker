@@ -1,8 +1,3 @@
-/*
-Create "ValidateBet" Util for Forms
-
-*/
-
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
@@ -160,6 +155,10 @@ class App extends Component {
     this.runGameLoop();
   }
 
+  componentDidUpdate() {
+    console.log(this.state)
+  }
+
   handleBetInputChange = (val, min, max) => {
     if (val === '') val = min
     if (val > max) val = max
@@ -228,9 +227,6 @@ class App extends Component {
                       <img style={{height: 35, width: 35}} src={'./assets/chips.svg'} />
                       <h5> {`${player.chips}`} </h5>
                     </div>
-  
-          {/* (this.state.blindIndex.big === index) && <div style={{marginTop: '8px'}}> Big Blind </div> */}
-          {/* (this.state.blindIndex.small === index) && <div style={{marginTop: '8px'}}> Small Blind </div> */}
           </div>
           <div className='centered-flex-row abscard'>
             { this.renderPlayerCards(index) }
@@ -292,23 +288,6 @@ class App extends Component {
     return(
       (phase === 'betting1' || phase === 'betting2' || phase === 'betting3' || phase === 'betting4') ? (players[activePlayerIndex].robot) ? (<h4> {`Current Move: ${players[activePlayerIndex].name}`}</h4>) : (
         <React.Fragment>
-        { /*
-          <input 
-            type='number'
-            min={min}
-            max={players[activePlayerIndex].chips + players[activePlayerIndex].bet}
-            value={this.state.betInputValue}
-            onChange={(e) => this.handleBetInputChange(e.target.value, min, max)}
-          />
-          <button
-            onClick={() => this.handleBet(this.state.betInputValue, min, max)}>
-              { this.renderActionButtonText() }
-          </button>
-          <button
-            onClick={() => this.handleFold()}>
-            Fold
-          </button>
-        */}
         <Slider
           rootStyle={sliderStyle}
           domain={[min, max]}
@@ -437,7 +416,7 @@ class App extends Component {
     const { highBet, players, activePlayerIndex, phase } = this.state
     const min = determineMinBet(highBet, players[activePlayerIndex].chips, players[activePlayerIndex].bet)
     const max = players[activePlayerIndex].chips + players[activePlayerIndex].bet
-    return (players[activePlayerIndex].robot) ? null : (
+    return ((players[activePlayerIndex].robot) || (this.state.phase === 'showdown')) ? null : (
       <React.Fragment>
       <button className='action-button' onClick={() => this.handleBet(this.state.betInputValue, min, max)}>
           {this.renderActionButtonText()}

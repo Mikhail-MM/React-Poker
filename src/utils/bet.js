@@ -97,9 +97,10 @@ const handlePhaseShift = (state) => {
 const reconcilePot = (state) => {
 	for (let player of state.players) {
 		state.pot = state.pot + player.bet;
-		player.sidePotStack = player.bet; // sidePotStack is just a copy of player.bet which can be reference and mutated in side pot calculations
+		player.sidePotStack = player.bet;
 		player.betReconciled = false; // This is used as a marker to determine whether to adv to next round of betting
 	}
+
 	state = condenseSidePots(calculateSidePots(state, state.players));
 
 	for (let player of state.players) {
@@ -126,6 +127,7 @@ const calculateSidePots = (state, playerStacks) => {
 		// This condition occurs when there is a single player who has bet an excess amount of chips. Refund and exit.
 		const playerToRefund = state.players[state.players.findIndex(player => player.name === investedPlayers[0].name)];
 		playerToRefund.chips = playerToRefund.chips + investedPlayers[0].sidePotStack;
+		state.pot -= investedPlayers[0].sidePotStack
 			return state
 	}
 		// Sort all players, Smallest stack first.
@@ -190,7 +192,10 @@ then all you have to do is check to see if that key exists in the lookup table f
 }
 
 const arrayIdentical = (arr1, arr2) => {
-	if (arr1.length !== arr2.length) return false
+
+	if (arr1.length !== arr2.length) {
+		return false
+	}
 		return arr1.map(el => arr2.includes(el)).filter(bool => bool !== true).length !== 0 ? false : true;
 }
 export { 

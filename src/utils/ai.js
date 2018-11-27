@@ -54,6 +54,16 @@ const handleAI = (state) => {
 	const lowCard = Math.min(...preFlopValues)
 	// We may want to keep track of how much the Ai has already invested into the pot to help determine what action to take.
 	//console.log(state.phase)
+	/*
+
+		TODO:
+
+		Ensure that the AI can handle going all-in on a bet - validate their input - ensure that willCall or wilLRaise amounts are above minBet
+
+		This may be a consideration around the slider - will it accept 
+
+	*/
+
 	switch(state.phase) {
 		case('betting1'): { 
 			const suited = Object.entries(suitHistogram).find(keyValuePair => keyValuePair[1] === 2)			
@@ -66,7 +76,7 @@ const handleAI = (state) => {
 			// Need to fix logic - If 
 			const willCall = (BET_HIERARCHY[stakes] <= BET_HIERARCHY[callLimit])
 			//console.log("Will Ai call?", willCall)
-			const callValue = (activePlayer.chips >= highBet) ? highBet : activePlayer.chips
+			const callValue = (activePlayer.chips >= highBet) ? highBet : activePlayer.chips + activePlayer.bet
 
 			if (willCall) {
 				if (willRaise(raiseChance)) {
@@ -81,18 +91,20 @@ const handleAI = (state) => {
 							let betValue = Math.floor(decideBetProportion(determinedRaiseRange) * activePlayer.chips)
 							if (betValue < highBet) {
 								//console.log("AI's decided raise is below current high bet ...")
-								betValue = highBet;
+								if (highBet < max) {
+									betValue = highBet;
+								}
 							}
-							//console.log("AI bets ", betValue)
+							if (betValue > max)
+							console.log("AI bets ", betValue)
 									activePlayer.canRaise = false
 									return handleBet(state, betValue, min, max);
 						} else {
-							//console.log("AI Wants to Call.")
-
+							console.log("AI Wants to Call.")
 							return handleBet(state, callValue, min, max);
 						}	
 				} else {
-					//console.log("AI Wants to Call.")
+					console.log("AI Wants to Call.")
 						return handleBet(state, callValue, min, max);
 				}
 			} else {
