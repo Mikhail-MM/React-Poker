@@ -3,21 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@babel/polyfill": "^7.0.0",
     "axios": "^0.18.0",
-    "env-cmd": "^8.0.2",
+    "core-js": "^2.5.7",
     "immer": "^1.7.2",
     "lodash": "^4.17.11",
+    "raf": "^3.4.1",
     "react": "^16.5.2",
     "react-compound-slider": "^0.16.2",
     "react-dom": "^16.5.2",
-    "react-scripts": "1.1.5",
-    "webpack-cli": "^3.1.2"
+    "react-scripts": "1.1.5"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
-    "debug": "set NODE_ENV=development&& set BABEL_ENV=development&& webpack --config ./node_modules/react-scripts/config/webpack.config.dev.js && yarn build"
+    "eject": "react-scripts eject"
   }
 }

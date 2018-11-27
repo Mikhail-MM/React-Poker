@@ -51,6 +51,8 @@ const handleAI = (state) => {
 	console.log("Pre-Histogram Generation")
 	const { frequencyHistogram, suitHistogram } =  generateHistogram(descendingSortHand)
 	console.log("Histogram Generated")
+	console.log(frequencyHistogram)
+	console.log(suitHistogram)
 	const stakes = classifyStakes(investmentRequiredToRemain);
 	//console.log("Current Stakes To Remain In Pot: ", stakes)
 	const preFlopValues = activePlayer.cards.map(el => el.value)
@@ -70,7 +72,9 @@ const handleAI = (state) => {
 	console.log("AI Thinking")
 	switch(state.phase) {
 		case('betting1'): { 
-			const suited = Object.entries(suitHistogram).find(keyValuePair => keyValuePair[1] === 2)			
+			console.log("internal case 1")
+			const suited = Object.entries(suitHistogram).find(keyValuePair => keyValuePair[1] === 2)	
+			console.log("found suited")		
 			const straightGap = (highCard - lowCard <= 4)
 			// Raise? If Good High Card - Raise inconsequential (Aggro will raise, standard will call)
 			// If good high card and low card, bet lowdraw 
@@ -83,7 +87,9 @@ const handleAI = (state) => {
 			const callValue = (activePlayer.chips >= highBet) ? highBet : activePlayer.chips + activePlayer.bet
 
 			if (willCall) {
+				console.log("internal willCall")
 				if (willRaise(raiseChance)) {
+					console.log("Internal willraise")
 					//console.log("AI has decided to bet")
 					const determinedRaiseRange = raiseRange[Math.floor(Math.random() * (raiseRange.length - 0)) + 0];
 					//console.log("AI's preferred bet state: ", determinedRaiseRange, " stakes.")
@@ -112,6 +118,7 @@ const handleAI = (state) => {
 						return handleBet(state, callValue, min, max);
 				}
 			} else {
+				console.log('internal folddesire')
 				return handleFold(state)
 			}
 			// TODO: RESET AI STATE IN NEXT-ROUND FN

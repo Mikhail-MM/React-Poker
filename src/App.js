@@ -1,3 +1,7 @@
+import "@babel/polyfill";
+import 'core-js/es6/map';
+import 'core-js/es6/set';
+
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
