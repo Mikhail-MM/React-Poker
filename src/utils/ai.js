@@ -518,7 +518,7 @@ const willRaise = (chance) => {
 const generateHistogram = (hand) => {
 	console.log("Histogram Generation Called")
 	console.log(hand)
-	return hand.reduce((acc, cur) => {
+	const histogram = hand.reduce((acc, cur) => {
 		console.log("Reduce Internal")
 		console.log(cur)
 		console.log(acc)
@@ -526,6 +526,8 @@ const generateHistogram = (hand) => {
 		acc.suitHistogram[cur.suit] = (acc.suitHistogram[cur.suit] || 0) + 1;
 		return acc
 	}, { frequencyHistogram: {}, suitHistogram: {} })
+	console.log(histogram)
+	return histogram
 }
 
 
