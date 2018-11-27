@@ -50,6 +50,7 @@ const handleAI = (state) => {
 	const descendingSortHand = activePlayer.cards.concat(state.communityCards).sort((a, b) => b.value - a.value)
 	console.log("Pre-Histogram Generation")
 	const { frequencyHistogram, suitHistogram } =  generateHistogram(descendingSortHand)
+	console.log("Histogram Generated")
 	const stakes = classifyStakes(investmentRequiredToRemain);
 	//console.log("Current Stakes To Remain In Pot: ", stakes)
 	const preFlopValues = activePlayer.cards.map(el => el.value)
@@ -66,7 +67,7 @@ const handleAI = (state) => {
 		This may be a consideration around the slider - will it accept 
 
 	*/
-
+	console.log("AI Thinking")
 	switch(state.phase) {
 		case('betting1'): { 
 			const suited = Object.entries(suitHistogram).find(keyValuePair => keyValuePair[1] === 2)			
