@@ -155,10 +155,6 @@ class App extends Component {
     this.runGameLoop();
   }
 
-  componentDidUpdate() {
-    console.log(this.state)
-  }
-
   handleBetInputChange = (val, min, max) => {
     if (val === '') val = min
     if (val > max) val = max
@@ -174,29 +170,41 @@ class App extends Component {
   }
   handleBet = (bet, min, max) => {
     const newState = handleBet(cloneDeep(this.state), parseInt(bet), parseInt(min), parseInt(max));
+    console.log("handlebet pre setTimeout")
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), Math.floor(Math.random() * Math.floor(2200)))
+          setTimeout(() => {
+            console.log("Timeout Internal")
+            this.handleAI()
+          }, 1200)
         }
       });
   }
   handleFold = () => {
     const newState = handleFold(cloneDeep(this.state));
+    console.log("handlefold  pre setTimeout")
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), Math.floor(Math.random() * Math.floor(2200)))
+          setTimeout(() => {
+            console.log("Timeout Internal")
+            this.handleAI()
+          }, 1200)
         }
       })
   }
 
   handleAI = () => {
     const newState = handleAI(cloneDeep(this.state))
+    console.log("HandleAI pre setTimeout")
       this.setState({
             ...newState,
             betInputValue: newState.minBet
       }, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), Math.floor(Math.random() * Math.floor(2200)))
+          setTimeout(() => {
+            console.log("Timeout Internal")
+            this.handleAI()
+          }, 1200)
         }
       })
   }
@@ -366,9 +374,13 @@ class App extends Component {
   runGameLoop = () => {
     if (this.state.phase === 'initialDeal') {
       const newState = dealPrivateCards(cloneDeep(this.state))
+      console.log("runGameLoop postdeal setTimeout")
         this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), Math.floor(Math.random() * Math.floor(2200)))
+          setTimeout(() => {
+            console.log("Timeout Internal")
+            this.handleAI()
+          }, 1200)
         }
       })
     }
@@ -407,7 +419,7 @@ class App extends Component {
     const newState = beginNextRound(cloneDeep(this.state))
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => this.handleAI(), Math.floor(Math.random() * Math.floor(2200)))
+          setTimeout(() => this.handleAI(), 1200)
         }
       })
   }
