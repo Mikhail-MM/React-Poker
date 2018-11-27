@@ -48,6 +48,7 @@ const handleAI = (state) => {
 	const totalInvestment = activePlayer.chips + activePlayer.bet + activePlayer.stackInvestment;
 	const investmentRequiredToRemain = (highBet / totalInvestment) * 100; 
 	const descendingSortHand = activePlayer.cards.concat(state.communityCards).sort((a, b) => b.value - a.value)
+	console.log("Pre-Histogram Generation")
 	const { frequencyHistogram, suitHistogram } =  generateHistogram(descendingSortHand)
 	const stakes = classifyStakes(investmentRequiredToRemain);
 	//console.log("Current Stakes To Remain In Pot: ", stakes)
@@ -515,6 +516,8 @@ const willRaise = (chance) => {
 }
 // Move to analysis utils
 const generateHistogram = (hand) => {
+	console.log("Histogram Generation Called")
+	console.log(hand)
 	return hand.reduce((acc, cur) => {
 		acc.frequencyHistogram[cur.cardFace] = (acc.frequencyHistogram[cur.cardFace] || 0) + 1;
 		acc.suitHistogram[cur.suit] = (acc.suitHistogram[cur.suit] || 0) + 1;
