@@ -81,6 +81,7 @@ const popCards = (deck, numToPop) => {
 }
 
 const dealPrivateCards = (state) => {
+	state.clearCards = false;
 	/*
 
 		connorToday at 1:28 PM

@@ -259,18 +259,20 @@ class App extends Component {
     let applyFoldedClassname;
     const { players, activePlayerIndex } = this.state
 
-    if (players[index].folded) applyFoldedClassname = true
+    if (players[index].folded || this.state.clearCards) {
+      applyFoldedClassname = true
+    }
 
     if (players[index].robot) {
       return players[index].cards.map(card => {
         if (this.state.phase !== 'showdown') {
           return(
-            <div className={`playing-card cardIn robotcard${(applyFoldedClassname ? ' folded' : '')}`} style={{animationDelay: `${(applyFoldedClassname) ?  0 : card.animationDelay}ms`}}>
+            <div key={`${card.suit} ${card.cardFace}`} className={`playing-card cardIn robotcard${(applyFoldedClassname ? ' folded' : '')}`} style={{animationDelay: `${(applyFoldedClassname) ?  0 : card.animationDelay}ms`}}>
             </div>
           );
         } else {
           return(
-            <div className={`playing-card cardIn${(applyFoldedClassname ? ' folded' : '')}`} style={{animationDelay: `${(applyFoldedClassname) ?  0 : card.animationDelay}ms`}}>
+            <div key={`${card.suit} ${card.cardFace}`} className={`playing-card cardIn${(applyFoldedClassname ? ' folded' : '')}`} style={{animationDelay: `${(applyFoldedClassname) ?  0 : card.animationDelay}ms`}}>
               <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
             </div>
           );
@@ -280,11 +282,16 @@ class App extends Component {
     else {
       return players[index].cards.map(card => {
         return(
-          <div className={`playing-card cardIn${(applyFoldedClassname ? ' folded' : '')}`} style={{animationDelay: `${(applyFoldedClassname) ?  0 : card.animationDelay}ms`}}>
+          <div key={`${card.suit} ${card.cardFace}`} className={`playing-card cardIn${(applyFoldedClassname ? ' folded' : '')}`} style={{animationDelay: `${(applyFoldedClassname) ?  0 : card.animationDelay}ms`}}>
             <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
           </div>
         );
       });
+    }
+
+    if (this.state.clearCards) {
+      console.log("Need to clear the cards")
+      this.forceUpdate()
     }
   }
 
@@ -425,6 +432,7 @@ class App extends Component {
   }
 
   handleNextRound = () => {
+    this.setState({clearCards: true})
     const newState = beginNextRound(cloneDeep(this.state))
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
