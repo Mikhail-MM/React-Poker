@@ -790,6 +790,8 @@ const analyzeHistogram = (hand, frequencyHistogram) => {
 }
 
 const checkStraight = (valueSet) => {
+	console.log("Check ValueSet")
+	console.log(valueSet)
 	if (valueSet.length < 5) return false
 	let numConcurrentCards = 0;
 	let concurrentCardValues = [];
@@ -822,6 +824,7 @@ const checkStraight = (valueSet) => {
 		}
 	} else {
 		if (valueSet[0] === 13) {
+			console.log("Have an Ace in the straight, checking low")
 			let { isLowStraight, concurrentCardValuesLow } = checkLowStraight(cloneDeep(valueSet));
 
 			if (isLowStraight) return {
@@ -843,7 +846,8 @@ const checkLowStraight = (valueSetCopy) => {
 	let numConcurrentCards = 0;
 	let concurrentCardValuesLow = [];
 	valueSetCopy[0] = 0; // Convert Ace High Value (13) to Low Wildcard Value (0)
-	valueSetCopy.map(el => el).sort((a,b) => a - b); // Sort in Ascending Order 
+	const sortedValueSetCopy = valueSetCopy.map(el => el).sort((a,b) => a - b); // Sort in Ascending Order 
+	console.log("Sorted Set:", )
 	// Basically look for [0, 1, 2, 3, 4,] AKA [A, 2, 3, 4, 5]
 	for (let i = 1; i < 5; i++) {
 		if (numConcurrentCards >= 5) {
@@ -852,14 +856,14 @@ const checkLowStraight = (valueSetCopy) => {
 				concurrentCardValuesLow,
 			}
 		}
-		if((valueSetCopy[i] - valueSetCopy[i - 1]) === 1 ) {
+		if((sortedValueSetCopy[i] - sortedValueSetCopy[i - 1]) === 1 ) {
 			if (numConcurrentCards === 0) {
 				numConcurrentCards = 2;
-					concurrentCardValuesLow.push(valueSetCopy[i - 1]);
-					concurrentCardValuesLow.push(valueSetCopy[i]);
+					concurrentCardValuesLow.push(sortedValueSetCopy[i - 1]);
+					concurrentCardValuesLow.push(sortedValueSetCopy[i]);
 			} else { 
 				numConcurrentCards++;
-				concurrentCardValuesLow.push(valueSetCopy[i]); 
+				concurrentCardValuesLow.push(sortedValueSetCopy[i]); 
 			}	
 		} else { 
 			numConcurrentCards = 0;
