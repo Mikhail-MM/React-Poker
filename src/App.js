@@ -175,13 +175,13 @@ class App extends Component {
     })
   }
   handleBet = (bet, min, max) => {
-    console.log("HandleBet called..by AI?")
+  
     const newState = handleBet(cloneDeep(this.state), parseInt(bet), parseInt(min), parseInt(max));
-    console.log("handlebet pre setTimeout")
+  
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => {
-            console.log("Timeout Internal")
+          
             this.handleAI()
           }, 1200)
         }
@@ -189,11 +189,11 @@ class App extends Component {
   }
   handleFold = () => {
     const newState = handleFold(cloneDeep(this.state));
-    console.log("handlefold  pre setTimeout")
+  
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => {
-            console.log("Timeout Internal")
+          
             this.handleAI()
           }, 1200)
         }
@@ -202,14 +202,14 @@ class App extends Component {
 
   handleAI = () => {
     const newState = handleAIUtil(cloneDeep(this.state))
-    console.log("HandleAI pre setTimeout")
+  
       this.setState({
             ...newState,
             betInputValue: newState.minBet
       }, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => {
-            console.log("Timeout Internal")
+          
             this.handleAI()
           }, 1200)
         }
@@ -256,19 +256,21 @@ class App extends Component {
   }
 
   renderPlayerCards = (index) => {
+    let applyFoldedClassname;
     const { players, activePlayerIndex } = this.state
-    if (players[index].folded) {
-      return 
-    } else if (players[index].robot) {
+
+    if (players[index].folded) applyFoldedClassname = true
+
+    if (players[index].robot) {
       return players[index].cards.map(card => {
         if (this.state.phase !== 'showdown') {
           return(
-            <div className={`playing-card robotcard${(index === 0) ? '' : ' shrinkwrap'}`} style={{animationDelay: `${card.animationDelay}ms`}}>
+            <div className={`playing-card cardIn robotcard${(applyFoldedClassname ? ' folded' : '')}`} style={{animationDelay: `${(applyFoldedClassname) ?  0 : card.animationDelay}ms`}}>
             </div>
           );
         } else {
           return(
-            <div className={`playing-card${(index === 0) ? '' : ' shrinkwrap'}`} style={{animationDelay: `${card.animationDelay}ms`}}>
+            <div className={`playing-card cardIn${(applyFoldedClassname ? ' folded' : '')}`} style={{animationDelay: `${(applyFoldedClassname) ?  0 : card.animationDelay}ms`}}>
               <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
             </div>
           );
@@ -278,7 +280,7 @@ class App extends Component {
     else {
       return players[index].cards.map(card => {
         return(
-          <div className={`playing-card${(index === 0) ? '' : ' shrinkwrap'}`} style={{animationDelay: `${card.animationDelay}ms`}}>
+          <div className={`playing-card cardIn${(applyFoldedClassname ? ' folded' : '')}`} style={{animationDelay: `${(applyFoldedClassname) ?  0 : card.animationDelay}ms`}}>
             <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
           </div>
         );
@@ -289,7 +291,7 @@ class App extends Component {
   renderCommunityCards = () => {
     return this.state.communityCards.map(card => {
       return(
-        <div className='playing-card' style={{animationDelay: `${card.animationDelay}ms`}}>
+        <div className='playing-card cardIn' style={{animationDelay: `${card.animationDelay}ms`}}>
           <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
         </div>
       );
@@ -373,19 +375,19 @@ class App extends Component {
       return 'Call'
     } else if ((highBet === 0) && (betInputValue > highBet)) {
       return 'Bet'
+    } else if ((betInputValue < highBet) || (betInputValue === activePlayer.chips)) {
+      return 'All-In!'
     } else if (betInputValue > highBet) {
       return 'Raise'
-    }
+    } 
   }
 
   runGameLoop = () => {
     if (this.state.phase === 'initialDeal') {
       const newState = dealPrivateCards(cloneDeep(this.state))
-      console.log("runGameLoop postdeal setTimeout")
         this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => {
-            console.log("Timeout Internal")
             this.handleAI()
           }, 1200)
         }

@@ -5,7 +5,7 @@ const axios = require('axios')
 // TODO Generate UUID to simulate User ID and really get a perf match on binding to players when determining winnings
 const generateTable = async () => {
 	const users = [{
-		name: 'Scarface Bojangles',
+		name: 'Player 1',
 		avatarURL: '/assets/boy.svg',
 		cards: [],
 		showDownHand: {
@@ -105,11 +105,36 @@ const determineNextActivePlayer = (state) => {
 			return determineNextActivePlayer(state);
 		}
 	}
+	// IF a player is all in, he will be reconciled?
 	if (state.players[state.activePlayerIndex].betReconciled) {
 		return handlePhaseShift(state);
 	}
 
+		const skipToShowDown = checkEdgeCasesRequiringShowdown(state)
+			// console.log("There are no bets:", (state.players.map(pl => pl.bet).filter(activeBets => activeBets > 0).length === 0))
+
+		if (skipToShowDown) {
+			console.log("Action on player, but all other players are all-in, no bets to call. Skipping to showdown")
+			return(showDown(reconcilePot(dealMissingCommunityCards(state))))
+		}
+
 		return state
+}
+
+const checkEdgeCasesRequiringShowdown = (state) => {
+	const checklit = (state.numPlayersActive - state.numPlayersAllIn === 1)
+	const playerBets = state.players.map(pl => pl.bet)
+	const activeBets = playerBets.filter(betValue => betValue > 0)
+		// console.log("Checking for Lituation: Are we in a possible twist of having all but one player all-in?", checklit)
+			// console.log(playerBets)
+			// console.log(activeBets)
+			// console.log("Checking if only 1 player with chips is in...in a roundabout fashion. Well, just by looking at active players")
+
+			if (checklit && activeBets.length === 0) {
+				return true
+			}
+
+			return false
 }
 
 const passDealerChip = (state) => {
@@ -179,6 +204,10 @@ const beginNextRound = (state) => {
 	state.deck = shuffle(generateDeckOfCards())
 	state.highBet = 20;
 	state.minBet = 20; // can export out to initialState
+	// Unmount all cards so react can re-trigger animations
+	   const { players } = state
+    	const clearPlayerCards = players.map(player => ({...player, cards: player.cards.map(card => {})}))
+    	state.players = clearPlayerCards
 	return passDealerChip(state)
 }
 
