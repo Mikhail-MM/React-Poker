@@ -202,10 +202,9 @@ class App extends Component {
 
   handleAI = () => {
     const newState = handleAIUtil(cloneDeep(this.state))
-    console.log(newState);
       this.setState({
             ...newState,
-            betInputValue: newState.minBet
+            betInputValue: newState.minBet // Need to remember the purpose of this...
       }, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => {
@@ -435,6 +434,7 @@ class App extends Component {
   handleNextRound = () => {
     this.setState({clearCards: true})
     const newState = beginNextRound(cloneDeep(this.state))
+    // TODO: CHECK WIN CONDITION HERE
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => this.handleAI(), 1200)
