@@ -101,6 +101,19 @@ const reconcilePot = (state) => {
 		player.betReconciled = false; // This is used as a marker to determine whether to adv to next round of betting
 	}
 
+		// Why would we even need to condense sidepots?
+		// When would there be a situation where there were 2 sidepots with the same player names? Well, if there were 2 rounds of betting and all players called in
+		/*
+			[{
+				contestants: ["Jim", "Mary", "Jake"],
+				pot: 2000 // FROM THE FLOP
+			},
+			{
+				contestatnts: ["Jim", "Mary", "Jake"],
+				pot: 3100 // FROM THE TURN
+			}]
+			It's in our interest to condense these since processing each one requires us to make card comparator functions, which are the most expensive functions here (lots of sorting, etc)
+		*/
 	state = condenseSidePots(calculateSidePots(state, state.players));
 
 	for (let player of state.players) {

@@ -90,8 +90,20 @@ const determinePhaseStartActivePlayer = (state, recursion = false) => {
 				return state
 }
 
+
+// This function can lead to errors if player all ins at a certain position
+// final AI will freeze
+// seems to happen when only 2 players left and someone has all-in
+
 const determineNextActivePlayer = (state) => {
 	state.activePlayerIndex = handleOverflowIndex(state.activePlayerIndex, 1, state.players.length, 'up')
+	const skipToShowDown = checkEdgeCasesRequiringShowdown(state)
+
+	if (skipToShowDown) {
+		console.log("Action on player, but all other players are all-in, no bets to call. Skipping to showdown")
+		return(showDown(reconcilePot(dealMissingCommunityCards(state))))
+	}
+
 	if (state.numPlayersActive ===  1) {
 		return(showDown(reconcilePot(dealMissingCommunityCards(state))))
 	}
@@ -109,28 +121,27 @@ const determineNextActivePlayer = (state) => {
 	if (state.players[state.activePlayerIndex].betReconciled) {
 		return handlePhaseShift(state);
 	}
-
-		const skipToShowDown = checkEdgeCasesRequiringShowdown(state)
-			// console.log("There are no bets:", (state.players.map(pl => pl.bet).filter(activeBets => activeBets > 0).length === 0))
-
-		if (skipToShowDown) {
-			console.log("Action on player, but all other players are all-in, no bets to call. Skipping to showdown")
-			return(showDown(reconcilePot(dealMissingCommunityCards(state))))
-		}
-
-		return state
+	
+	return state
 }
 
 const checkEdgeCasesRequiringShowdown = (state) => {
-	const checklit = (state.numPlayersActive - state.numPlayersAllIn === 1)
-	const playerBets = state.players.map(pl => pl.bet)
-	const activeBets = playerBets.filter(betValue => betValue > 0)
+	const checklit = (state.numPlayersActive - state.numPlayersAllIn === 1);
+	console.log(state.numPlayersActive)
+	console.log( state.numPlayersAllIn)
+	console.log(state.numPlayersActive - state.numPlayersAllIn)
+	const activePlayers = state.players.filter(pl => !pl.folded);
+	const activeBets = activePlayers.map(pl => pl.bet);
 		// console.log("Checking for Lituation: Are we in a possible twist of having all but one player all-in?", checklit)
 			// console.log(playerBets)
 			// console.log(activeBets)
 			// console.log("Checking if only 1 player with chips is in...in a roundabout fashion. Well, just by looking at active players")
-
-			if (checklit && activeBets.length === 0) {
+			console.log(checklit)
+			console.log(activeBets.length === 0)
+			if (checklit && activeBets.length === 0) { 
+				// THIS MUST be refactored, As this is FALSE when the PLAYER GOES ALL IN on an EARLY AI BET which exceeds PLAYER'S CHIP COUNT.
+				// THIS ACCOUNTS FOR ALL PLAYERS ON THE TABLE !!!!!!!! EVEN THOSE WHO HAVE FOLDED!!!!!!!!
+				
 				return true
 			}
 
@@ -149,11 +160,15 @@ const passDealerChip = (state) => {
 		return filterBrokePlayers(state, nextDealer.name);
 }
 
+
+/* !!!!
+ Action is initiated on the first betting round by the first player to the left of the blinds. On all subsequent betting rounds, the action begins with the first active player to the left of the button.
+ */
 const filterBrokePlayers = (state, dealerID) => {
 	state.players = state.players.filter(player => player.chips > 0);
 	const newDealerIndex = state.players.findIndex(player => player.name === dealerID)
 	state.dealerIndex = newDealerIndex
-	state.activePlayerIndex = newDealerIndex
+	state.activePlayerIndex = newDealerIndex // This is incorrect, action should proceed to the left of the blinds -- if there are only 2 people...will it be the small blind? If there are 3, is it the dealer? Action is initiated on the first betting round by the first player to the left of the blinds. On all subsequent betting rounds, the action begins with the first active player to the left of the button.)))) This means THIS FUNCTION WILL CHANGE depending on the ACTIVE PHASE....
 	if (state.players.length === 1) {
 		// Victory!
 		return state

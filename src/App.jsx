@@ -202,7 +202,7 @@ class App extends Component {
 
   handleAI = () => {
     const newState = handleAIUtil(cloneDeep(this.state))
-  
+    console.log(newState);
       this.setState({
             ...newState,
             betInputValue: newState.minBet
@@ -408,6 +408,7 @@ class App extends Component {
 
   renderBestHands = () => {
     const { players } = this.state
+    // Run final ranking of all player hands in showdown
     return players.map(player => {
       if (!player.folded) {
           return (

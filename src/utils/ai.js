@@ -96,14 +96,18 @@ const handleAI = (state) => {
 							}
 							if (betValue > max)
 									activePlayer.canRaise = false
+									console.log("AI bet")
 									return handleBet(state, betValue, min, max);
 						} else {
+							console.log("AI bet")
 							return handleBet(state, callValue, min, max);
 						}	
 				} else {
+					console.log("AI bet")
 						return handleBet(state, callValue, min, max);
 				}
 			} else {
+				console.log("AI fold.")
 				return handleFold(state)
 			}
 			// TODO: RESET AI STATE IN NEXT-ROUND FN
@@ -226,18 +230,19 @@ const handleAI = (state) => {
 								//console.log("AI's decided raise is below current high bet ...")
 								betValue = highBet;
 							}
-							//console.log("AI bets ", betValue)
+							console.log("AI bets ", betValue)
 									activePlayer.canRaise = false
 									return handleBet(state, betValue, min, max);
 						} else {
-							//console.log("AI Wants to Call.")
+							console.log("AI Wants to Call.")
 							return handleBet(state, callValue, min, max);
 						}	
 				} else {
-					//console.log("AI Wants to Call.")
+					console.log("AI Wants to Call.")
 						return handleBet(state, callValue, min, max);
 				}
 			} else {
+				console.log("AI has folded")
 				return handleFold(state)
 			}
 	}
