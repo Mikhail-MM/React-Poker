@@ -39,6 +39,7 @@ import { handleBet, handleFold, determineMinBet } from './bet.js';
 import { analyzeHistogram, checkFlush, checkRoyalFlush, checkStraightFlush, checkStraight, buildValueSet } from './cards.js'
 
 const handleAI = (state) => {
+	console.log('wat')
 	const { highBet } = state
 	const activePlayer = state.players[state.activePlayerIndex];
 	const min = determineMinBet(highBet, activePlayer.chips, activePlayer.bet)

@@ -174,7 +174,7 @@ class App extends Component {
       betInputValue: val[0]
     })
   }
-  handleBet = (bet, min, max) => {
+  handleBetInputSubmit = (bet, min, max) => {
   
     const newState = handleBet(cloneDeep(this.state), parseInt(bet), parseInt(min), parseInt(max));
   
@@ -448,7 +448,7 @@ class App extends Component {
     const max = players[activePlayerIndex].chips + players[activePlayerIndex].bet
     return ((players[activePlayerIndex].robot) || (this.state.phase === 'showdown')) ? null : (
       <React.Fragment>
-      <button className='action-button' onClick={() => this.handleBet(this.state.betInputValue, min, max)}>
+      <button className='action-button' onClick={() => this.handleBetInputSubmit(this.state.betInputValue, min, max)}>
           {this.renderActionButtonText()}
       </button>
       <button className='fold-button' onClick={() => this.handleFold()}>
