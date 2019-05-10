@@ -38,8 +38,7 @@ import { handleOverflowIndex } from './players.js';
 import { handleBet, handleFold, determineMinBet } from './bet.js';
 import { analyzeHistogram, checkFlush, checkRoyalFlush, checkStraightFlush, checkStraight, buildValueSet } from './cards.js'
 
-const handleAI = (state) => {
-	console.log('wat')
+const handleAI = (state, pushAnimationState) => {
 	const { highBet } = state
 	const activePlayer = state.players[state.activePlayerIndex];
 	const min = determineMinBet(highBet, activePlayer.chips, activePlayer.bet)
@@ -98,17 +97,21 @@ const handleAI = (state) => {
 							if (betValue > max)
 									activePlayer.canRaise = false
 									console.log("AI bet")
+									pushAnimationState(state.activePlayerIndex, `BET/CALL: ${betValue}`);
 									return handleBet(state, betValue, min, max);
 						} else {
 							console.log("AI bet")
+							pushAnimationState(state.activePlayerIndex, `BET/CALL: ${callValue}`);
 							return handleBet(state, callValue, min, max);
 						}	
 				} else {
 					console.log("AI bet")
+						pushAnimationState(state.activePlayerIndex, `BET/CALL: ${callValue}`);
 						return handleBet(state, callValue, min, max);
 				}
 			} else {
 				console.log("AI fold.")
+				pushAnimationState(state.activePlayerIndex, `FOLD`);
 				return handleFold(state)
 			}
 			// TODO: RESET AI STATE IN NEXT-ROUND FN
@@ -233,17 +236,21 @@ const handleAI = (state) => {
 							}
 							console.log("AI bets ", betValue)
 									activePlayer.canRaise = false
+									pushAnimationState(state.activePlayerIndex, `BET/CALL: ${betValue}`);
 									return handleBet(state, betValue, min, max);
 						} else {
 							console.log("AI Wants to Call.")
+							pushAnimationState(state.activePlayerIndex, `BET/CALL: ${callValue}`);
 							return handleBet(state, callValue, min, max);
 						}	
 				} else {
 					console.log("AI Wants to Call.")
+						pushAnimationState(state.activePlayerIndex, `BET/CALL: ${callValue}`);
 						return handleBet(state, callValue, min, max);
 				}
 			} else {
 				console.log("AI has folded")
+				pushAnimationState(state.activePlayerIndex, `FOLD`);
 				return handleFold(state)
 			}
 	}

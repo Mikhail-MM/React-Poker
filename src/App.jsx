@@ -251,7 +251,7 @@ class App extends Component {
 
   handleAI = () => {
     const {playerAnimationSwitchboard, ...appState} = this.state;
-    const newState = handleAIUtil(cloneDeep(appState))
+    const newState = handleAIUtil(cloneDeep(appState), this.pushAnimationState)
       this.setState({
             ...newState,
             betInputValue: newState.minBet // Need to remember the purpose of this...
