@@ -107,7 +107,7 @@ img {
 .transitionable-actionBox-enter-active {
 	display: block;
 	opacity: 1;
-	transition: opacity 350ms ease-in-out;
+	transition: opacity 2000ms ease-in-out;
 	transform: translateX(-50%);
 }
 .transitionable-actionBox-enter-done {
@@ -124,7 +124,7 @@ img {
 	display: block;
 	opacity: 0;
 	transform: translateX(-50%) translateY(-55px);
-	transition: opacity 350ms ease-in-out, transform 350ms linear;
+	transition: opacity 2000ms ease-in-out, transform 2000ms linear;
 }
 
 @keyframes fade-in-out {

@@ -18,6 +18,7 @@ const generateTable = async () => {
 		bet: 0,
 		betReconciled: false,
 		folded: false,
+		allIn: false,
 		canRaise: true,
 		stackInvestment: 0,
 		robot: false
@@ -39,6 +40,7 @@ const generateTable = async () => {
 			bet: 0,
 			betReconciled: false,
 			folded: false,
+			allIn: false,
 			robot: true,
 			canRaise: true,
 			stackInvestment: 0,
@@ -96,46 +98,39 @@ const determinePhaseStartActivePlayer = (state, recursion = false) => {
 // seems to happen when only 2 players left and someone has all-in
 
 const determineNextActivePlayer = (state) => {
-	state.activePlayerIndex = handleOverflowIndex(state.activePlayerIndex, 1, state.players.length, 'up')
-	const skipToShowDown = checkEdgeCasesRequiringShowdown(state)
+	state.activePlayerIndex = handleOverflowIndex(state.activePlayerIndex, 1, state.players.length, 'up');
+	const activePlayer = state.players[state.activePlayerIndex];
 
-	if (skipToShowDown) {
-		console.log("Action on player, but all other players are all-in, no bets to call. Skipping to showdown")
-		return(showDown(reconcilePot(dealMissingCommunityCards(state))))
-	}
-
+	const allButOnePlayersAreAllIn = (state.numPlayersActive - state.numPlayersAllIn === 1);
 	if (state.numPlayersActive ===  1) {
-		return(showDown(reconcilePot(dealMissingCommunityCards(state))))
+		console.log("Only one player active, skipping to showdown.")
+		return(showDown(reconcilePot(dealMissingCommunityCards(state))));
 	}
-	if (state.players[state.activePlayerIndex].folded) {
+	if (activePlayer.folded) {
+		console.log("Current player index is folded, going to next active player.")
 		return determineNextActivePlayer(state);
 	}
-	if (state.players[state.activePlayerIndex].chips === 0) {
+
+	if (activePlayer.chips === 0) {
 		if (state.numPlayersAllIn === state.numPlayersActive) {
-			return(showDown(reconcilePot(dealMissingCommunityCards(state))))
+			console.log("All players are all in.")
+			return(showDown(reconcilePot(dealMissingCommunityCards(state))));
+		} else if (allButOnePlayersAreAllIn && activePlayer.allIn) {
+			return(showDown(reconcilePot(dealMissingCommunityCards(state))));
 		} else {
 			return determineNextActivePlayer(state);
 		}
 	}
+
 	// IF a player is all in, he will be reconciled?
-	if (state.players[state.activePlayerIndex].betReconciled) {
+	if (activePlayer.betReconciled) {
+		console.log("Player is reconciled with pot, round betting cycle complete, proceed to next round.")
 		return handlePhaseShift(state);
 	}
 
 	return state
 }
 
-const checkEdgeCasesRequiringShowdown = (state) => {
-	// Check if there's only 1 active player left, and all others have gone in
-	const checklit = (state.numPlayersActive - state.numPlayersAllIn === 1);
-	const activePlayers = state.players.filter(pl => !pl.folded);
-	const activePlayerBets = activePlayers.map(pl => pl.bet).filter(bet => bet > 0);
-	// If all active bets are zero, (meaning the active player is not being awaited on to call the other players' all ins, skip to the end)
-	if (checklit && activePlayerBets.length === 0) { 				
-		return true
-	}
-	return false
-}
 
 const passDealerChip = (state) => {
 	// This is messy because we are determining active player, dealer, and blinds based on an arbitrary index, not with flags on player entries.
@@ -175,6 +170,7 @@ const filterBrokePlayers = (state, dealerID) => {
 			},
 			betReconciled: false,
 			folded: false,
+			allIn: false,
 		}))
 		state.numPlayersAllIn = 0;
 		state.numPlayersFolded = 0;
@@ -194,6 +190,7 @@ const filterBrokePlayers = (state, dealerID) => {
 			},
 			betReconciled: false,
 			folded: false,
+			allIn: false,
 		}))
 		state.numPlayersAllIn = 0; // May need to alter this is big/small blind brings a player all in
 		state.numPlayersFolded = 0;
@@ -209,9 +206,9 @@ const beginNextRound = (state) => {
 	state.highBet = 20;
 	state.minBet = 20; // can export out to initialState
 	// Unmount all cards so react can re-trigger animations
-	   const { players } = state
-    	const clearPlayerCards = players.map(player => ({...player, cards: player.cards.map(card => {})}))
-    	state.players = clearPlayerCards
+	const { players } = state
+	const clearPlayerCards = players.map(player => ({...player, cards: player.cards.map(card => {})}))
+	state.players = clearPlayerCards
 	return passDealerChip(state)
 }
 

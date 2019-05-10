@@ -165,7 +165,6 @@ const dealRiver = (state) => {
 
 const showDown = (state) => {
 	for (let player of state.players) {
-		console.log("Evaluating hand of", player.name)
 		const frequencyHistogram = {};
 		const suitHistogram = {};
 		const bestHands = {}

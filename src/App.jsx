@@ -117,7 +117,7 @@ function PlayerActionInfoBox({index, isActive, content, endTransition}) {
   return(
       <CSSTransition 
         in={isActive} 
-        timeout={350} 
+        timeout={2000} 
         classNames="transitionable-actionBox" 
         onEntered={() => endTransition(index)}
       >
@@ -184,6 +184,10 @@ class App extends Component {
     this.runGameLoop();
   }
 
+  componentDidUpdate() {
+    console.log(this.state.activePlayerIndex);
+  }
+
   handleBetInputChange = (val, min, max) => {
     if (val === '') val = min
     if (val > max) val = max
@@ -199,31 +203,31 @@ class App extends Component {
   }
 
   pushAnimationState = (index, content) => {
-    const { playerAnimationSwitchboard } = this.state;
-    const newAnimationSwitchboard = { ...playerAnimationSwitchboard };
-    newAnimationSwitchboard[index].isAnimating = true;
-    newAnimationSwitchboard[index].content = content;
+    const newAnimationSwitchboard = Object.assign(
+      {}, 
+      this.state.playerAnimationSwitchboard,
+      {[index]: {isAnimating: true, content}}     
+    )
+    this.setState({playerAnimationSwitchboard: newAnimationSwitchboard});
   }
 
   popAnimationState = (index) => {
-    console.log("Calling to End Transition");
-
-    const { playerAnimationSwitchboard } = this.state;
-    const newAnimationSwitchboard = { ...playerAnimationSwitchboard };
-    newAnimationSwitchboard[index].isAnimating = false;
-    console.log("Old State:");
-    console.log(playerAnimationSwitchboard);
-    console.log("New State")
-    console.log(newAnimationSwitchboard);
+    const persistContent = this.state.playerAnimationSwitchboard[index].content;
+    const newAnimationSwitchboard = Object.assign(
+      {}, 
+      this.state.playerAnimationSwitchboard,
+      {[index]: {isAnimating: false, content: persistContent}}     
+    )
+    this.setState({playerAnimationSwitchboard: newAnimationSwitchboard});
   }
 
   handleBetInputSubmit = (bet, min, max) => {
     const {playerAnimationSwitchboard, ...appState} = this.state;
     const { activePlayerIndex } = appState;
     this.pushAnimationState(activePlayerIndex, `BET/CALL: ${bet}`);
-
     const newState = handleBet(cloneDeep(appState), parseInt(bet), parseInt(min), parseInt(max));
-  
+    console.log("WATDAFUQ")
+    console.log(newState)
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => {
@@ -236,8 +240,10 @@ class App extends Component {
 
   handleFold = () => {
     const {playerAnimationSwitchboard, ...appState} = this.state
+    console.log("Animation Switchboard in HandleFold:")
+    console.log(playerAnimationSwitchboard)
     const newState = handleFold(cloneDeep(appState));
-  
+    console.log(newState)
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => {
@@ -249,9 +255,11 @@ class App extends Component {
   }
 
   handleAI = () => {
-    const {playerAnimationSwitchboard, ...appState} = this.state
+    const {playerAnimationSwitchboard, ...appState} = this.state;
+    console.log("Animation Switchboard in HandleAI:")
+    console.log(playerAnimationSwitchboard)
     const newState = handleAIUtil(cloneDeep(appState))
-    
+    console.log(newState)
       this.setState({
             ...newState,
             betInputValue: newState.minBet // Need to remember the purpose of this...
@@ -279,7 +287,7 @@ class App extends Component {
     // Reverse Players Array for the sake of taking turns counter-clockwise.
     const reversedPlayers = this.state.players.reduce((result, player, index) => {
       result.unshift(
-        <React.Fragment>
+        <React.Fragment key={index}>
         <div className={`p${index}${(index === this.state.activePlayerIndex) ? ' action' : ''}`}>
           <PlayerActionInfoBox 
             index={index} 
@@ -361,9 +369,9 @@ class App extends Component {
   }
 
   renderCommunityCards = () => {
-    return this.state.communityCards.map(card => {
+    return this.state.communityCards.map((card, index) => {
       return(
-        <div className='playing-card cardIn' style={{animationDelay: `${card.animationDelay}ms`}}>
+        <div key={index} className='playing-card cardIn' style={{animationDelay: `${card.animationDelay}ms`}}>
           <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
         </div>
       );
@@ -474,16 +482,16 @@ class App extends Component {
   renderBestHands = () => {
     const { players } = this.state
     // Run final ranking of all player hands in showdown
-    return players.map(player => {
+    return players.map((player, index) => {
       if (!player.folded) {
           return (
-            <div className='showdown-row'> 
+            <div key={index} className='showdown-row'> 
               <h6 className='player-header'> {player.name} </h6>
               <div className='centered-flex-row' style={{alignItems: 'center'}}>
                 { 
-                    player.showDownHand.bestHand.map(card => {
+                    player.showDownHand.bestHand.map((card, index) => {
                       return(
-                        <div className='playing-card' style={{animationDelay: `0ms`}}>
+                        <div key={index} className='playing-card' style={{animationDelay: `0ms`}}>
                           <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
                         </div>
                       )

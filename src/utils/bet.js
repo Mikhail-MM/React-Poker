@@ -47,17 +47,15 @@ const handleBet = (state, bet, min, max) => {
 		}
 	}
 
-	const activePlayer = state.players[state.activePlayerIndex];
+		const activePlayer = state.players[state.activePlayerIndex];
 		const subtractableChips = bet - activePlayer.bet;
 		activePlayer.bet = bet;
 		activePlayer.chips = activePlayer.chips - subtractableChips;
 		if (activePlayer.chips === 0) {
+			activePlayer.allIn = true;
 			state.numPlayersAllIn++
 		}
 		activePlayer.betReconciled = true;
-	
-
-	
 	return determineNextActivePlayer(state)
 }
 
