@@ -84,6 +84,49 @@ img {
 	animation: fade-in-out 0.5s;
 	animation-fill-mode: both;
 }
+
+.actionBox {
+	background: rgba(0,0,0,0.85);
+	color: yellow;
+	padding: 12px;
+	
+	position: absolute;
+	top: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 100;
+	display: none;
+}
+
+.transitionable-actionBox-enter {
+	display: block;
+	opacity: 0;
+	transform: translateX(-50%);
+}
+
+.transitionable-actionBox-enter-active {
+	display: block;
+	opacity: 1;
+	transition: opacity 350ms ease-in-out;
+	transform: translateX(-50%);
+}
+.transitionable-actionBox-enter-done {
+	display: block;
+}
+
+.transitionable-actionBox-exit {
+	display: block;
+	opacity: 1;
+	transform: translateX(-50%);
+}
+
+.transitionable-actionBox-exit-active {
+	display: block;
+	opacity: 0;
+	transform: translateX(-50%) translateY(-55px);
+	transition: opacity 350ms ease-in-out, transform 350ms linear;
+}
+
 @keyframes fade-in-out {
 	0% {
 		opacity: 1;

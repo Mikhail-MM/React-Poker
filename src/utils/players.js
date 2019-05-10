@@ -126,28 +126,15 @@ const determineNextActivePlayer = (state) => {
 }
 
 const checkEdgeCasesRequiringShowdown = (state) => {
+	// Check if there's only 1 active player left, and all others have gone in
 	const checklit = (state.numPlayersActive - state.numPlayersAllIn === 1);
-	console.log(state.numPlayersActive)
-	console.log( state.numPlayersAllIn)
-	console.log(state.numPlayersActive - state.numPlayersAllIn)
 	const activePlayers = state.players.filter(pl => !pl.folded);
 	const activePlayerBets = activePlayers.map(pl => pl.bet).filter(bet => bet > 0);
-
-		// console.log("Checking for Lituation: Are we in a possible twist of having all but one player all-in?", checklit)
-			// console.log(playerBets)
-			// console.log(activeBets)
-			// console.log("Checking if only 1 player with chips is in...in a roundabout fashion. Well, just by looking at active players")
-			console.log(checklit)
-			console.log(activePlayerBets)
-			console.log(activePlayerBets.length === 0)
-			if (checklit && activePlayerBets.length === 0) { 
-				// THIS MUST be refactored, As this is FALSE when the PLAYER GOES ALL IN on an EARLY AI BET which exceeds PLAYER'S CHIP COUNT.
-				// THIS ACCOUNTS FOR ALL PLAYERS ON THE TABLE !!!!!!!! EVEN THOSE WHO HAVE FOLDED!!!!!!!!
-				
-				return true
-			}
-
-			return false
+	// If all active bets are zero, (meaning the active player is not being awaited on to call the other players' all ins, skip to the end)
+	if (checklit && activePlayerBets.length === 0) { 				
+		return true
+	}
+	return false
 }
 
 const passDealerChip = (state) => {

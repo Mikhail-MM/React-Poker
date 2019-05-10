@@ -11,6 +11,7 @@ import './Poker.css';
 import Spinner from './Spinner';
 
 import { Slider, Rail, Handles, Tracks, Ticks } from 'react-compound-slider'
+import { CSSTransition } from 'react-transition-group';
 
 import { 
   generateDeckOfCards, 
@@ -111,7 +112,21 @@ function Track ({ source, target, getTrackProps }) {
   )
 }
 
-
+function PlayerActionInfoBox({index, isActive, content, endTransition}) {
+  
+  return(
+      <CSSTransition 
+        in={isActive} 
+        timeout={350} 
+        classNames="transitionable-actionBox" 
+        onEntered={() => endTransition(index)}
+      >
+        <div className="actionBox">
+          {`${index} ${isActive} -- ${content}`}
+        </div>
+      </CSSTransition>
+    )
+}
 
 class App extends Component {
   state = {
@@ -131,6 +146,14 @@ class App extends Component {
     sidePots: [],
     minBet: 20,
     phase: 'loading',
+    playerAnimationSwitchboard: {
+      0: {isAnimating: false, content: null},
+      1: {isAnimating: false, content: null},
+      2: {isAnimating: false, content: null},
+      3: {isAnimating: false, content: null},
+      4: {isAnimating: false, content: null},
+      5: {isAnimating: false, content: null}
+    }
   }
 
   cardAnimationDelay = 0;
@@ -174,9 +197,32 @@ class App extends Component {
       betInputValue: val[0]
     })
   }
+
+  pushAnimationState = (index, content) => {
+    const { playerAnimationSwitchboard } = this.state;
+    const newAnimationSwitchboard = { ...playerAnimationSwitchboard };
+    newAnimationSwitchboard[index].isAnimating = true;
+    newAnimationSwitchboard[index].content = content;
+  }
+
+  popAnimationState = (index) => {
+    console.log("Calling to End Transition");
+
+    const { playerAnimationSwitchboard } = this.state;
+    const newAnimationSwitchboard = { ...playerAnimationSwitchboard };
+    newAnimationSwitchboard[index].isAnimating = false;
+    console.log("Old State:");
+    console.log(playerAnimationSwitchboard);
+    console.log("New State")
+    console.log(newAnimationSwitchboard);
+  }
+
   handleBetInputSubmit = (bet, min, max) => {
-  
-    const newState = handleBet(cloneDeep(this.state), parseInt(bet), parseInt(min), parseInt(max));
+    const {playerAnimationSwitchboard, ...appState} = this.state;
+    const { activePlayerIndex } = appState;
+    this.pushAnimationState(activePlayerIndex, `BET/CALL: ${bet}`);
+
+    const newState = handleBet(cloneDeep(appState), parseInt(bet), parseInt(min), parseInt(max));
   
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
@@ -187,8 +233,10 @@ class App extends Component {
         }
       });
   }
+
   handleFold = () => {
-    const newState = handleFold(cloneDeep(this.state));
+    const {playerAnimationSwitchboard, ...appState} = this.state
+    const newState = handleFold(cloneDeep(appState));
   
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
@@ -201,7 +249,9 @@ class App extends Component {
   }
 
   handleAI = () => {
-    const newState = handleAIUtil(cloneDeep(this.state))
+    const {playerAnimationSwitchboard, ...appState} = this.state
+    const newState = handleAIUtil(cloneDeep(appState))
+    
       this.setState({
             ...newState,
             betInputValue: newState.minBet // Need to remember the purpose of this...
@@ -215,12 +265,28 @@ class App extends Component {
       })
   }
 
+  ifAnimating = (playerBoxIndex) => { 
+    const { playerAnimationSwitchboard } = this.state;
+    if (playerAnimationSwitchboard[playerBoxIndex].isAnimating) {
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+
   renderBoard = () => {
     // Reverse Players Array for the sake of taking turns counter-clockwise.
     const reversedPlayers = this.state.players.reduce((result, player, index) => {
       result.unshift(
         <React.Fragment>
         <div className={`p${index}${(index === this.state.activePlayerIndex) ? ' action' : ''}`}>
+          <PlayerActionInfoBox 
+            index={index} 
+            isActive={this.ifAnimating(index)} 
+            content={this.state.playerAnimationSwitchboard[index].content}
+            endTransition={this.popAnimationState}
+          />
           <div className='player-avatar-container' >
             <div className='bet-container'> 
               <img style={{width: 35, height: 35}} src={'./assets/bet.svg'} />
