@@ -226,8 +226,6 @@ class App extends Component {
     const { activePlayerIndex } = appState;
     this.pushAnimationState(activePlayerIndex, `BET/CALL: ${bet}`);
     const newState = handleBet(cloneDeep(appState), parseInt(bet), parseInt(min), parseInt(max));
-    console.log("WATDAFUQ")
-    console.log(newState)
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => {
@@ -240,10 +238,7 @@ class App extends Component {
 
   handleFold = () => {
     const {playerAnimationSwitchboard, ...appState} = this.state
-    console.log("Animation Switchboard in HandleFold:")
-    console.log(playerAnimationSwitchboard)
     const newState = handleFold(cloneDeep(appState));
-    console.log(newState)
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => {
@@ -256,10 +251,7 @@ class App extends Component {
 
   handleAI = () => {
     const {playerAnimationSwitchboard, ...appState} = this.state;
-    console.log("Animation Switchboard in HandleAI:")
-    console.log(playerAnimationSwitchboard)
     const newState = handleAIUtil(cloneDeep(appState))
-    console.log(newState)
       this.setState({
             ...newState,
             betInputValue: newState.minBet // Need to remember the purpose of this...
