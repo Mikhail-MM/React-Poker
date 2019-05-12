@@ -384,7 +384,7 @@ img {
 	color: white;
 }
 
-
+/*
 .table-test {
 	position: absolute;
 	top: 20px;
@@ -395,7 +395,7 @@ img {
 	z-index: 500;
 }
 
-/*
+
 @media screen and (orientation: portrait) {
 	.poker-players {
 		transform: rotate(90deg);
