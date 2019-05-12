@@ -537,6 +537,7 @@ class App extends Component {
         <div className='centered-flex-row'> 
           { (this.state.loading) ? <Spinner/> : (
               <div className='poker-players'>
+               {/* <img class="table-test" src={"./assets/table-nobg-svg-01.svg"} /> */}
                 { (this.state.phase === 'showdown') && this.renderShowdown() } 
                 <div className='top-game-menu-bar' >
                     <h4> Texas Hold 'Em Poker </h4>

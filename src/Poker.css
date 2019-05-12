@@ -383,3 +383,22 @@ img {
 	left: calc(50% - 22.5px);
 	color: white;
 }
+
+
+.table-test {
+	position: absolute;
+	top: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 765px;
+	height: auto;
+	z-index: 500;
+}
+
+/*
+@media screen and (orientation: portrait) {
+	.poker-players {
+		transform: rotate(90deg);
+	}
+}
+*/
