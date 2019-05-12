@@ -37,14 +37,6 @@ img {
 	border-radius: 100px;
 }
 
-.bet-container {
-	display: flex;
-
-	position: absolute;
-	left: 85px;
-	top: -15px;
-	color: white;
-}
 
 .player-avatar-image {
 	box-sizing: content-box;
@@ -202,10 +194,6 @@ img {
  .p3 {
  	bottom: 21.1518%;
  	right: 6%;
- }
-
- .action {
- 	border-color: blue;
  }
 
  .community-card-container {
@@ -402,3 +390,43 @@ img {
 	}
 }
 */
+
+.player-entity--container {
+	display: flex;
+	height: auto;
+	width: auto;
+}
+.player-entity--wrapper {
+	position: absolute;
+}
+.player-avatar--container {
+	position: relative;
+
+	height: 100px;
+	width: 100px;
+	border-radius: 100px;
+}
+
+.player-info--stash--container,
+.player-info--bet--container {
+	display: flex;
+	align-items: center;
+}
+
+.player-info--stash--image,
+.player-info--bet--image {
+	height: 35px;
+	width: 35px;
+}
+
+// OLD
+
+
+.bet-container {
+	display: flex;
+
+	position: absolute;
+	left: 85px;
+	top: -15px;
+	color: white;
+}

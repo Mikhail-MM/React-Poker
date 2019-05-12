@@ -10,6 +10,10 @@ import './App.css';
 import './Poker.css';
 import Spinner from './Spinner';
 
+import Player from "./components/players/Player";
+import HiddenCard from "./components/cards/HiddenCard";
+import Card from "./components/cards/Card";
+
 import { Slider, Rail, Handles, Tracks, Ticks } from 'react-compound-slider'
 import { CSSTransition } from 'react-transition-group';
 
@@ -184,10 +188,6 @@ class App extends Component {
     this.runGameLoop();
   }
 
-  componentDidUpdate() {
-    console.log(this.state.activePlayerIndex);
-  }
-
   handleBetInputChange = (val, min, max) => {
     if (val === '') val = min
     if (val > max) val = max
@@ -276,42 +276,37 @@ class App extends Component {
   }
 
   renderBoard = () => {
+
+    const { 
+      players,
+      activePlayerIndex,
+      dealerIndex
+    } = this.state;
     // Reverse Players Array for the sake of taking turns counter-clockwise.
-    const reversedPlayers = this.state.players.reduce((result, player, index) => {
+    const reversedPlayers = players.reduce((result, player, index) => {
+
+      const isActive = (index === activePlayerIndex);
+      const hasDealerChip = (index === dealerIndex);
+
       result.unshift(
         <React.Fragment key={index}>
-        <div className={`p${index}${(index === this.state.activePlayerIndex) ? ' action' : ''}`}>
           <PlayerActionInfoBox 
             index={index} 
             isActive={this.ifAnimating(index)} 
             content={this.state.playerAnimationSwitchboard[index].content}
             endTransition={this.popAnimationState}
           />
-          <div className='player-avatar-container' >
-            <div className='bet-container'> 
-              <img style={{width: 35, height: 35}} src={'./assets/bet.svg'} />
-              <h5> {`Bet: ${player.bet}`} </h5> 
-            </div>
-            <img className={`player-avatar-image${(index === this.state.activePlayerIndex) ? ' activePlayer' : ''}`} src={player.avatarURL} />
-              {(this.state.dealerIndex === index) && 
-                <React.Fragment>
-                  <div className='dealer-chip-icon-container'>
-                    <img src={'/assets/chip.svg'} />
-                  </div>
-                </React.Fragment>
-            }
-          </div>
-          <div className='player-info-box'>
-                    <h5> {player.name} </h5>
-                    <div style={{display: 'flex', alignItems: 'center'}}>
-                      <img style={{height: 35, width: 35}} src={'./assets/chips.svg'} />
-                      <h5> {`${player.chips}`} </h5>
-                    </div>
-          </div>
+          <Player
+            key={index}
+            arrayIndex={index}
+            isActive={isActive}
+            hasDealerChip={hasDealerChip}
+            player={player}      
+          />
+
           <div className='centered-flex-row abscard'>
             { this.renderPlayerCards(index) }
           </div>
-        </div>
         </React.Fragment>
 
       )
@@ -322,7 +317,10 @@ class App extends Component {
 
   renderPlayerCards = (index) => {
     let applyFoldedClassname;
-    const { players, activePlayerIndex } = this.state
+    const { 
+      players, 
+      activePlayerIndex 
+    } = this.state
 
     if (players[index].folded || this.state.clearCards) {
       applyFoldedClassname = true
@@ -332,14 +330,11 @@ class App extends Component {
       return players[index].cards.map(card => {
         if (this.state.phase !== 'showdown') {
           return(
-            <div key={`${card.suit} ${card.cardFace}`} className={`playing-card cardIn robotcard${(applyFoldedClassname ? ' folded' : '')}`} style={{animationDelay: `${(applyFoldedClassname) ?  0 : card.animationDelay}ms`}}>
-            </div>
+            <HiddenCard cardData={card}/>
           );
         } else {
           return(
-            <div key={`${card.suit} ${card.cardFace}`} className={`playing-card cardIn${(applyFoldedClassname ? ' folded' : '')}`} style={{animationDelay: `${(applyFoldedClassname) ?  0 : card.animationDelay}ms`}}>
-              <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
-            </div>
+            <Card cardData={card}/>
           );
         }
       });
@@ -347,9 +342,7 @@ class App extends Component {
     else {
       return players[index].cards.map(card => {
         return(
-          <div key={`${card.suit} ${card.cardFace}`} className={`playing-card cardIn${(applyFoldedClassname ? ' folded' : '')}`} style={{animationDelay: `${(applyFoldedClassname) ?  0 : card.animationDelay}ms`}}>
-            <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
-          </div>
+          <Card cardData={card}/>
         );
       });
     }
@@ -363,9 +356,7 @@ class App extends Component {
   renderCommunityCards = () => {
     return this.state.communityCards.map((card, index) => {
       return(
-        <div key={index} className='playing-card cardIn' style={{animationDelay: `${card.animationDelay}ms`}}>
-          <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
-        </div>
+        <Card cardData={card}/>
       );
     });
   }
