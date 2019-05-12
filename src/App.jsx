@@ -280,13 +280,16 @@ class App extends Component {
     const { 
       players,
       activePlayerIndex,
-      dealerIndex
+      dealerIndex,
+      clearCards,
+      phase,
     } = this.state;
     // Reverse Players Array for the sake of taking turns counter-clockwise.
     const reversedPlayers = players.reduce((result, player, index) => {
-
+      
       const isActive = (index === activePlayerIndex);
       const hasDealerChip = (index === dealerIndex);
+
 
       result.unshift(
         <React.Fragment key={index}>
@@ -301,12 +304,15 @@ class App extends Component {
             arrayIndex={index}
             isActive={isActive}
             hasDealerChip={hasDealerChip}
-            player={player}      
+            player={player}
+            clearCards={clearCards}
+            phase={phase}      
           />
-
+        {/* 
           <div className='centered-flex-row abscard'>
             { this.renderPlayerCards(index) }
           </div>
+        */}
         </React.Fragment>
 
       )
@@ -323,7 +329,7 @@ class App extends Component {
     } = this.state
 
     if (players[index].folded || this.state.clearCards) {
-      applyFoldedClassname = true
+      applyFoldedClassname = true;
     }
 
     if (players[index].robot) {
@@ -345,11 +351,6 @@ class App extends Component {
           <Card cardData={card}/>
         );
       });
-    }
-
-    if (this.state.clearCards) {
-      console.log("Need to clear the cards")
-      this.forceUpdate()
     }
   }
 

@@ -407,10 +407,15 @@ img {
 	border-radius: 100px;
 }
 
+.player-info--wrapper {
+	color: white;
+}
+
 .player-info--stash--container,
 .player-info--bet--container {
 	display: flex;
 	align-items: center;
+	color: white;
 }
 
 .player-info--stash--image,
