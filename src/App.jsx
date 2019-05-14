@@ -5,14 +5,16 @@ import 'core-js/es6/set';
 import 'raf/polyfill';
 
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import './Poker.css';
 import Spinner from './Spinner';
 
 import Player from "./components/players/Player";
-import HiddenCard from "./components/cards/HiddenCard";
 import Card from "./components/cards/Card";
+
+import Handle from "./components/slider/Handle";
+import Track from "./components/slider/Track";
+import { sliderStyle, railStyle } from "./components/slider/styles";
 
 import { Slider, Rail, Handles, Tracks, Ticks } from 'react-compound-slider'
 import { CSSTransition } from 'react-transition-group';
@@ -20,15 +22,13 @@ import { CSSTransition } from 'react-transition-group';
 import { 
   generateDeckOfCards, 
   shuffle, 
-  popCards,
   dealPrivateCards,
-  dealFlop,
+  dealFlop
 } from './utils/cards.js';
 
 import { 
   generateTable, 
-  handleOverflowIndex,
-  beginNextRound, 
+  beginNextRound 
 } from './utils/players.js';
 
 import { 
@@ -49,72 +49,6 @@ import {
 } from './utils/ai.js';
 
 import { cloneDeep } from 'lodash';
-
-const sliderStyle = {
-  position: 'relative',
-  width: '100%',
-  height: 80,
-}
-
-const railStyle = {
-  position: 'absolute',
-  width: '100%',
-  height: 10,
-  marginTop: 35,
-  borderRadius: 5,
-  backgroundColor: '#8B9CB6',
-}
-
- function Handle({
-  handle: { id, value, percent },
-  getHandleProps
-}) {
-  return (
-    <div
-      style={{
-        left: `${percent}%`,
-        position: 'absolute',
-        marginLeft: -15,
-        marginTop: 25,
-        zIndex: 2,
-        width: 30,
-        height: 30,
-        border: 0,
-        textAlign: 'center',
-        cursor: 'pointer',
-        borderRadius: '50%',
-        backgroundColor: '#2C4870',
-        color: '#aaa',
-      }}
-      {...getHandleProps(id)}
-    >
-      <div style={{ fontFamily: 'Roboto', fontSize: 11, marginTop: -35}} >
-        {value}
-      </div>
-    </div>
-
-  )
-}
-
-function Track ({ source, target, getTrackProps }) {
-  return(
-    <div
-      style={{
-        position: 'absolute',
-        height: 10,
-        zIndex: 1,
-        marginTop: 35,
-        backgroundColor: '#546C91',
-        borderRadius: 5,
-        cursor: 'pointer',
-        left: `${source.percent}%`,
-        width: `${target.percent - source.percent}%`,
-      }}
-      {...getTrackProps()}
-    />
-
-  )
-}
 
 function PlayerActionInfoBox({index, isActive, content, endTransition}) {
   
@@ -252,9 +186,10 @@ class App extends Component {
   handleAI = () => {
     const {playerAnimationSwitchboard, ...appState} = this.state;
     const newState = handleAIUtil(cloneDeep(appState), this.pushAnimationState)
+
       this.setState({
             ...newState,
-            betInputValue: newState.minBet // Need to remember the purpose of this...
+            betInputValue: newState.minBet
       }, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => {
@@ -308,50 +243,12 @@ class App extends Component {
             clearCards={clearCards}
             phase={phase}      
           />
-        {/* 
-          <div className='centered-flex-row abscard'>
-            { this.renderPlayerCards(index) }
-          </div>
-        */}
         </React.Fragment>
 
       )
       return result
     }, []);
     return reversedPlayers.map(component => component);
-  }
-
-  renderPlayerCards = (index) => {
-    let applyFoldedClassname;
-    const { 
-      players, 
-      activePlayerIndex 
-    } = this.state
-
-    if (players[index].folded || this.state.clearCards) {
-      applyFoldedClassname = true;
-    }
-
-    if (players[index].robot) {
-      return players[index].cards.map(card => {
-        if (this.state.phase !== 'showdown') {
-          return(
-            <HiddenCard cardData={card}/>
-          );
-        } else {
-          return(
-            <Card cardData={card}/>
-          );
-        }
-      });
-    }
-    else {
-      return players[index].cards.map(card => {
-        return(
-          <Card cardData={card}/>
-        );
-      });
-    }
   }
 
   renderCommunityCards = () => {
@@ -523,37 +420,44 @@ class App extends Component {
       </div>
     )
   }
+
+  renderGame = () => {
+    return (
+      <div className='poker-app--background'>
+        <div className="poker-table--container">
+          <img className="poker-table--table-image" src={"./assets/table-nobg-svg-01.svg"} />
+          { this.renderBoard() }
+          <div className='community-card-container' >
+            { this.renderCommunityCards() }
+          </div>
+          <div className='pot-container'>
+            <img style={{height: 55, width: 55}} src={'./assets/pot.svg'}/>
+            <h4> {`${this.state.pot}`} </h4>
+          </div>
+        </div>
+        { (this.state.phase === 'showdown') && this.renderShowdown() } 
+        {/*
+          <div className='top-game-menu-bar' >
+              <h4> Texas Hold 'Em Poker </h4>
+          </div>
+        */}
+        <div className='bottom-game-menu-bar' >
+          <div className='action-buttons'>
+              { this.renderActionButtons() }
+          </div>
+          <div className='slider-boi'>
+            { (!this.state.loading)  && this.renderActionMenu() }
+          </div>
+        </div>
+        <div className='chat-box' />
+      </div>
+    )
+  }
   render() {
     return (
       <div className="App">
-        <div className='centered-flex-row'> 
-          { (this.state.loading) ? <Spinner/> : (
-              <div className='poker-players'>
-               {/* <img class="table-test" src={"./assets/table-nobg-svg-01.svg"} /> */}
-                { (this.state.phase === 'showdown') && this.renderShowdown() } 
-                <div className='top-game-menu-bar' >
-                    <h4> Texas Hold 'Em Poker </h4>
-                </div>
-                <div className='pot-container'>
-                  <img style={{height: 55, width: 55}} src={'./assets/pot.svg'}/>
-                  <h4> {`${this.state.pot}`} </h4>
-                </div>
-                <div className='bottom-game-menu-bar' >
-                  <div className='action-buttons'>
-                      { this.renderActionButtons() }
-                  </div>
-                  <div className='slider-boi'>
-                    { (!this.state.loading)  && this.renderActionMenu() }
-                  </div>
-                </div>
-                <div className='chat-box' />
-                { this.renderBoard() }
-                <div className='community-card-container' >
-                  { this.renderCommunityCards() }
-                </div>
-              </div>
-              ) 
-          }
+        <div className='poker-table--wrapper'> 
+          { (this.state.loading) ? <Spinner/> : this.renderGame()}
         </div>
       </div>
     );

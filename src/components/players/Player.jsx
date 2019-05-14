@@ -65,30 +65,28 @@ const Player = (props) => {
   }
 
   return (
-    <div class={`player-entity--wrapper p${arrayIndex}`}>
+    <div className={`player-entity--wrapper p${arrayIndex}`}>
       <div className='centered-flex-row abscard'>
         { renderPlayerCards() }
       </div>
-      <div class="player-entity--container">
-        <div class="player-avatar--container">
+      <div className="player-entity--container">
+        <div className="player-avatar--container">
           <img 
-            class={`player-avatar--image${(isActive ? ' activePlayer' : '')}`} 
+            className={`player-avatar--image${(isActive ? ' activePlayer' : '')}`} 
             src={avatarURL}  
           />
-          {() => renderDealerChip()}
-        </div>
-        <div class="player-info--wrapper">
-          <h5 class="player-info--name">
+          <h5 className="player-info--name">
             {`${name}`}
           </h5>
-          <div class="player-info--stash--container">
-            <img class="player-info--stash--image" src={chipCountImageURL} />
+          <div className="player-info--stash--container">
+            <img className="player-info--stash--image" src={chipCountImageURL} />
             <h5>{`${chips}`}</h5>
           </div>
-          <div class="player-info--bet--container">
-            <img class="player-info--bet--image" src={playerBetImageURL} />
+          <div className="player-info--bet--container">
+            <img className="player-info--bet--image" src={playerBetImageURL} />
             <h5>{`Bet: ${bet}`}</h5>
           </div>
+          { renderDealerChip() }
         </div>
       </div>
     </div>

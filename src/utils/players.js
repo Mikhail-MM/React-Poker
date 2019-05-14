@@ -14,7 +14,6 @@ const generateTable = async () => {
 		},
 		chips: 20000,
 		chipsInvested: 0,
-		roundStartChips: 2000,
 		bet: 0,
 		betReconciled: false,
 		folded: false,
@@ -32,7 +31,6 @@ const generateTable = async () => {
 			cards: [],
 			chips: Math.floor(Math.random() * (20000 - 18000)) + 18000,
 			chipsInvested: 0,
-			roundStartChips: 2000,
 			showDownHand: {
 				hand: [],
 				descendingSortHand: [],
