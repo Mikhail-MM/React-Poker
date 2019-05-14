@@ -84,6 +84,7 @@ class App extends Component {
     sidePots: [],
     minBet: 20,
     phase: 'loading',
+    showDownRender: [],
     playerAnimationSwitchboard: {
       0: {isAnimating: false, content: null},
       1: {isAnimating: false, content: null},
@@ -211,7 +212,6 @@ class App extends Component {
   }
 
   renderBoard = () => {
-
     const { 
       players,
       activePlayerIndex,
@@ -326,8 +326,6 @@ class App extends Component {
   }
 
   renderActionButtonText() {
-    // Move to UI Utils
-    // TODO: Add logic for CALL, RAISE
     const { highBet, betInputValue, players, activePlayerIndex } = this.state
     const activePlayer = players[activePlayerIndex]
     if ((highBet === 0) && (betInputValue === 0)) {
@@ -406,10 +404,16 @@ class App extends Component {
       </React.Fragment>
       )
   }
+
+  finalRanking = () => {
+    const { players } = this.state
+  }
+  
   renderShowdown = () => {
     return(
       <div className='showdown-container'>
         { this.renderBestHands() }
+        <div class="final-ranking">{ this.finalRanking() }</div>
         <button onClick={() => this.handleNextRound()}> Next Round </button>
       </div>
     )

@@ -147,21 +147,24 @@ const calculateSidePots = (state, playerStacks) => {
 		const smallStackValue = ascBetPlayers[0].sidePotStack;
 		
 		const builtSidePot = ascBetPlayers.reduce((acc, cur) => {
-			/***
-				If we have a group of players with this bet configuration
-				[100, 200, 300, 500, 1000]
-					We build a side pot for the player with 100 chips invested, by subtracting 100 from each index and accumulating them.
-					Each player who we subtract from is an eligible contestant
-						We should end up with [0, 100, 300, 500, 100] in the original array
-						And the accumulator will be { potValue: 500, contestants[(all the players in the original array)]}
-						Mutations will be done to the original array to persist changes
-							We can pass this to the next iteration of the function to repeat logic recursively
-			***/
+/***
+	If we have a group of players with this bet configuration
+	[100, 200, 300, 500, 1000]
+		We build a side pot for the player with 100 chips invested, by subtracting 100 from each index and accumulating them.
+		Each player who we subtract from is an eligible contestant
+			We should end up with [0, 100, 200, 400, 900] in the original array
+			And the accumulator will be { potValue: 500, contestants[(all the players in the original array)]}
+			Mutations will be done to the original array to persist changes
+				We can pass this to the next iteration of the function to repeat logic recursively, filtering out the "0"
+				[100, 200, 400, 900] --> [0, 100, 300, 800] {potValue: 400}
+				[100, 300, 800] -> [0, 200, 700] {potValue: 300}
+				[200, 700] -> [0, 500] {potValue: 400} --> refund 500
+***/
 			if (!cur.folded) {
 				acc.contestants.push(cur.name);
 			}
 			acc.potValue = acc.potValue + smallStackValue;
-			cur.sidePotStack = cur.sidePotStack - smallStackValue
+			cur.sidePotStack = cur.sidePotStack - smallStackValue;
 				return acc
 		}, {
 			contestants: [],
@@ -192,6 +195,7 @@ const arrayIdentical = (arr1, arr2) => {
 		return false
 	}
 		return arr1.map(el => arr2.includes(el)).filter(bool => bool !== true).length !== 0 ? false : true;
+		// Can be simplified return arr1.every(el => arr2.includes(el));
 }
 export { 
 	determineBlindIndices, 

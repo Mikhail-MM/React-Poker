@@ -148,7 +148,6 @@ const showDown = (state) => {
 	for (let player of state.players) {
 		const frequencyHistogram = {};
 		const suitHistogram = {};
-		const bestHands = {}
 
 		player.showDownHand.hand = player.cards.concat(state.communityCards);
 		player.showDownHand.descendingSortHand = player.showDownHand.hand.map(el => el).sort((a,b) => b.value - a.value); // This mutates showDownHand.hand in place(!!)
@@ -172,6 +171,7 @@ const showDown = (state) => {
 		const { isFourOfAKind, isFullHouse, isThreeOfAKind, isTwoPair, isPair, frequencyHistogramMetaData } = analyzeHistogram(player.showDownHand.descendingSortHand, frequencyHistogram);
 		const isNoPair = ((!isRoyalFlush) && (!isStraightFlush) && (!isFourOfAKind) && (!isFullHouse) && (!isFlush) && (!isStraight) && (!isThreeOfAKind) && (!isTwoPair) && (!isPair))
 		
+		// For debugging/organization purposes, can probably be eliminated
 		player.showDownHand.bools = {
 			isRoyalFlush,
 			isStraightFlush,
@@ -376,22 +376,13 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 const distributeSidePots = (state) => {
 	for (let sidePot of state.sidePots) {
 		const rankMap = rankPlayerHands(state, sidePot.contestants);
-			state = battleRoyale(state, rankMap, sidePot.potValue)
+		state = battleRoyale(state, rankMap, sidePot.potValue)
 	}
-				return state
+	return state
 }
 
 const rankPlayerHands = (state, contestants) => {
-	/*
-
-		bpfToday at 2:25 PM
-		also I do this for readability
-		new Map(Object.entries({
-		  'Royal Flush': [],
-		  // etc.
-		}));
-	*/
-
+	
 	const rankMap = new Map([
 		['Royal Flush', []], 
 		['Straight Flush', []],
@@ -417,7 +408,6 @@ const rankPlayerHands = (state, contestants) => {
 		}
 	}
 		return rankMap;
-		// return battleRoyale(state);
 }
 
 const battleRoyale = (state, rankMap, prize) => {
@@ -428,12 +418,8 @@ const battleRoyale = (state, rankMap, prize) => {
 		if (!winnerFound) {
 			if (contestants.length === 1) {
 				winnerFound = true
-				// Uncontested Winner (player at val[0])
-						// state = payWinner(state, val[0], rank) 
-					   console.log("Uncontested Winner, ", contestants[0].name, " , beating out the competition with a ", rank)
-						state = payWinners(state, contestants, prize)
-
-	
+				console.log("Uncontested Winner, ", contestants[0].name, " , beating out the competition with a ", rank)
+				state = payWinners(state, contestants, prize)
 			} else if (contestants.length > 1) {
 				console.log(contestants)
 				winnerFound = true
@@ -670,10 +656,10 @@ const checkFlush = (suitHistogram) => {
 			}
 		} 
 	}
-			return {
-				isFlush: false,
-				flushedSuit: null,
-			}
+	return {
+		isFlush: false,
+		flushedSuit: null,
+	}
 }
 
 const checkRoyalFlush = (flushMatchCards) => {
