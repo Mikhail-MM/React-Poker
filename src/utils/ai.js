@@ -43,7 +43,7 @@ const handleAI = (state, pushAnimationState) => {
 	const activePlayer = state.players[state.activePlayerIndex];
 	const min = determineMinBet(highBet, activePlayer.chips, activePlayer.bet)
     const max = activePlayer.chips + activePlayer.bet
-	const totalInvestment = activePlayer.chips + activePlayer.bet + activePlayer.stackInvestment;
+	const totalInvestment = activePlayer.chips + activePlayer.bet + activePlayer.stackInvestment; // NOTE: StackInvestment must be incremented at each level of BETTING
 	const investmentRequiredToRemain = (highBet / totalInvestment) * 100; 
 	const descendingSortHand = activePlayer.cards.concat(state.communityCards).sort((a, b) => b.value - a.value)
 	const { frequencyHistogram, suitHistogram } =  generateHistogram(descendingSortHand)

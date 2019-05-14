@@ -82,25 +82,6 @@ const popCards = (deck, numToPop) => {
 
 const dealPrivateCards = (state) => {
 	state.clearCards = false;
-	/*
-
-		connorToday at 1:28 PM
-		why use a while
-
-		do you remember where you posted it? I want to take a look
-		I found it, but you only wrote 
-		
-		const dealPocketCards = gameState => {
-		  gameState.allPlayers.forEach();
-		};
-
-		So you can build an array of all of the cards that would be dealt to the players (players.length * 2), and use a forEach loop to give each player the valid index
-		If you have 6 players, pop off 12 cards into an array. First player gets the card at index 0, 6. Second gets the cards at index 1, 7(edited)
-		is that what you mean by declarative?
-
-	*/
-
-	// A MORE DECLARATIVE APPROACH WOULD BE MORE ELEGANT AND SAVE PROCESSING POWER
 	let animationDelay = 0;
 	while (state.players[state.activePlayerIndex].cards.length < 2) {
 		const { mutableDeckCopy, chosenCards } = popCards(state.deck, 1);
@@ -242,15 +223,6 @@ const showDown = (state) => {
 		player.showDownHand.bestHandRank = player.showDownHand.heldRankHierarchy[highRankPosition].name;
 		player.showDownHand.bestHand = buildBestHand(player.showDownHand.descendingSortHand, player.showDownHand.bestHandRank, flushedSuit, flushCards, concurrentCardValues, concurrentCardValuesLow, isLowStraight, isLowStraightFlush, concurrentSFCardValues, concurrentSFCardValuesLow, frequencyHistogramMetaData)
 
-		// TODO: IGNORE ALL WHO ARE FOLDED...
-
-
-		/*
-			hand.reduce((prev = {}, next) => {
-   			 prev[next] = (prev[next] || 0) + 1;
-    		return prev;
-			});
-		*/
 	}
 		
 		/* 
@@ -880,12 +852,6 @@ const checkLowStraight = (valueSetCopy) => {
 
 
 const buildValueSet = (hand) => {
-	/*
-	return hand.reduce((uniqueFaces, card) => {
-
-	}, [])
-	*/
-
 	return Array.from(new Set(hand.map(cardInfo => cardInfo.value)))
 }
 
@@ -908,110 +874,3 @@ const dealMissingCommunityCards = (state) => {
 }
 
 export { generateDeckOfCards, shuffle, popCards, dealPrivateCards, dealFlop, dealTurn, dealRiver, showDown, dealMissingCommunityCards, analyzeHistogram, checkFlush, checkRoyalFlush, checkStraightFlush, checkStraight, buildValueSet }
-
-// Straight: Divide array into frames: 0-4, 1-5, 2-6, 
-// For a straight, converting to a SET may help
-// Array.from(new Set([2, 2, 3, 4, 5, 5]));
-// So, this fails when it's an array of objects, but we can try to do a reduce
-
-/*
-[{face: A, value: 13}].reduce[(cur, acc) => {
-	if (cur does not contain our cardFace yet) {
-	throw it in there...
-	}
-}, []]
-*/
-/*
-
-OLD CHECKS
-
-const checkFourOfAKind = (frequencyHistogram) => {
-	for (let cardFace in frequencyHistogram) {
-		if (frequencyHistogram[cardFace] === 4) {
-			return true
-		}
-	}
-		return false
-}
-const checkFullHouse = (frequencyHistogram) => {
-	let numPairs = 0;
-	let numThreeKind = 0;
-	for (let cardFace in frequencyHistogram) {
-		if (frequencyHistogram[cardFace] === 3) numThreeKind++;
-		if (frequencyHistogram[cardFace] === 2) numPairs++
-	}
-
-	if ((numThreeKind >= 2) || (numPairs >= 1 && numThreeKind >=1)) {
-		return true
-	} else {
-		return false
-	}
-}
-const checkThreeOfAKind = (frequencyHistogram) => {
-	for (let cardFace in frequencyHistogram) {
-		if (frequencyHistogram[cardFace] === 3) return true
-	}
-		return false
-}
-const checkTwoPair = (frequencyHistogram) => {
-	let numPairs = 0;
-	for (let cardFace in frequencyHistogram) {
-		if (frequencyHistogram[cardFace] === 2) {
-			numPairs++
-		}
-	}
-	if (numPairs >= 2) {
-		return true
-	} else { return false }
-}
-const checkPair = (frequencyHistogram) => {
-	let numPairs = 0;
-	for (let cardFace in frequencyHistogram) {
-		if (frequencyHistogram[cardFace] === 2) {
-			numPairs++
-		}
-	}
-	if (numPairs >= 1) {
-		return true
-	} else { return false }
-}
-
-
-MikeMKToday at 12:23 AM
-I am kind of dreading making the recursive function that should properly deal out pot winnings to all players and take into account side pots. Each player will have maxWinnings which would be set to their chips at the beginning of each round. 
-After player hands are eval'd, and it is determined for every player what their Best Hand is - I would need to create a Map which contains arrays of players organized by their strongest possible hand.
-{
-    'Royal Flush': [],
-    'Full House': [Player 1, Player 2],
-    'Four of A Kind': [Player 3],
-    ...
-}
-
-When the Map is established, I will iterate with forEach() - First array with length 1 will be a winner. If the length is >1, will need to compare all player hands to determine a winner (need different comparator functions for each hand type..., though logic can be reused)
-
-When a winner is established, can pluck him out of the array with filter. He will receive maxWinnings * activePlayers chips from the pot. If there is still money left in da pot, will recurse the function to calculate next winner
-i think this might work
-
-
-Connor's Approach: 
-
-{
-    [["2C", "3C", "4C", "5C", "6C"].toString()]: getBestHand(["2C", "3C", "4C", "5C", "6C"].)
-}
-*/
-
-/*
-
-OLD COMPARATOR
-
-			for (let i = 0; i < val.bestHand.length; i++) {
-				comparator[i] = [];
-				for (let contestant of val) {
-					comparator[i].push({
-						card: val.bestHand[i],
-						name: val.name,
-					})
-				}
-			}
-
-*/

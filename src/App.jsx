@@ -254,7 +254,7 @@ class App extends Component {
   renderCommunityCards = () => {
     return this.state.communityCards.map((card, index) => {
       return(
-        <Card cardData={card}/>
+        <Card key={index} cardData={card}/>
       );
     });
   }
@@ -344,20 +344,14 @@ class App extends Component {
   }
 
   runGameLoop = () => {
-    if (this.state.phase === 'initialDeal') {
-      const newState = dealPrivateCards(cloneDeep(this.state))
-        this.setState(newState, () => {
-        if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
-          setTimeout(() => {
-            this.handleAI()
-          }, 1200)
-        }
-      })
-    }
-    if (this.state.phase === 'flop') {
-      const newState = dealFlop(cloneDeep(this.state));
-        this.setState(newState);
-    }
+    const newState = dealPrivateCards(cloneDeep(this.state))
+    this.setState(newState, () => {
+      if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
+        setTimeout(() => {
+          this.handleAI()
+        }, 1200)
+      }
+    })
   }
 
   renderBestHands = () => {
@@ -436,11 +430,6 @@ class App extends Component {
           </div>
         </div>
         { (this.state.phase === 'showdown') && this.renderShowdown() } 
-        {/*
-          <div className='top-game-menu-bar' >
-              <h4> Texas Hold 'Em Poker </h4>
-          </div>
-        */}
         <div className='bottom-game-menu-bar' >
           <div className='action-buttons'>
               { this.renderActionButtons() }
