@@ -374,11 +374,155 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 }
 
 const distributeSidePots = (state) => {
+	buildAbsolutePlayerRankings(state);
+	
 	for (let sidePot of state.sidePots) {
 		const rankMap = rankPlayerHands(state, sidePot.contestants);
 		state = battleRoyale(state, rankMap, sidePot.potValue)
 	}
 	return state
+}
+
+const buildAbsolutePlayerRankings = (state) => {
+	
+	const activePlayers = state.players.filter(player => !player.folded);
+	let hierarchy = [];
+	// dupe logic from rankPlayerHands 
+	const rankMap = new Map([
+		['Royal Flush', []], 
+		['Straight Flush', []],
+		['Four Of A Kind', []],
+		['Full House', []],
+		['Flush', []],
+		['Straight', []],
+		['Three Of A Kind', []],
+		['Two Pair', []],
+		['Pair', []],
+		['No Pair', []]
+	]);
+
+	activePlayers.forEach((player, playerIndex) => {
+		const {
+			name,
+			showDownHand: {
+				bestHandRank,
+				bestHand
+			}
+		} = player;
+		rankMap.get(bestHandRank).push({
+			name,
+         bestHand,
+         playerIndex
+		})
+	})
+	
+	for (const [handRank, playersWhoHoldThisRank] of rankMap) {
+		if (playersWhoHoldThisRank.length > 0) {
+			if (handRank === 'Royal Flush') {
+				playersWhoHoldThisRank.forEach((player) => hierarchy.push(player));
+				continue;
+			} 
+			if (playersWhoHoldThisRank.length === 1) {
+            hierarchy.push(playersWhoHoldThisRank);
+			} else {
+				const sortedComparator = buildComparator(handRank, playersWhoHoldThisRank)
+				.map((snapshot) => { 
+					return snapshot.sort((a, b) => b.card.value - a.card.value)
+            });
+
+				buildContestedHierarchy(sortedComparator, hierarchy);
+			}
+		}
+   }
+
+	return rankMap;
+}
+
+
+const buildContestedHierarchy = (sortedComparator, hierarchy) => {
+   
+	// Pass through the main hierarchy object from buildAbsolutePlayerRankings and concatenate onto it.
+	let winnerHierarchy = [];
+	let loserHierarchy = [];
+	if (sortedComparator.length === 1) {
+      // Return early, likely the function was called recursively from a previous loserHierarchy
+      const {
+         name,
+         bestHand
+      } = sortedComparator[0];
+      winnerHierarchy.push({ name, bestHand });
+	} else {
+		for (let i = 0; i < sortedComparator.length; i++) {
+			const snapshot = sortedComparator[i];
+			const { winningSnapshot, losingFrame } = processSnapshot(snapshot);
+			if (i === sortedComparator.length || winningSnapshot.length === 1) {
+				/***  
+				 * End Condition: If there is only a single winner in a snapshot round, we can push this 
+				 * user into the main hierarchy as the decisive winner. If function was not stopped by that
+				 * condition, it means that contestants have been tied with the same highvalue for each snapshot window
+				 * meaning we can add all comparator members to the hierarchy array as a tie.
+				 ***/
+				winningSnapshot.forEach((snapshot) => {
+					const { name, bestHand } = snapshot;
+					winnerHierarchy.push({ name, bestHand });
+				})
+				break;
+			}
+			/***
+			 * During each iteration, if contestants are eliminated, they must be grouped together by round.
+			 * Users who are eliminated earlier are always going to have a worse hand than those who are eliminated after.
+			 * We will filter the main comparator and extract users from subsequent iterations
+			 * Those extracted comparator users will be recursively fed back into this function
+			 * example:
+			 *  round1 (Compare DAVE, FRED, EARL, JIM, BLARNE)
+			 * 		winners: ['dave', 'fred']
+			 *		losers: ['earl', 'jim', 'blarne']
+			 *		
+			 *		loserHierarchy [['earl', 'jim', 'fred']]
+			 * 
+			 *  round2 (Compare DAVE, FRED)
+			 * 		winners: ['dave']
+			 * 		losers: ['fred']
+			 * 
+			 * 		loserHierarchy [['fred'], ['earl', 'jim', 'fred']]
+			 * 
+			 * 		Because Fred lost after earl, jim and blarne were knocked out already, he has better cards
+			 * 		LoserHierarchy is processed again as losers are unshifted into the array
+			 * 		It should exit early for Fred since the comparator is of length 1
+			 * 		(we did not experience comparators of length 1 snapshots because the function 
+			 * 		did not build comparators if there was only a single contestant in the rankmap)
+			 * 
+			 */
+			if (losingFrame.length > 0) {
+				const losingComparators = []
+				losingFrame.forEach((snapshot) => {
+					const nameToFilter = snapshot.name;
+					const snapshotsOfLowRank = sortedComparator.map((frame) => {
+						return frame.filter(snapshot => snapshot.name === nameToFilter);
+					})
+					losingComparators.push(snapshotsOfLowRank)
+					/***
+					 * After each iteration, we need to filter out the low ranks 
+					 * from the current comparator being processed, as they have now been parceled
+					 *  out to be processed separately in the next recursive call of this function
+					 */
+					sortedComparator = sortedComparator.map((frame) => { 
+						return frame.filter(snapshot => snapshot.name == nameToFilter);
+					})
+				})
+				loserHierarchy.unshift(losingComparators);
+			}
+			winnerHierarchy.forEach(winner => hierarchy.push(winner));
+			loserHierarchy.forEach(comparatorsToReCheck => buildContestedHierarchy(comparatorsToReCheck, hierarchy));
+		}
+	}
+}
+
+const processSnapshot = (snapshot) => {
+	const highValue = snapshot[0].card.value;
+	const winningSnapshot = snapshot.filter(snapshot => snapshot.card.value === highValue);
+	const losingFrame = snapshot.filter(snapshot => snapshot.card.value < highValue);
+	return { winningSnapshot, losingFrame }
 }
 
 const rankPlayerHands = (state, contestants) => {
@@ -427,7 +571,7 @@ const battleRoyale = (state, rankMap, prize) => {
 				// Return Early. Build Truncated Comparators for different pair functions. length 4 for Pair, length 3 for 2 pairs, length 2 for full house/four of a kind, etc.
 				const winners = determineWinner(buildComparator(rank, contestants), rank)
 					if (winners.length === 1) {
-					   console.log("Uncontested Winner, ", winners[0], " , beating out the competition with a ", rank)
+					   console.log("Uncontested Winner, ", winners[0].name, " , beating out the competition with a ", rank)
 						state = payWinners(state, winners, prize)
 					} else {
 					   console.log("We have a tie! Split the pot amongst ", winners, " Who will take the pot with their ", rank)
@@ -468,6 +612,7 @@ const buildComparator = (rank, playerData) => {
 				comparator.push({
 					name: playerData[index].name, // All Royal Flush hands are instant ties, we don't need to process these contestants further, just divide the pot between all players in this array
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				})
 			})
 			break 
@@ -479,11 +624,13 @@ const buildComparator = (rank, playerData) => {
 					card: playerData[index].bestHand[0], // First Card (Quad) -- same as second, third, and fourth card
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				})
 				comparator[1].push({
 					card: playerData[index].bestHand[4], // Last Card (Kicker)
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				})
 			})
 			break 
@@ -495,11 +642,13 @@ const buildComparator = (rank, playerData) => {
 					card: playerData[index].bestHand[0], // First Card (Tripple) -- same as second and third card
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				})
 				comparator[1].push({
 					card: playerData[index].bestHand[3], // Fourth Card (Pair) -- same as fifth card
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				})
 			})
 			break 
@@ -513,6 +662,7 @@ const buildComparator = (rank, playerData) => {
 							card: playerData[index].bestHand[i], // We need to check all 5 cards of a flush/no-pair
 							name: playerData[index].name,
 							playerIndex: playerData[index].playerIndex,
+							bestHand: playerData[index].bestHand
 						})
 					}
 				})
@@ -525,16 +675,19 @@ const buildComparator = (rank, playerData) => {
 					card: playerData[index].bestHand[0], // First Card (Tripple) -- same as second and third cards
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				});
 				comparator[1].push({
 					card: playerData[index].bestHand[3], // Fourth Card (First Kicker)
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				});
 				comparator[2].push({
 					card: playerData[index].bestHand[4], // Fifth Card (Second Kicker)
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				});
 			})
 			break 
@@ -547,6 +700,7 @@ const buildComparator = (rank, playerData) => {
 					card: playerData[index].bestHand[0], // The highest card of a straight will determine the winner, all others are concurrent and will be the same
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				})
 			})
 			break 
@@ -558,16 +712,19 @@ const buildComparator = (rank, playerData) => {
 					card: playerData[index].bestHand[0], // First card (First Pair) -- same as second card
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				})
 				comparator[1].push({
 					card: playerData[index].bestHand[2], // Third card (Second Pair) -- same as fourth card
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				})
 				comparator[2].push({
 					card: playerData[index].bestHand[4], // Last Card (Kicker)
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				})
 			})
 			break 
@@ -579,28 +736,31 @@ const buildComparator = (rank, playerData) => {
 					card: playerData[index].bestHand[0], // First Card (Pair) -- same as second card
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				});
 				comparator[1].push({
 					card: playerData[index].bestHand[2], // Third Card -- first kicker
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				});
 				comparator[2].push({
 					card: playerData[index].bestHand[3], // Fourth Card -- second kicker
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				});
 				comparator[3].push({
 					card: playerData[index].bestHand[4], //  Fifth Card -- third kicker
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
+					bestHand: playerData[index].bestHand
 				});
 			})
 			break 
 		}
 	}
 		return comparator
-	
 }
 
 const determineWinner = (comparator, rank) => {
