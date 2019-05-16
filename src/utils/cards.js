@@ -423,17 +423,18 @@ const buildAbsolutePlayerRankings = (state) => {
 				continue;
 			} 
 			if (playersWhoHoldThisRank.length === 1) {
-            hierarchy.push(playersWhoHoldThisRank);
+            hierarchy.push(playersWhoHoldThisRank[0]);
 			} else {
 				const sortedComparator = buildComparator(handRank, playersWhoHoldThisRank)
 				.map((snapshot) => { 
 					return snapshot.sort((a, b) => b.card.value - a.card.value)
             });
-
-				buildContestedHierarchy(sortedComparator, hierarchy);
+				hierarchy = buildContestedHierarchy(sortedComparator, hierarchy);
 			}
 		}
    }
+   console.log("Final Hierarchy");
+   console.log(hierarchy);
 
 	return rankMap;
 }
@@ -450,7 +451,8 @@ const buildContestedHierarchy = (sortedComparator, hierarchy) => {
          name,
          bestHand
       } = sortedComparator[0];
-      winnerHierarchy.push({ name, bestHand });
+      hierarchy.push({ name, bestHand });
+      return hierarchy;
 	} else {
 		for (let i = 0; i < sortedComparator.length; i++) {
 			const snapshot = sortedComparator[i];
@@ -493,6 +495,7 @@ const buildContestedHierarchy = (sortedComparator, hierarchy) => {
 			 * 		did not build comparators if there was only a single contestant in the rankmap)
 			 * 
 			 */
+         console.log(losingFrame)
 			if (losingFrame.length > 0) {
 				const losingComparators = []
 				losingFrame.forEach((snapshot) => {
@@ -511,10 +514,18 @@ const buildContestedHierarchy = (sortedComparator, hierarchy) => {
 					})
 				})
 				loserHierarchy.unshift(losingComparators);
-			}
-			winnerHierarchy.forEach(winner => hierarchy.push(winner));
-			loserHierarchy.forEach(comparatorsToReCheck => buildContestedHierarchy(comparatorsToReCheck, hierarchy));
-		}
+			}			
+      }
+      winnerHierarchy.forEach(winner => hierarchy.push(winner));
+      if (loserHierarchy.length > 0) {
+         console.log(loserHierarchy)
+         loserHierarchy.forEach((comparatorsToReCheck) => { 
+            console.log(comparatorsToReCheck)
+            hierarchy = buildContestedHierarchy(comparatorsToReCheck, hierarchy)
+         });
+      } else {
+         return hierarchy;
+      }
 	}
 }
 

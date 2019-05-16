@@ -413,7 +413,7 @@ class App extends Component {
     return(
       <div className='showdown-container'>
         { this.renderBestHands() }
-        <div class="final-ranking">{ this.finalRanking() }</div>
+        <div className="final-ranking">{ this.finalRanking() }</div>
         <button onClick={() => this.handleNextRound()}> Next Round </button>
       </div>
     )
