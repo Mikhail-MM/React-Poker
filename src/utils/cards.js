@@ -414,6 +414,7 @@ const battleRoyale = (state, rankMap, prize) => {
 	let winnerFound = false;
 
 	// Map.entries().find(([rank, contestants]) => { logic here })
+	// We can iterate in insertion order this way as well: for (const [key, value] of map) {} .. for of loop will be MUCH cleaner
 	rankMap.forEach((contestants, rank, map) => {
 		if (!winnerFound) {
 			if (contestants.length === 1) {
@@ -449,7 +450,7 @@ const payWinners = (state, winners, prize) => {
 		const splitPot = Math.floor(prize / winners.length)
 		console.log("Mediating Tie. Total Prize ", prize, " split into ", winners.length, " portions with an overflow of ", overflow)
 		winners.forEach(winner => {
-			console.log()
+			console.log(`${winner.name} takes ${splitPot} chips from the pot.`)
 			state.players[winner.playerIndex].chips += splitPot
 			state.pot -= splitPot
 		})
@@ -465,7 +466,8 @@ const buildComparator = (rank, playerData) => {
 			comparator = Array.from({length: 1});
 			playerData.forEach((playerShowdownData, index) => {
 				comparator.push({
-					name: playerData[index].name,
+					name: playerData[index].name, // All Royal Flush hands are instant ties, we don't need to process these contestants further, just divide the pot between all players in this array
+					playerIndex: playerData[index].playerIndex,
 				})
 			})
 			break 
@@ -474,12 +476,12 @@ const buildComparator = (rank, playerData) => {
 			comparator = Array.from({length: 2}, () => Array.from({length: 0}))
 			playerData.forEach((playerShowdownData, index) => {
 				comparator[0].push({
-					card: playerData[index].bestHand[0],
+					card: playerData[index].bestHand[0], // First Card (Quad) -- same as second, third, and fourth card
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				})
 				comparator[1].push({
-					card: playerData[index].bestHand[4],
+					card: playerData[index].bestHand[4], // Last Card (Kicker)
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				})
@@ -490,12 +492,12 @@ const buildComparator = (rank, playerData) => {
 			comparator = Array.from({length: 2}, () => Array.from({length: 0}))
 			playerData.forEach((playerShowdownData, index) => {
 				comparator[0].push({
-					card: playerData[index].bestHand[0],
+					card: playerData[index].bestHand[0], // First Card (Tripple) -- same as second and third card
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				})
 				comparator[1].push({
-					card: playerData[index].bestHand[3],
+					card: playerData[index].bestHand[3], // Fourth Card (Pair) -- same as fifth card
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				})
@@ -508,7 +510,7 @@ const buildComparator = (rank, playerData) => {
 				playerData.forEach((playerShowdownData, index) => {
 					for (let i = 0; i < 5; i++) {
 						comparator[i].push({
-							card: playerData[index].bestHand[i],
+							card: playerData[index].bestHand[i], // We need to check all 5 cards of a flush/no-pair
 							name: playerData[index].name,
 							playerIndex: playerData[index].playerIndex,
 						})
@@ -520,17 +522,17 @@ const buildComparator = (rank, playerData) => {
 			comparator = Array.from({length: 3}, () => Array.from({length: 0}))
 			playerData.forEach((playerShowdownData, index) => {
 				comparator[0].push({
-					card: playerData[index].bestHand[0],
+					card: playerData[index].bestHand[0], // First Card (Tripple) -- same as second and third cards
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				});
 				comparator[1].push({
-					card: playerData[index].bestHand[3],
+					card: playerData[index].bestHand[3], // Fourth Card (First Kicker)
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				});
 				comparator[2].push({
-					card: playerData[index].bestHand[4],
+					card: playerData[index].bestHand[4], // Fifth Card (Second Kicker)
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				});
@@ -542,7 +544,7 @@ const buildComparator = (rank, playerData) => {
 			comparator = Array.from({length: 1}, () => Array.from({length: 0}))
 			playerData.forEach((playerShowdownData, index) => {
 				comparator[0].push({
-					card: playerData[index].bestHand[0],
+					card: playerData[index].bestHand[0], // The highest card of a straight will determine the winner, all others are concurrent and will be the same
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				})
@@ -553,17 +555,17 @@ const buildComparator = (rank, playerData) => {
 			comparator = Array.from({length: 3}, () => Array.from({length: 0}))
 			playerData.forEach((playerShowdownData, index) => {
 				comparator[0].push({
-					card: playerData[index].bestHand[0],
+					card: playerData[index].bestHand[0], // First card (First Pair) -- same as second card
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				})
 				comparator[1].push({
-					card: playerData[index].bestHand[2],
+					card: playerData[index].bestHand[2], // Third card (Second Pair) -- same as fourth card
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				})
 				comparator[2].push({
-					card: playerData[index].bestHand[4],
+					card: playerData[index].bestHand[4], // Last Card (Kicker)
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				})
@@ -574,22 +576,22 @@ const buildComparator = (rank, playerData) => {
 			comparator = Array.from({length: 4}, () => Array.from({length: 0}))
 			playerData.forEach((playerShowdownData, index) => {
 				comparator[0].push({
-					card: playerData[index].bestHand[0],
+					card: playerData[index].bestHand[0], // First Card (Pair) -- same as second card
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				});
 				comparator[1].push({
-					card: playerData[index].bestHand[2],
+					card: playerData[index].bestHand[2], // Third Card -- first kicker
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				});
 				comparator[2].push({
-					card: playerData[index].bestHand[3],
+					card: playerData[index].bestHand[3], // Fourth Card -- second kicker
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				});
 				comparator[3].push({
-					card: playerData[index].bestHand[4],
+					card: playerData[index].bestHand[4], //  Fifth Card -- third kicker
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 				});
@@ -603,16 +605,20 @@ const buildComparator = (rank, playerData) => {
 
 const determineWinner = (comparator, rank) => {
 	let winners;
-		if (rank === 'Royal Flush') return comparator
+	// We can definitely refactor this.
+	if (rank === 'Royal Flush') return comparator
 		for (let i = 0; i < comparator.length; i++) {
-			
+			console.log(comparator);
 			let highValue = 0;
-			let losersIndex = [];
-			
-			winners = comparator[i].reduce((acc, cur, index) => {
+			let losers = [];
+			console.log("Are markers refreshed?")
+			console.log(highValue);
+			console.log(losers)
+			// Sort Comparator, highest card first
+			winners = comparator[i].sort((a, b) => b.card.value - a.card.value).reduce((acc, cur, index) => {
 				if (cur.card.value > highValue) {
+					
 					highValue = cur.card.value;
-					acc = [];
 					acc.push({
 						name: cur.name,
 						playerIndex: cur.playerIndex,
@@ -625,23 +631,22 @@ const determineWinner = (comparator, rank) => {
 					});
 						return acc;
 				} else if (cur.card.value < highValue) {
-					losersIndex.push(index)
+					losers.push(cur.name);
 					return acc; 
 				}
 			}, [])
 
-				if(winners.length === 1 || i === comparator.length) {
-					return winners
-				} else if (winners.length > 1) {
-					// THIS IS BROKEN LOGIC...
-					if (losersIndex.length >= 1) {
-						losersIndex.forEach(indexToRemove => {
-							comparator = comparator.map(cardsAtEachIndexOfBestHand => cardsAtEachIndexOfBestHand.filter((cards, index) => index !== indexToRemove))
-						})
-					}
-				}
-		}
+			if(winners.length === 1 || i === comparator.length) {
 				return winners
+			} else {
+				if (losers.length >= 1) {
+					losers.forEach((nameToExtract) => {
+						comparator = comparator.map(snapshot => snapshot.filter((el) => el.name !== nameToExtract));
+					})
+ 				}
+			}
+		}
+	return winners
 
 }
 
