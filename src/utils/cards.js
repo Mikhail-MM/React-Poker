@@ -452,7 +452,7 @@ const determineContestedHierarchy = (sortedComparator, handRank) => {
 	const processComparator = (comparator, round = 0) => {
 		if (comparator[0].length === 1) {
 			console.log("First comparator frame has length of 1, likely a loser from previous round. Adding to winner hierarchy")
-			const { name, bestHand } = comparator[0]
+			const { name, bestHand } = comparator[0][0]
 			winnerHierarchy = winnerHierarchy.concat([{name, bestHand}])
 			return;
 		}
@@ -533,11 +533,11 @@ const determineContestedHierarchy = (sortedComparator, handRank) => {
 			const loserComparatorToProcess = loserHierarchyFrame[0];
 			console.log(loserComparatorToProcess);
 			loserHierarchy = loserHierarchyFrame.slice(1);
-			console.log(loserHierarchyFrame);
+			console.log(loserHierarchy);
 			console.log("Sending loser to COMPARATOR PROCESSING.")
 			processComparator(loserComparatorToProcess);
 			console.log("Loser Processed. We may have a new loserHierarchy Frame: ")
-			console.log(loserHierarchyFrame)
+			console.log(loserHierarchy)
 			console.log("Recursively calling ProcessLowTierComparators, and passing in that loserHierarchFrame.")
 			processLowTierComparators(loserHierarchy);
 		}
