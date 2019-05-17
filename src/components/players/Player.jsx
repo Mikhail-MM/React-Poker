@@ -43,22 +43,22 @@ const Player = (props) => {
     }
 
     if (robot) {
-      return cards.map(card => {
+      return cards.map((card, index)=> {
         if (phase !== 'showdown') {
           return(
-            <HiddenCard cardData={card} applyFoldedClassname={applyFoldedClassname}/>
+            <HiddenCard key={index} cardData={card} applyFoldedClassname={applyFoldedClassname}/>
           );
         } else {
           return(
-            <Card cardData={card} applyFoldedClassname={applyFoldedClassname}/>
+            <Card key={index} cardData={card} applyFoldedClassname={applyFoldedClassname}/>
           );
         }
       });
     }
     else {
-      return cards.map(card => {
+      return cards.map((card, index) => {
         return(
-          <Card cardData={card} applyFoldedClassname={applyFoldedClassname}/>
+          <Card key={index} cardData={card} applyFoldedClassname={applyFoldedClassname}/>
         );
       });
     }
