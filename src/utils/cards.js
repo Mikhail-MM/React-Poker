@@ -374,7 +374,9 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 }
 
 const distributeSidePots = (state) => {
-	buildAbsolutePlayerRankings(state);
+	state.playerHierarchy = buildAbsolutePlayerRankings(state);
+	console.log("Ultimate Player Hierarchy Determined:")
+	console.log(state.playerHierarchy);
 	
 	for (let sidePot of state.sidePots) {
 		const rankMap = rankPlayerHands(state, sidePot.contestants);
@@ -417,6 +419,11 @@ const buildAbsolutePlayerRankings = (state) => {
 	for (const [handRank, playersWhoHoldThisRank] of rankMap) {
 		if (playersWhoHoldThisRank.length > 0) {
 			if (handRank === 'Royal Flush') {
+				const formattedPlayersWhoHoldThisRank = playersWhoHoldThisRank.map(player => ({
+					name: player.name,
+					bestHand: player.bestHand,
+					handRank
+				}))
 				hierarchy = hierarchy.concat(playersWhoHoldThisRank);
 				continue;
 			} 
@@ -424,7 +431,12 @@ const buildAbsolutePlayerRankings = (state) => {
 				console.log(`Only one contestant has ${handRank}, appending to hierarchy.`)
 				console.log(`Pre:`)
 				console.log(hierarchy);
-				hierarchy = hierarchy.concat(playersWhoHoldThisRank)
+				const { name, bestHand } = playersWhoHoldThisRank[0];
+				hierarchy = hierarchy.concat([{
+					name,
+					bestHand, 
+					handRank
+				}]);
 				console.log(`Post`)
 				console.log(hierarchy);
 			} else if (playersWhoHoldThisRank.length > 1) {
@@ -443,7 +455,7 @@ const buildAbsolutePlayerRankings = (state) => {
 		}
    }
 
-	return rankMap;
+	return hierarchy;
 }
 
 const determineContestedHierarchy = (sortedComparator, handRank) => {
@@ -453,7 +465,7 @@ const determineContestedHierarchy = (sortedComparator, handRank) => {
 		if (comparator[0].length === 1) {
 			console.log("First comparator frame has length of 1, likely a loser from previous round. Adding to winner hierarchy")
 			const { name, bestHand } = comparator[0][0]
-			winnerHierarchy = winnerHierarchy.concat([{name, bestHand}])
+			winnerHierarchy = winnerHierarchy.concat([{name, bestHand, handRank}])
 			return;
 		}
 		let filterableComparator = sortedComparator.map(el => el);
@@ -493,7 +505,8 @@ const determineContestedHierarchy = (sortedComparator, handRank) => {
 			console.log(`Single winner found among comparator: ${name}`);
 			winnerHierarchy = winnerHierarchy.concat([{
 				name,
-				bestHand
+				bestHand,
+				handRank
 			}])
 			console.log("New concatenated winnerHierarchy:")
 			console.log(winnerHierarchy);
@@ -503,7 +516,8 @@ const determineContestedHierarchy = (sortedComparator, handRank) => {
 			console.log("Filtering out for just name and bestHand from comparator snapshot")
 			const filteredWinnerSnapshots = winningFrame.map(snapshot => ({
 				name: snapshot.name,
-				bestHand: snapshot.bestHand
+				bestHand: snapshot.bestHand,
+				handRank
 			}))
 			console.log("Appending tied winners (as an array) to winnerHierarchy")
 			winnerHierarchy = winnerHierarchy.concat([filteredWinnerSnapshots]);

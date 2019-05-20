@@ -16,14 +16,13 @@ import Handle from "./components/slider/Handle";
 import Track from "./components/slider/Track";
 import { sliderStyle, railStyle } from "./components/slider/styles";
 
-import { Slider, Rail, Handles, Tracks, Ticks } from 'react-compound-slider'
+import { Slider, Rail, Handles, Tracks } from 'react-compound-slider'
 import { CSSTransition } from 'react-transition-group';
 
 import { 
   generateDeckOfCards, 
   shuffle, 
   dealPrivateCards,
-  dealFlop
 } from './utils/cards.js';
 
 import { 
@@ -38,11 +37,6 @@ import {
   handleBet,
   handleFold, 
 } from './utils/bet.js';
-
-import { 
-  renderPhaseStatement, 
-  renderUnicodeSuitSymbol 
-} from './utils/ui.js';
 
 import {
   handleAI as handleAIUtil
@@ -85,6 +79,7 @@ class App extends Component {
     minBet: 20,
     phase: 'loading',
     showDownRender: [],
+    playerHierarchy: [],
     playerAnimationSwitchboard: {
       0: {isAnimating: false, content: null},
       1: {isAnimating: false, content: null},
@@ -352,29 +347,32 @@ class App extends Component {
     })
   }
 
+  renderRankTie = (rankSnapshot) => {
+    return rankSnapshot.map(player => {
+      return this.renderRankWinner(player);
+    })
+  }
+
+  renderRankWinner = (player) => {
+    const { name, bestHand, handRank } = player;
+    return (
+      <div key={name}>
+        <h6 className='player-header'> {name} </h6>
+        <div className='centered-flex-row' style={{alignItems: 'center'}}>
+          {
+            bestHand.map((card, index) => <Card key={index} cardData={card}/>)
+          }
+        </div>
+        <div>{handRank}</div>
+      </div>
+    )
+  }
+
   renderBestHands = () => {
-    const { players } = this.state
-    // Run final ranking of all player hands in showdown
-    return players.map((player, index) => {
-      if (!player.folded) {
-          return (
-            <div key={index} className='showdown-row'> 
-              <h6 className='player-header'> {player.name} </h6>
-              <div className='centered-flex-row' style={{alignItems: 'center'}}>
-                { 
-                    player.showDownHand.bestHand.map((card, index) => {
-                      return(
-                        <div key={index} className='playing-card' style={{animationDelay: `0ms`}}>
-                          <h6 style={{color: `${(card.suit === 'Diamond' || card.suit === 'Heart') ? 'red' : 'black'}`}}> {`${card.cardFace} ${renderUnicodeSuitSymbol(card.suit)}`}</h6>
-                        </div>
-                      )
-                  }) 
-                }
-              </div>
-              <h6>{player.showDownHand.bestHandRank}</h6>
-            </div>
-          )
-      }
+    const { playerHierarchy } = this.state;
+    return playerHierarchy.map(rankSnapshot => {
+      const tie = Array.isArray(rankSnapshot);
+      return tie ? this.renderRankTie(rankSnapshot) : this.renderRankWinner(rankSnapshot);
     })
   }
 
@@ -404,16 +402,11 @@ class App extends Component {
       </React.Fragment>
       )
   }
-
-  finalRanking = () => {
-    const { players } = this.state
-  }
   
   renderShowdown = () => {
     return(
       <div className='showdown-container'>
         { this.renderBestHands() }
-        <div className="final-ranking">{ this.finalRanking() }</div>
         <button onClick={() => this.handleNextRound()}> Next Round </button>
       </div>
     )
