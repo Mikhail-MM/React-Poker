@@ -49,8 +49,10 @@ const Player = (props) => {
             <HiddenCard key={index} cardData={card} applyFoldedClassname={applyFoldedClassname}/>
           );
         } else {
+          // Reset Animation Delay
+          const cardData = {...card, animationDelay: 0}
           return(
-            <Card key={index} cardData={card} applyFoldedClassname={applyFoldedClassname}/>
+            <Card key={index} cardData={cardData} applyFoldedClassname={applyFoldedClassname}/>
           );
         }
       });

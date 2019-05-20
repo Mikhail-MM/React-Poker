@@ -360,7 +360,11 @@ class App extends Component {
         <h6 className='player-header'> {name} </h6>
         <div className='centered-flex-row' style={{alignItems: 'center'}}>
           {
-            bestHand.map((card, index) => <Card key={index} cardData={card}/>)
+            bestHand.map((card, index) => {
+              // Reset Animation Delay
+              const cardData = {...card, animationDelay: 0}
+              return <Card key={index} cardData={cardData}/>
+            })
           }
         </div>
         <div>{handRank}</div>
