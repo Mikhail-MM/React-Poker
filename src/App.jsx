@@ -78,8 +78,9 @@ class App extends Component {
     sidePots: [],
     minBet: 20,
     phase: 'loading',
-    showDownRender: [],
     playerHierarchy: [],
+    showDownMessages: [],
+    playActionMessages: [],
     playerAnimationSwitchboard: {
       0: {isAnimating: false, content: null},
       1: {isAnimating: false, content: null},
@@ -246,10 +247,14 @@ class App extends Component {
     return reversedPlayers.map(component => component);
   }
 
-  renderCommunityCards = () => {
+  renderCommunityCards = (purgeAnimation) => {
     return this.state.communityCards.map((card, index) => {
+      let cardData = {...card};
+      if (purgeAnimation) {
+        cardData.animationDelay = 0;
+      }
       return(
-        <Card key={index} cardData={card}/>
+        <Card key={index} cardData={cardData}/>
       );
     });
   }
@@ -410,8 +415,11 @@ class App extends Component {
   
   renderShowdown = () => {
     return(
-      <div className='showdown-container'>
-        { this.renderCommunityCards() }
+      <div className='showdown-container--wrapper'>
+        <div className='showdown-container--community-cards'>
+        { this.renderCommunityCards(true) }
+        </div>
+        
         { this.renderBestHands() }
         <button onClick={() => this.handleNextRound()}> Next Round </button>
       </div>

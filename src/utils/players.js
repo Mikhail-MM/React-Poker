@@ -204,6 +204,7 @@ const beginNextRound = (state) => {
 	state.communityCards = [];
 	state.sidePots = [];
 	state.playerHierarchy = [];
+	state.showDownMessages = [];
 	state.deck = shuffle(generateDeckOfCards())
 	state.highBet = 20;
 	state.minBet = 20; // can export out to initialState
