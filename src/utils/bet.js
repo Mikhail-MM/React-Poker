@@ -9,7 +9,6 @@ const determineBlindIndices = (dealerIndex, numPlayers) => {
 }
 
 const anteUpBlinds = (players, blindIndices, minBet) => {
-
 	const { bigBlindIndex, smallBlindIndex } = blindIndices;
 	players[bigBlindIndex].bet = minBet;
 	players[bigBlindIndex].chips = players[bigBlindIndex].chips - minBet;
@@ -50,6 +49,7 @@ const handleBet = (state, bet, min, max) => {
 		const activePlayer = state.players[state.activePlayerIndex];
 		const subtractableChips = bet - activePlayer.bet;
 		activePlayer.bet = bet;
+
 		activePlayer.chips = activePlayer.chips - subtractableChips;
 		if (activePlayer.chips === 0) {
 			activePlayer.allIn = true;
@@ -94,7 +94,9 @@ const handlePhaseShift = (state) => {
 
 const reconcilePot = (state) => {
 	for (let player of state.players) {
+
 		state.pot = state.pot + player.bet;
+
 		player.sidePotStack = player.bet;
 		player.betReconciled = false; // This is used as a marker to determine whether to adv to next round of betting
 	}
@@ -116,6 +118,7 @@ const reconcilePot = (state) => {
 	state = condenseSidePots(calculateSidePots(state, state.players));
 
 	for (let player of state.players) {
+		player.currentRoundChipsInvested += player.bet;
 		player.bet = 0 // Reset all player bets to 0 for the start of the next round
 	}
 

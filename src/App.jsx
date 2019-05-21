@@ -42,6 +42,10 @@ import {
   handleAI as handleAIUtil
 } from './utils/ai.js';
 
+import {
+  renderShowdownMessages
+} from './utils/ui.js';
+
 import { cloneDeep } from 'lodash';
 
 function PlayerActionInfoBox({index, isActive, content, endTransition}) {
@@ -412,15 +416,22 @@ class App extends Component {
       </React.Fragment>
       )
   }
-  
+
+
   renderShowdown = () => {
     return(
       <div className='showdown-container--wrapper'>
+        <h5 className="showdown-container--title">
+          Round Complete!
+        </h5>
+        <div className="showdown-container--messages">
+          { renderShowdownMessages(this.state.showDownMessages)}
+        </div>
         <div className='showdown-container--community-cards'>
-        { this.renderCommunityCards(true) }
+          { this.renderCommunityCards(true) }
         </div>
         
-        { this.renderBestHands() }
+          { this.renderBestHands() }
         <button onClick={() => this.handleNextRound()}> Next Round </button>
       </div>
     )

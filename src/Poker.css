@@ -470,6 +470,10 @@ img {
 	z-index: 100;
 }
 
+.showdown-container--messages {
+	text-align: left;
+}
+
 @media (min-width: 1080px) {
 	.poker-table--container {
 		left: 50%;

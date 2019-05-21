@@ -1,3 +1,5 @@
+import React from 'react';
+
 const renderPhaseStatement = (phase) => {
 	switch(phase) {
 		case('loading'): return 'Finding a Table, Please Wait'
@@ -22,5 +24,72 @@ const renderUnicodeSuitSymbol = (suit) => {
 	}
 }
 
+const renderShowdownMessages = (showDownMessages) => {
+    return showDownMessages.map(message => {
+		const { users, prize, rank } = message;
+		if (users.length > 1) {
+			return (
+				<React.Fragment>
+					<div className="message--container">
+						<span className="message--user">
+							{`${users.length} players `}
+						</span>
+						<span className="message--content">
+							{`tied for a split pot with a `}
+						</span>
+						<span className="message--rank">
+							{`${rank}!`}
+						</span>
+					</div>
+					{ 
+						users.map(user => {
+							return(
+								<div class="message--container">
+									<span className="message--player">
+										{`${user} `}
+									</span>
+									<span className="message--content">
+										{`takes `}
+									</span>
+									<span className="message--earnings">
+										{`${prize} chips `}
+									</span>
+									<span className="message--content">
+										{`from the pot.`}
+									</span>
+								</div>
+							)
+						})
+					}
+				</React.Fragment>
+			)
+		} else if (users.length === 1) {
+			return(
+				<div class="message--container">
+					<span className="message--player">
+						{`${users[0]} `}
+					</span>
+					<span className="message--content">
+						{`wins `}
+					</span>
+					<span className="message--earnings">
+						{`${prize} chips `}
+					</span>
+					<span className="message--content">
+						{`from the pot with a `}
+					</span>
+					<span className="message--rank">
+						{`${rank}!`}
+					</span>
+				</div>
+			)
+		}
+	})
+}
 
-export { renderPhaseStatement, renderUnicodeSuitSymbol }
+export { 
+	renderPhaseStatement, 
+	renderUnicodeSuitSymbol, 
+	renderShowdownMessages 
+}
+

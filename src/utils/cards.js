@@ -382,6 +382,12 @@ const distributeSidePots = (state) => {
 		const rankMap = rankPlayerHands(state, sidePot.contestants);
 		state = battleRoyale(state, rankMap, sidePot.potValue)
 	}
+
+	state.players = state.players.map(player => ({
+		...player,
+		roundEndChips: player.chips
+	}));
+	
 	return state
 }
 
@@ -619,7 +625,7 @@ const battleRoyale = (state, rankMap, prize) => {
 			if (contestants.length === 1) {
 				winnerFound = true
 				console.log("Uncontested Winner, ", contestants[0].name, " , beating out the competition with a ", rank)
-				state = payWinners(state, contestants, prize)
+				state = payWinners(state, contestants, prize, rank)
 			} else if (contestants.length > 1) {
 				console.log(contestants)
 				winnerFound = true
@@ -627,10 +633,10 @@ const battleRoyale = (state, rankMap, prize) => {
 				const winners = determineWinner(buildComparator(rank, contestants), rank)
 					if (winners.length === 1) {
 					   console.log("Uncontested Winner, ", winners[0].name, " , beating out the competition with a ", rank)
-						state = payWinners(state, winners, prize)
+						state = payWinners(state, winners, prize, rank)
 					} else {
 					   console.log("We have a tie! Split the pot amongst ", winners, " Who will take the pot with their ", rank)
-						state = payWinners(state, winners, prize)
+						state = payWinners(state, winners, prize, rank)
 					}
 				// Send Contestants to Algo that Determines best hand of same ranks
 				// (contestants is an array of all contestants)
@@ -639,8 +645,13 @@ const battleRoyale = (state, rankMap, prize) => {
 			return state
 }
 
-const payWinners = (state, winners, prize) => {
+const payWinners = (state, winners, prize, rank) => {
 	if(winners.length === 1) {
+		state.showDownMessages = state.showDownMessages.concat([{
+			users: [winners[0].name],
+			prize,
+			rank
+		}]);
 		console.log("Transferring ", prize, " chips to ", winners[0].name)
 		state.players[winners[0].playerIndex].chips += prize
 		state.pot -= prize
@@ -648,8 +659,12 @@ const payWinners = (state, winners, prize) => {
 		const overflow = prize % winners.length;
 		const splitPot = Math.floor(prize / winners.length)
 		console.log("Mediating Tie. Total Prize ", prize, " split into ", winners.length, " portions with an overflow of ", overflow)
+		state.showDownMessages = state.showDownMessages.concat([{
+			users: winners.map(winner => winner.name),
+			prize: splitPot,
+			rank
+		}])
 		winners.forEach(winner => {
-			console.log(`${winner.name} takes ${splitPot} chips from the pot.`)
 			state.players[winner.playerIndex].chips += splitPot
 			state.pot -= splitPot
 		})
