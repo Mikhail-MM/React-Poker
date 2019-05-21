@@ -374,6 +374,7 @@ class App extends Component {
 
   renderBestHands = () => {
     const { playerHierarchy } = this.state;
+
     return playerHierarchy.map(rankSnapshot => {
       const tie = Array.isArray(rankSnapshot);
       return tie ? this.renderRankTie(rankSnapshot) : this.renderRankWinner(rankSnapshot);
@@ -410,6 +411,7 @@ class App extends Component {
   renderShowdown = () => {
     return(
       <div className='showdown-container'>
+        { this.renderCommunityCards() }
         { this.renderBestHands() }
         <button onClick={() => this.handleNextRound()}> Next Round </button>
       </div>
@@ -439,7 +441,6 @@ class App extends Component {
             { (!this.state.loading)  && this.renderActionMenu() }
           </div>
         </div>
-        <div className='chat-box' />
       </div>
     )
   }

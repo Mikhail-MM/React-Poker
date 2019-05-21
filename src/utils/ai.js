@@ -75,7 +75,7 @@ const handleAI = (state, pushAnimationState) => {
 			// Need to fix logic - If 
 			const willCall = (BET_HIERARCHY[stakes] <= BET_HIERARCHY[callLimit])
 			//console.log("Will Ai call?", willCall)
-			const callValue = (activePlayer.chips >= highBet) ? highBet : activePlayer.chips + activePlayer.bet
+			const callValue = (activePlayer.chips + activePlayer.bet >= highBet) ? highBet : activePlayer.chips + activePlayer.bet
 
 			if (willCall) {
 				if (willRaise(raiseChance)) {
@@ -218,7 +218,7 @@ const handleAI = (state, pushAnimationState) => {
 		//console.log(activePlayer.name, " is ready to call up to", callLimit, " stakes. There is a ", raiseChance, " chance that the AI will raise with one of these possible bets if it has not been met: ", raiseRange)
 		const willCall = (BET_HIERARCHY[stakes] <= BET_HIERARCHY[callLimit])
 		//console.log("Will Ai call?", willCall)
-		const callValue = (activePlayer.chips >= highBet) ? highBet : activePlayer.chips
+		const callValue = (activePlayer.chips + activePlayer.bet >= highBet) ? highBet : activePlayer.chips + activePlayer.bet
 		if (willCall) {
 				if (willRaise(raiseChance)) {
 					//console.log("AI has decided to bet")

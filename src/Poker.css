@@ -256,16 +256,6 @@ img {
  	color: white;
  }
 
- .chat-box {
- 	position: absolute;
- 	display: none;
- 	left: 0%;
- 	width: 70%;
- 	top: 86.5px;
- 	height: 100%;
- 	background-color: rgba(0,0,0,0.25);
- }
-
  .abscard {
  	position: absolute;
  	top: -80px;
@@ -344,23 +334,6 @@ img {
 .player-info-box h5 {
 	margin: 4px 0;
 }
- .showdown-container {
- 	display: flex;
-	 flex-direction: column;
-	 flex-wrap: wrap;
- 	align-items: center;
- 	position: absolute;
- 	left: 0;
- 	top: 0;
-	width: 500px; 
- 	height: 300px;
-
- 	background-color: rgba(0,0,0,0.85);
- 	color: white;
-
- 	z-index: 100;
-
- }
 
  .slider-handles > div > div {
 	 color: yellowgreen !important;
@@ -472,9 +445,27 @@ img {
 	background-image: radial-gradient(#8B0000 60%, #6A0000 82%);
 }
 
+.poker-table--container {
+	position: absolute;
+}
+
+.showdown-container {
+	display: flex;
+   	flex-direction: column;
+	align-items: center;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-color: rgba(0,0,0,0.85);
+	color: white;
+
+	z-index: 100;
+}
+
 @media (min-width: 1080px) {
 	.poker-table--container {
-		position: absolute;
 		left: 50%;
 		top: 50%;
 		transform: translate(-50%, -50%);
@@ -486,6 +477,11 @@ img {
 		width: 100%;
 		height: 100%;
 	}	
+}
+
+
+@media (max-width: 801px) {
+
 }
 
 /*
