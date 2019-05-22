@@ -445,11 +445,14 @@ class App extends Component {
         <div className="showdown-container--messages">
           { renderShowdownMessages(this.state.showDownMessages)}
         </div>
+        <h5 className="showdown-container--community-card-label">
+          Community Cards
+        </h5>
         <div className='showdown-container--community-cards'>
           { this.renderCommunityCards(true) }
         </div>
+        <button className="showdown--nextRound--button" onClick={() => this.handleNextRound()}> Next Round </button>
           { this.renderBestHands() }
-        <button onClick={() => this.handleNextRound()}> Next Round </button>
       </div>
     )
   }

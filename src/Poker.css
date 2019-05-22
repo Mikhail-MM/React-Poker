@@ -225,7 +225,8 @@ img {
 
  .showdown-container--community-cards {
 	display: flex;
-	margin: 2rem 0;
+	height: 52px;
+	margin-bottom: 1rem;
  }
 
  .cardbabmock {
@@ -454,11 +455,21 @@ img {
 	left: 0;
 	right: 0;
 	top: 0;
-	bottom: 0;
 	background-color: rgba(0,0,0,0.85);
 	color: white;
-
+	height: auto;
+	min-height: 100%;
+	width: 100%;
 	z-index: 100;
+}
+
+.showdown-container--title {
+	font-size: 28px;
+	margin: 0 6px;
+}
+
+.showdown-container--community-card-label {
+	margin: 12px 0;
 }
 
 .showdown-container--messages {
@@ -469,6 +480,7 @@ img {
 	display: flex;
 	align-items: center;
 	margin-bottom: 8px;
+	height: 112px;
 }
 
 
@@ -520,6 +532,11 @@ img {
 	width: 100%;
 	height: 100%;
 }
+
+.showdown--nextRound--button {
+
+}
+
 @media (min-width: 1080px) {
 	.poker-table--container {
 		left: 50%;
