@@ -23,7 +23,7 @@ function Handle({
       }}
       {...getHandleProps(id)}
     >
-      <div style={{ fontFamily: 'Roboto', fontSize: 11, marginTop: -35}} >
+      <div style={{ display: 'flex', textShadow: '2px 2px 8px rgba(0,0,0,0.95)', justifyContent: 'center', fontFamily: 'Roboto', fontSize: 11, marginTop: 30}} >
         {value}
       </div>
     </div>

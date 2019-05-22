@@ -155,6 +155,7 @@ img {
 
 .poker-app--background {
 	position: relative;
+	overflow: auto;
 	width: 100%;
 	height: 100%;
 }
@@ -234,20 +235,7 @@ img {
  	background-color: black;
  }
 
- .top-game-menu-bar {
- 	display: flex;
- 	flex-direction: column;
- 	justify-content: center;
- 	align-items: center;
- 	position: absolute;
- 	left: 0%;
- 	right: 0%;
- 	top: 0%;
- 	height: 86.5px;
- 	background-color: rgba(0,0,0,0.85);
- 	color: white;
- }
- .bottom-game-menu-bar {
+ .game-action-bar {
  	position: absolute;
 
  	display: flex;
@@ -257,8 +245,8 @@ img {
  	left: 0;
  	right: 0;
  	top: 0;
- 	height: 100px;
- 	background-color: rgba(0,0,0,0.55);
+ 	height: 50px;
+ 	background-color: rgba(0,0,0,0.85);
  	color: white;
  }
 
@@ -288,13 +276,12 @@ img {
  }
 
  .action-button {
- 	height: 85px;
- 	width: 175px;
- 	margin: 0 25px;
+ 	height: 45px;
+ 	width: 125px;
+ 	margin: 0 12px;
  	border-radius: 500px;
  	background-color: rgba(242, 242, 242, 0.80);
- 	font-size: 2.5em;
- 	letter-spacing: .10em;
+ 	font-size: 28px;
  	color: white;
  	background-color: #2adb2a;
  	border: 3px solid white;
@@ -307,11 +294,11 @@ img {
 	color: #f56132;
  }
  .fold-button {
- 	height: 85px;
- 	width: 175px;
- 	margin: 0 25px;
+ 	height: 45px;
+ 	width: 125px;
+ 	margin: 0 12px;
  	background-color: rgba(255, 80, 80, 0.8);
- 	font-size: 2.5em;
+ 	font-size: 28px;
  	color: white;
  	outline: none;
  	z-index: 100;
@@ -342,7 +329,7 @@ img {
 }
 
  .slider-handles > div > div {
-	 color: yellowgreen !important;
+	 color: white !important;
 	 font-size: 24px !important;
  }
 
@@ -434,9 +421,12 @@ img {
 .player-info--bet--container {
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	color: white;
 	margin-top: 10px;
+	text-shadow: 2px 2px 18px rgba(0,0,0,0.95);
 }
+
 
 .player-info--stash--image,
 .player-info--bet--image {
@@ -524,7 +514,11 @@ img {
 
 .showdownPlayer--earnings {
 	text-align: center;
+}
 
+.poker-table--table-image {
+	width: 100%;
+	height: 100%;
 }
 @media (min-width: 1080px) {
 	.poker-table--container {
@@ -535,17 +529,44 @@ img {
 		height: 590px;
 	}
 	
-	.poker-table--table-image {
+}
+
+
+@media (max-width: 1079px) {
+	.poker-table--container {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
 		width: 100%;
-		height: 100%;
+		height: auto;
+	}
+	.player-info--bet--container {
+		position: absolute;
+		top: -20px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 100%;
+		color: whitesmoke;
+		border-radius: 100px;
+		background-color: rgba(0,0,0,10);
+		border: 1px solid white;
+	}
+	.pot-container {
+		top: 55px;
+		right: 20%;
+		left: unset;
+	}
+}
+
+@media (max-width: 736px) {
+	.player-avatar--container {
+		height: 75px;
+		width: 75px;
 	}	
+	.player-info--name {
+		width: 100px;
+	}
 }
-
-
-@media (max-width: 801px) {
-
-}
-
 /*
 @media (min-width: 1280px) {
 	.poker-table--container {

@@ -469,7 +469,7 @@ class App extends Component {
           </div>
         </div>
         { (this.state.phase === 'showdown') && this.renderShowdown() } 
-        <div className='bottom-game-menu-bar' >
+        <div className='game-action-bar' >
           <div className='action-buttons'>
               { this.renderActionButtons() }
           </div>
