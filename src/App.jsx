@@ -10,6 +10,7 @@ import './Poker.css';
 import Spinner from './Spinner';
 
 import Player from "./components/players/Player";
+import ShowdownPlayer from "./components/players/ShowdownPlayer";
 import Card from "./components/cards/Card";
 
 import Handle from "./components/slider/Handle";
@@ -208,7 +209,6 @@ class App extends Component {
     } else {
       return false;
     }
-
   }
 
   renderBoard = () => {
@@ -364,19 +364,37 @@ class App extends Component {
 
   renderRankWinner = (player) => {
     const { name, bestHand, handRank } = player;
+    const playerStateData = this.state.players.find(statePlayer => statePlayer.name === name);
+    console.log(playerStateData);
     return (
-      <div key={name}>
-        <h6 className='player-header'> {name} </h6>
-        <div className='centered-flex-row' style={{alignItems: 'center'}}>
-          {
-            bestHand.map((card, index) => {
-              // Reset Animation Delay
-              const cardData = {...card, animationDelay: 0}
-              return <Card key={index} cardData={cardData}/>
-            })
-          }
+      <div className="showdown-player--entity" key={name}>
+        <ShowdownPlayer
+          name={name}
+          avatarURL={playerStateData.avatarURL}
+          cards={playerStateData.cards}
+          roundEndChips={playerStateData.roundEndChips}
+          roundStartChips={playerStateData.roundStartChips}
+        />
+        <div className="showdown-player--besthand--container">
+          <h5 className="showdown-player--besthand--heading">
+            Best Hand
+          </h5>
+          <div className='showdown-player--besthand--cards' style={{alignItems: 'center'}}>
+            {
+              bestHand.map((card, index) => {
+                // Reset Animation Delay
+                const cardData = {...card, animationDelay: 0}
+                return <Card key={index} cardData={cardData}/>
+              })
+            }
+          </div>
         </div>
-        <div>{handRank}</div>
+        <div className="showdown--handrank">
+          {handRank}
+        </div>
+        <div class="showdownPlayer--earnings">
+          {`${playerStateData.roundEndChips - playerStateData.roundStartChips}`}
+        </div>  
       </div>
     )
   }
@@ -430,7 +448,6 @@ class App extends Component {
         <div className='showdown-container--community-cards'>
           { this.renderCommunityCards(true) }
         </div>
-        
           { this.renderBestHands() }
         <button onClick={() => this.handleNextRound()}> Next Round </button>
       </div>

@@ -460,6 +460,7 @@ img {
    	flex-direction: column;
 	align-items: center;
 	position: absolute;
+	overflow: auto;
 	left: 0;
 	right: 0;
 	top: 0;
@@ -474,6 +475,57 @@ img {
 	text-align: left;
 }
 
+.showdown-player--entity {
+	display: flex;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+
+.showdownPlayer--data,
+.showdownPlayer--privateCards  {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+.showdown-player--besthand--container {
+	margin-left: 12px;
+}
+
+.showdown-player--entity .player-avatar--container {
+	margin-right: 12px;
+}
+
+.showdown-player--entity .player-info--name {
+	border: 1px solid white;
+}
+
+.showdown-player--besthand--cards {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: auto;
+	height: auto;
+}
+
+.player-entity--container {
+	display: flex;
+}
+
+.showdown--handrank {
+	width: 115px;
+	text-align: center;
+}
+
+.showdownPlayer--cards {
+	display: flex;
+}
+
+.showdownPlayer--earnings {
+	text-align: center;
+
+}
 @media (min-width: 1080px) {
 	.poker-table--container {
 		left: 50%;

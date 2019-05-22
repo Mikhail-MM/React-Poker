@@ -219,11 +219,12 @@ const beginNextRound = (state) => {
 	state.showDownMessages = [];
 	state.deck = shuffle(generateDeckOfCards())
 	state.highBet = 20;
+	state.betInputValue = 20;
 	state.minBet = 20; // can export out to initialState
 	// Unmount all cards so react can re-trigger animations
-	const { players } = state
+	const { players } = state;
 	const clearPlayerCards = players.map(player => ({...player, cards: player.cards.map(card => {})}))
-	state.players = clearPlayerCards
+	state.players = clearPlayerCards;
 	return passDealerChip(state)
 }
 

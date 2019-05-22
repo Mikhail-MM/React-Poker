@@ -35,7 +35,7 @@ const renderShowdownMessages = (showDownMessages) => {
 							{`${users.length} players `}
 						</span>
 						<span className="message--content">
-							{`tied for a split pot with a `}
+							{`split the pot with a `}
 						</span>
 						<span className="message--rank">
 							{`${rank}!`}
