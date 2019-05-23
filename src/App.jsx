@@ -11,6 +11,7 @@ import Spinner from './Spinner';
 
 import Player from "./components/players/Player";
 import ShowdownPlayer from "./components/players/ShowdownPlayer";
+import PlayerStatusNotificationBox from "./components/players/PlayerStatusNotificationBox";
 import Card from "./components/cards/Card";
 
 import Handle from "./components/slider/Handle";
@@ -18,7 +19,6 @@ import Track from "./components/slider/Track";
 import { sliderStyle, railStyle } from "./components/slider/styles";
 
 import { Slider, Rail, Handles, Tracks } from 'react-compound-slider'
-import { CSSTransition } from 'react-transition-group';
 
 import { 
   generateDeckOfCards, 
@@ -48,22 +48,6 @@ import {
 } from './utils/ui.js';
 
 import { cloneDeep } from 'lodash';
-
-function PlayerActionInfoBox({index, isActive, content, endTransition}) {
-  
-  return(
-      <CSSTransition 
-        in={isActive} 
-        timeout={2000} 
-        classNames="transitionable-actionBox" 
-        onEntered={() => endTransition(index)}
-      >
-        <div className="actionBox">
-          {`${index} ${isActive} -- ${content}`}
-        </div>
-      </CSSTransition>
-    )
-}
 
 class App extends Component {
   state = {
@@ -218,6 +202,7 @@ class App extends Component {
       dealerIndex,
       clearCards,
       phase,
+      playerAnimationSwitchboard
     } = this.state;
     // Reverse Players Array for the sake of taking turns counter-clockwise.
     const reversedPlayers = players.reduce((result, player, index) => {
@@ -227,13 +212,6 @@ class App extends Component {
 
 
       result.unshift(
-        <React.Fragment key={index}>
-          <PlayerActionInfoBox 
-            index={index} 
-            isActive={this.ifAnimating(index)} 
-            content={this.state.playerAnimationSwitchboard[index].content}
-            endTransition={this.popAnimationState}
-          />
           <Player
             key={index}
             arrayIndex={index}
@@ -241,10 +219,10 @@ class App extends Component {
             hasDealerChip={hasDealerChip}
             player={player}
             clearCards={clearCards}
-            phase={phase}      
+            phase={phase}
+            playerAnimationSwitchboard={playerAnimationSwitchboard}      
+            endTransition={this.popAnimationState}
           />
-        </React.Fragment>
-
       )
       return result
     }, []);

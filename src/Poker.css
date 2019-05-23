@@ -121,14 +121,14 @@ img {
 
 .transitionable-actionBox-enter {
 	display: block;
-	opacity: 0;
+	opacity: 1;
 	transform: translateX(-50%);
 }
 
 .transitionable-actionBox-enter-active {
 	display: block;
 	opacity: 1;
-	transition: opacity 2000ms ease-in-out;
+	transition: opacity 1250ms ease-in-out;
 	transform: translateX(-50%);
 }
 .transitionable-actionBox-enter-done {
@@ -145,7 +145,7 @@ img {
 	display: block;
 	opacity: 0;
 	transform: translateX(-50%) translateY(-55px);
-	transition: opacity 2000ms ease-in-out, transform 2000ms linear;
+	transition: opacity 1250ms ease-in-out, transform 1250ms linear;
 }
 
 

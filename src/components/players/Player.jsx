@@ -3,6 +3,8 @@ import React from 'react';
 import Card from '../cards/Card';
 import HiddenCard from '../cards/HiddenCard';
 
+import PlayerStatusNotificationBox from "./PlayerStatusNotificationBox";
+
 const dealerChipImageURL = "/assets/chip.svg";
 const chipCountImageURL = "./assets/chips.svg";
 const playerBetImageURL = "./assets/bet.svg";
@@ -10,6 +12,8 @@ const playerBetImageURL = "./assets/bet.svg";
 const Player = (props) => {
   const {
     arrayIndex,
+    playerAnimationSwitchboard,
+    endTransition,
     hasDealerChip,
     isActive,
     phase,
@@ -66,8 +70,22 @@ const Player = (props) => {
     }
   }
 
+  const ifAnimating = (playerBoxIndex) => { 
+    if (playerAnimationSwitchboard[playerBoxIndex].isAnimating) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   return (
     <div className={`player-entity--wrapper p${arrayIndex}`}>
+      <PlayerStatusNotificationBox
+        index={arrayIndex}
+        isActive={ifAnimating(arrayIndex)}
+        content={playerAnimationSwitchboard[arrayIndex].content}
+        endTransition={endTransition}
+      />
       <div className='centered-flex-row abscard'>
         { renderPlayerCards() }
       </div>
