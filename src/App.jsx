@@ -11,14 +11,7 @@ import Spinner from './Spinner';
 
 import Player from "./components/players/Player";
 import ShowdownPlayer from "./components/players/ShowdownPlayer";
-import PlayerStatusNotificationBox from "./components/players/PlayerStatusNotificationBox";
 import Card from "./components/cards/Card";
-
-import Handle from "./components/slider/Handle";
-import Track from "./components/slider/Track";
-import { sliderStyle, railStyle } from "./components/slider/styles";
-
-import { Slider, Rail, Handles, Tracks } from 'react-compound-slider'
 
 import { 
   generateDeckOfCards, 
@@ -44,7 +37,9 @@ import {
 } from './utils/ai.js';
 
 import {
-  renderShowdownMessages
+  renderShowdownMessages,
+  renderActionButtonText,
+  renderActionMenu
 } from './utils/ui.js';
 
 import { cloneDeep } from 'lodash';
@@ -186,15 +181,6 @@ class App extends Component {
       })
   }
 
-  ifAnimating = (playerBoxIndex) => { 
-    const { playerAnimationSwitchboard } = this.state;
-    if (playerAnimationSwitchboard[playerBoxIndex].isAnimating) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   renderBoard = () => {
     const { 
       players,
@@ -239,88 +225,6 @@ class App extends Component {
         <Card key={index} cardData={cardData}/>
       );
     });
-  }
-  
-  renderActionMenu = () => {
-    const { highBet, players, activePlayerIndex, phase } = this.state
-    const min = determineMinBet(highBet, players[activePlayerIndex].chips, players[activePlayerIndex].bet)
-    const max = players[activePlayerIndex].chips + players[activePlayerIndex].bet
-    return(
-      (phase === 'betting1' || phase === 'betting2' || phase === 'betting3' || phase === 'betting4') ? (players[activePlayerIndex].robot) ? (<h4> {`Current Move: ${players[activePlayerIndex].name}`}</h4>) : (
-        <React.Fragment>
-        <Slider
-          rootStyle={sliderStyle}
-          domain={[min, max]}
-          values={[min]}
-          step={1}
-
-          onChange={this.changeSliderInput}
-            mode={2}
-        >
-          <Rail>
-            {
-              ({ getRailProps }) => (
-                <div style={railStyle} {...getRailProps()} />
-              )
-            }
-          </Rail>
-          <Handles>
-            { 
-              ({ handles, getHandleProps}) => (
-                <div className='slider-handles'>
-                  { 
-                    handles.map(handle => (
-                      <Handle
-                        key={handle.id}
-                        handle={handle}
-                        getHandleProps={getHandleProps}
-                      />
-                    ))
-                  }
-                </div>
-              )
-            }
-          </Handles>
-          <Tracks right={false}>
-            {
-              ({ tracks, getTrackProps }) => (
-                <div className='slider-tracks'>
-                  {
-                    tracks.map(
-                      ({ id, source, target }) => (
-                        <Track
-                          key={id}
-                          source={source}
-                          target={target}
-                          getTrackProps={getTrackProps}
-                        />
-                      )
-                    )
-                  }
-                </div>
-              )
-            }
-          </Tracks>
-        </Slider>
-        </React.Fragment>
-      ) : null
-    )
-  }
-
-  renderActionButtonText() {
-    const { highBet, betInputValue, players, activePlayerIndex } = this.state
-    const activePlayer = players[activePlayerIndex]
-    if ((highBet === 0) && (betInputValue === 0)) {
-      return 'Check'
-    } else if ((highBet === betInputValue)) {
-      return 'Call'
-    } else if ((highBet === 0) && (betInputValue > highBet)) {
-      return 'Bet'
-    } else if ((betInputValue < highBet) || (betInputValue === activePlayer.chips)) {
-      return 'All-In!'
-    } else if (betInputValue > highBet) {
-      return 'Raise'
-    } 
   }
 
   runGameLoop = () => {
@@ -398,17 +302,17 @@ class App extends Component {
   }
 
   renderActionButtons = () => {
-    const { highBet, players, activePlayerIndex, phase } = this.state
+    const { highBet, players, activePlayerIndex, phase, betInputValue } = this.state
     const min = determineMinBet(highBet, players[activePlayerIndex].chips, players[activePlayerIndex].bet)
     const max = players[activePlayerIndex].chips + players[activePlayerIndex].bet
-    return ((players[activePlayerIndex].robot) || (this.state.phase === 'showdown')) ? null : (
+    return ((players[activePlayerIndex].robot) || (phase === 'showdown')) ? null : (
       <React.Fragment>
-      <button className='action-button' onClick={() => this.handleBetInputSubmit(this.state.betInputValue, min, max)}>
-          {this.renderActionButtonText()}
-      </button>
-      <button className='fold-button' onClick={() => this.handleFold()}>
-        Fold
-      </button>
+        <button className='action-button' onClick={() => this.handleBetInputSubmit(betInputValue, min, max)}>
+          {renderActionButtonText(highBet, betInputValue, players[activePlayerIndex])}
+        </button>
+        <button className='fold-button' onClick={() => this.handleFold()}>
+          Fold
+        </button>
       </React.Fragment>
       )
   }
@@ -436,6 +340,7 @@ class App extends Component {
   }
 
   renderGame = () => {
+    const { highBet, players, activePlayerIndex, phase } = this.state;
     return (
       <div className='poker-app--background'>
         <div className="poker-table--container">
@@ -455,7 +360,7 @@ class App extends Component {
               { this.renderActionButtons() }
           </div>
           <div className='slider-boi'>
-            { (!this.state.loading)  && this.renderActionMenu() }
+            { (!this.state.loading)  && renderActionMenu(highBet, players, activePlayerIndex, phase, this.handleBetInputChange)}
           </div>
         </div>
       </div>
