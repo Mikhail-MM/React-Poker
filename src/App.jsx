@@ -317,7 +317,6 @@ class App extends Component {
       )
   }
 
-
   renderShowdown = () => {
     return(
       <div className='showdown-container--wrapper'>

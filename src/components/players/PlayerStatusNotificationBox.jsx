@@ -14,7 +14,7 @@ function PlayerStatusNotificationBox({index, isActive, content, endTransition}) 
             onEntered={() => endTransition(index)}
         >
             <div className="actionBox">
-            {`${index} ${isActive} -- ${content}`}
+            {`${content}`}
             </div>
         </CSSTransition>
     )

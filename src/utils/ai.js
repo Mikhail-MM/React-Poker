@@ -38,6 +38,8 @@ import { handleOverflowIndex } from './players.js';
 import { handleBet, handleFold, determineMinBet } from './bet.js';
 import { analyzeHistogram, checkFlush, checkRoyalFlush, checkStraightFlush, checkStraight, buildValueSet } from './cards.js'
 
+import { renderActionButtonText } from './ui.js';
+
 const handleAI = (state, pushAnimationState) => {
 	const { highBet } = state
 	const activePlayer = state.players[state.activePlayerIndex];
@@ -97,16 +99,17 @@ const handleAI = (state, pushAnimationState) => {
 							if (betValue > max)
 									activePlayer.canRaise = false
 									console.log("AI bet")
-									pushAnimationState(state.activePlayerIndex, `BET/CALL: ${betValue}`);
+									pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, betValue, activePlayer)} ${betValue}`);
 									return handleBet(state, betValue, min, max);
 						} else {
 							console.log("AI bet")
-							pushAnimationState(state.activePlayerIndex, `BET/CALL: ${callValue}`);
+							// Do not render the bet value if it's a "check"
+							pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, callValue, activePlayer)} ${(callValue > activePlayer.bet) ? (callValue) : ""}`);
 							return handleBet(state, callValue, min, max);
 						}	
 				} else {
 					console.log("AI bet")
-						pushAnimationState(state.activePlayerIndex, `BET/CALL: ${callValue}`);
+						pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, callValue, activePlayer)} ${(callValue > activePlayer.bet) ? (callValue) : ""}`);
 						return handleBet(state, callValue, min, max);
 				}
 			} else {
@@ -236,16 +239,16 @@ const handleAI = (state, pushAnimationState) => {
 							}
 							console.log("AI bets ", betValue)
 									activePlayer.canRaise = false
-									pushAnimationState(state.activePlayerIndex, `BET/CALL: ${betValue}`);
+									pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, betValue, activePlayer)} ${betValue}`);
 									return handleBet(state, betValue, min, max);
 						} else {
 							console.log("AI Wants to Call.")
-							pushAnimationState(state.activePlayerIndex, `BET/CALL: ${callValue}`);
+							pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, callValue, activePlayer)} ${(callValue > activePlayer.bet) ? (callValue) : ""}`);
 							return handleBet(state, callValue, min, max);
 						}	
 				} else {
 					console.log("AI Wants to Call.")
-						pushAnimationState(state.activePlayerIndex, `BET/CALL: ${callValue}`);
+						pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, callValue, activePlayer)} ${(callValue > activePlayer.bet) ? (callValue) : ""}`);
 						return handleBet(state, callValue, min, max);
 				}
 			} else {
