@@ -107,42 +107,45 @@ img {
 /* Action Status Notification Base Styles & Transitions*/
 
 .actionBox {
-	background: rgba(0,0,0,0.85);
+	/* background: rgba(0,0,0,0.85); */ 
 	color: yellow;
+	text-shadow: 2px 2px 10px rgba(0,0,0,1);
 	padding: 12px;
 	
 	position: absolute;
-	top: 0;
+	top: -30px;
+	width: 100%;
 	left: 50%;
 	transform: translateX(-50%);
 	z-index: 100;
 	display: none;
+	justify-content: center;
 }
 
 .transitionable-actionBox-enter {
-	display: block;
+	display: flex;
 	opacity: 1;
 	transform: translateX(-50%);
 }
 
 .transitionable-actionBox-enter-active {
-	display: block;
+	display: flex;
 	opacity: 1;
 	transition: opacity 1250ms ease-in-out;
 	transform: translateX(-50%);
 }
 .transitionable-actionBox-enter-done {
-	display: block;
+	display: flex;
 }
 
 .transitionable-actionBox-exit {
-	display: block;
+	display: flex;
 	opacity: 1;
 	transform: translateX(-50%);
 }
 
 .transitionable-actionBox-exit-active {
-	display: block;
+	display: flex;
 	opacity: 0;
 	transform: translateX(-50%) translateY(-55px);
 	transition: opacity 1250ms ease-in-out, transform 1250ms linear;
