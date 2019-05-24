@@ -139,7 +139,7 @@ class App extends Component {
   handleBetInputSubmit = (bet, min, max) => {
     const {playerAnimationSwitchboard, ...appState} = this.state;
     const { activePlayerIndex } = appState;
-    this.pushAnimationState(activePlayerIndex, `BET/CALL: ${bet}`);
+    this.pushAnimationState(activePlayerIndex, `${renderActionButtonText(this.state.highBet, this.state.betInputValue, this.state.players[this.state.activePlayerIndex])} ${(bet > this.state.players[this.state.activePlayerIndex].bet) ? (bet) : ""}`);;
     const newState = handleBet(cloneDeep(appState), parseInt(bet), parseInt(min), parseInt(max));
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
