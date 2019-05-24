@@ -48,6 +48,17 @@ const renderActionButtonText = (highBet, betInputValue, activePlayer) => {
 	} 
 }
 
+const renderNetPlayerEarnings = (endChips, startChips) => {
+	const netChipEarnings = (endChips - startChips);
+	const win = (netChipEarnings > 0);
+	const none = (netChipEarnings === 0);	
+	return(
+		<div class={`showdownPlayer--earnings ${(win) ? ('positive') : (none) ? ('') : ('negative')}`}>
+			{`${(win) ? ('+') : ('')}${netChipEarnings}`}
+		</div>  
+	)
+}
+
 const renderShowdownMessages = (showDownMessages) => {
     return showDownMessages.map(message => {
 		const { users, prize, rank } = message;
@@ -180,6 +191,7 @@ export {
 	renderPhaseStatement, 
 	renderUnicodeSuitSymbol, 
 	renderShowdownMessages,
+	renderNetPlayerEarnings,
 	renderActionMenu,
 	renderActionButtonText 
 }

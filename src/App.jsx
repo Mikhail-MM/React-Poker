@@ -39,6 +39,7 @@ import {
 import {
   renderShowdownMessages,
   renderActionButtonText,
+  renderNetPlayerEarnings,
   renderActionMenu
 } from './utils/ui.js';
 
@@ -274,9 +275,7 @@ class App extends Component {
         <div className="showdown--handrank">
           {handRank}
         </div>
-        <div class="showdownPlayer--earnings">
-          {`${playerStateData.roundEndChips - playerStateData.roundStartChips}`}
-        </div>  
+        {renderNetPlayerEarnings(playerStateData.roundEndChips, playerStateData.roundStartChips)}
       </div>
     )
   }
