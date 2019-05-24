@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import { handleOverflowIndex, determinePhaseStartActivePlayer, beginNextRound } from './players.js';
+import { handleOverflowIndex, determinePhaseStartActivePlayer } from './players.js';
 
 const totalNumCards = 52;
 const suits = ['Heart', 'Spade', 'Club', 'Diamond'];
@@ -370,6 +370,7 @@ const buildBestHand = (hand, bestRank, flushedSuit, flushCards, concurrentCardVa
 		case('No Pair'): {
 			return hand.slice(0, 5)
 		}
+		default: throw Error('Recieved unfamiliar rank argument in buildBestHand()');
 	}
 }
 
@@ -430,7 +431,7 @@ const buildAbsolutePlayerRankings = (state) => {
 					bestHand: player.bestHand,
 					handRank
 				}))
-				hierarchy = hierarchy.concat(playersWhoHoldThisRank);
+				hierarchy = hierarchy.concat(formattedPlayersWhoHoldThisRank);
 				continue;
 			} 
 			if (playersWhoHoldThisRank.length === 1) {
@@ -829,6 +830,7 @@ const buildComparator = (rank, playerData) => {
 			})
 			break 
 		}
+		default: throw Error('Recieved unfamiliar rank argument in buildComparator()');
 	}
 		return comparator
 }

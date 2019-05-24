@@ -20,6 +20,7 @@ const ShowdownPlayer = (props) => {
         <img 
             className="player-avatar--image" 
             src={avatarURL}  
+            alt="Player Avatar"
         />
         <h5 className="player-info--name">
             {`${name}`}

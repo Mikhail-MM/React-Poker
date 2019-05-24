@@ -108,7 +108,7 @@ class App extends Component {
     if (val === '') val = min
     if (val > max) val = max
       this.setState({
-        betInputValue: parseInt(val),
+        betInputValue: parseInt(val, 10),
       });
   }
   
@@ -141,7 +141,7 @@ class App extends Component {
     const {playerAnimationSwitchboard, ...appState} = this.state;
     const { activePlayerIndex } = appState;
     this.pushAnimationState(activePlayerIndex, `${renderActionButtonText(this.state.highBet, this.state.betInputValue, this.state.players[this.state.activePlayerIndex])} ${(bet > this.state.players[this.state.activePlayerIndex].bet) ? (bet) : ""}`);;
-    const newState = handleBet(cloneDeep(appState), parseInt(bet), parseInt(min), parseInt(max));
+    const newState = handleBet(cloneDeep(appState), parseInt(bet, 10), parseInt(min, 10), parseInt(max, 10));
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => {
@@ -342,13 +342,13 @@ class App extends Component {
     return (
       <div className='poker-app--background'>
         <div className="poker-table--container">
-          <img className="poker-table--table-image" src={"./assets/table-nobg-svg-01.svg"} />
+          <img className="poker-table--table-image" src={"./assets/table-nobg-svg-01.svg"} alt="Poker Table" />
           { this.renderBoard() }
           <div className='community-card-container' >
             { this.renderCommunityCards() }
           </div>
           <div className='pot-container'>
-            <img style={{height: 55, width: 55}} src={'./assets/pot.svg'}/>
+            <img style={{height: 55, width: 55}} src={'./assets/pot.svg'} alt="Pot Value"/>
             <h4> {`${this.state.pot}`} </h4>
           </div>
         </div>

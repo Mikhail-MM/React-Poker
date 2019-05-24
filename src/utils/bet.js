@@ -1,5 +1,5 @@
 import { dealFlop, dealTurn, dealRiver, showDown } from './cards.js';
-import { handleOverflowIndex, determineNextActivePlayer } from './players.js';
+import { determineNextActivePlayer } from './players.js';
 
 const determineBlindIndices = (dealerIndex, numPlayers) => {
 	return({
@@ -88,8 +88,8 @@ const handlePhaseShift = (state) => {
 			state.phase = 'showdown'
 			return showDown(reconcilePot(state));
 		}
+		default: throw Error("handlePhaseShift() called from non-betting phase")
 	}
-	return reconcilePot(state)
 }
 
 const reconcilePot = (state) => {

@@ -33,7 +33,7 @@ const Player = (props) => {
     if (hasDealerChip) {
       return (
         <div className="dealer-chip-icon-container">
-          <img src={dealerChipImageURL} />
+          <img src={dealerChipImageURL} alt="Dealer Chip"/>
         </div>
       )
     } else return null;
@@ -93,17 +93,18 @@ const Player = (props) => {
         <div className="player-avatar--container">
           <img 
             className={`player-avatar--image${(isActive ? ' activePlayer' : '')}`} 
-            src={avatarURL}  
+            src={avatarURL} 
+            alt="Player Avatar" 
           />
           <h5 className="player-info--name" style={{'fontSize': (name.length < 14) ? 12 : 10}}>
             {`${name}`}
           </h5>
           <div className="player-info--stash--container">
-            <img className="player-info--stash--image" src={chipCountImageURL} />
+            <img className="player-info--stash--image" src={chipCountImageURL} alt="Player Stash"/>
             <h5>{`${chips}`}</h5>
           </div>
           <div className="player-info--bet--container">
-            <img className="player-info--bet--image" src={playerBetImageURL} />
+            <img className="player-info--bet--image" src={playerBetImageURL} alt="Player Bet" />
             <h5>{`Bet: ${bet}`}</h5>
           </div>
           { renderDealerChip() }

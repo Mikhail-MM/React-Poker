@@ -34,7 +34,6 @@ Personalities: Standard, Conservative, Aggressive, (WildCards: Erratic/Bluffer)
 
 // Can make bet determinations against current chips or against pot
 
-import { handleOverflowIndex } from './players.js';
 import { handleBet, handleFold, determineMinBet } from './bet.js';
 import { analyzeHistogram, checkFlush, checkRoyalFlush, checkStraightFlush, checkStraight, buildValueSet } from './cards.js'
 
@@ -118,7 +117,6 @@ const handleAI = (state, pushAnimationState) => {
 				return handleFold(state)
 			}
 			// TODO: RESET AI STATE IN NEXT-ROUND FN
-			break
 		}
 		case('betting2'):
 		case('betting3'):
@@ -256,6 +254,7 @@ const handleAI = (state, pushAnimationState) => {
 				pushAnimationState(state.activePlayerIndex, `FOLD`);
 				return handleFold(state)
 			}
+		default: throw Error("Handle AI Running during incorrect phase");
 	}
 }
 
@@ -505,8 +504,6 @@ const decideBetProportion = (stakes) => {
 		return Math.random() * (1 - 0.75) + 0.75
 	}
 }
-
-const betHierarchy = ['blind', 'insignificant', 'lowdraw', 'meddraw', 'hidraw', 'strong', 'major', 'aggro', 'beware'];
 
 const BET_HIERARCHY = {
 	blind: 0,
