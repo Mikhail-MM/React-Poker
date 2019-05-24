@@ -422,7 +422,6 @@ const buildAbsolutePlayerRankings = (state) => {
 		})
 	})
 	
-	console.log("Iterating through rank-map to build top-level hierarchy")
 	for (const [handRank, playersWhoHoldThisRank] of rankMap) {
 		if (playersWhoHoldThisRank.length > 0) {
 			if (handRank === 'Royal Flush') {
@@ -435,28 +434,18 @@ const buildAbsolutePlayerRankings = (state) => {
 				continue;
 			} 
 			if (playersWhoHoldThisRank.length === 1) {
-				console.log(`Only one contestant has ${handRank}, appending to hierarchy.`)
-				console.log(`Pre:`)
-				console.log(hierarchy);
 				const { name, bestHand } = playersWhoHoldThisRank[0];
 				hierarchy = hierarchy.concat([{
 					name,
 					bestHand, 
 					handRank
 				}]);
-				console.log(`Post`)
-				console.log(hierarchy);
 			} else if (playersWhoHoldThisRank.length > 1) {
 				const sortedComparator = buildComparator(handRank, playersWhoHoldThisRank)
 				.map((snapshot) => { 
 					return snapshot.sort((a, b) => b.card.value - a.card.value)
 				});
-				console.log(`Sorted Top-Level Comparator Built for ${handRank}:`)
-				console.log(sortedComparator)
-				console.log(`Determining contested hierarchy for ${handRank}`);
 				const winnerHierarchy = determineContestedHierarchy(sortedComparator, handRank);
-				console.log(`Winner Hierarchy for ${handRank} determined.`)
-				console.log(winnerHierarchy)
 				hierarchy = hierarchy.concat(winnerHierarchy);
 			}
 		}
@@ -470,19 +459,14 @@ const determineContestedHierarchy = (sortedComparator, handRank) => {
 	let loserHierarchy = [];
 	const processComparator = (comparator, round = 0) => {
 		if (comparator[0].length === 1) {
-			console.log("First comparator frame has length of 1, likely a loser from previous round. Adding to winner hierarchy")
 			const { name, bestHand } = comparator[0][0]
 			winnerHierarchy = winnerHierarchy.concat([{name, bestHand, handRank}])
 			return;
 		}
 		let filterableComparator = sortedComparator.map(el => el);
-		console.log(`Processing comparator for round ${round}`);
-		console.log(comparator);
 		const frame = comparator[round];
 		const { winningFrame, losingFrame } = processSnapshotFrame(frame);
 		if (losingFrame.length > 0) {
-			console.log("Some users were eliminated from the processed snapshot. Here is the Loser Frame:")
-			console.log(losingFrame)
 			// Loser Hierarchy can have mixed types, Array of Objects OR Objects
 			// The comparators will be processed differently
 			// We will run processComparator on all entries. 
@@ -491,7 +475,6 @@ const determineContestedHierarchy = (sortedComparator, handRank) => {
 			// Initial Loserhierarchy: [{steve, card:8}]
 			// losingFrame: [{dave, card:9}, {jim, card:4}]
 			// New loserHierarchy: [[{dave, card:9}, {jim, card:4}], {steve, card:8}]
-			console.log("Processing Loser Frame. Filtering out original comparator") 
 			const lowerTierComparator = filterableComparator.map(frame => {
 				return frame.filter(snapshot => {
 					return losingFrame.some(snapshotToMatchName => {
@@ -499,40 +482,25 @@ const determineContestedHierarchy = (sortedComparator, handRank) => {
 					})
 				})
 			})
-			console.log("Original comparator filtered and pushed to the front of loserHierarchy queue for further processing.")
-			console.log(lowerTierComparator)
 			// Push the filtered comparator to the FRONT of the losers queue. 
 			// Users who are eliminated earlier must be processed last, as they have worse cards than those who are eliminated later.
 			loserHierarchy = [lowerTierComparator].concat(loserHierarchy);
-			console.log("New loserHierarchy constructed, unshifted immutably:");
-			console.log(loserHierarchy);
 		}
 		if (winningFrame.length === 1) {
 			const {name, bestHand} = winningFrame[0];
-			console.log(`Single winner found among comparator: ${name}`);
 			winnerHierarchy = winnerHierarchy.concat([{
 				name,
 				bestHand,
 				handRank
 			}])
-			console.log("New concatenated winnerHierarchy:")
-			console.log(winnerHierarchy);
-			console.log("function will now end")
 		} else if (round === (sortedComparator.length - 1)) {
-			console.log("Terminating Function, final round reached. we must have a tie.")
-			console.log("Filtering out for just name and bestHand from comparator snapshot")
 			const filteredWinnerSnapshots = winningFrame.map(snapshot => ({
 				name: snapshot.name,
 				bestHand: snapshot.bestHand,
 				handRank
 			}))
-			console.log("Appending tied winners (as an array) to winnerHierarchy")
 			winnerHierarchy = winnerHierarchy.concat([filteredWinnerSnapshots]);
-			console.log("New winnerHierarchy:")
-			console.log(winnerHierarchy);
 		} else {
-			console.log("No single winner found, still rounds to go.")
-			console.log("Filtering out comparator for WINNERS, and Recursively calling function again with iterated round.")
 			const higherTierComparator = filterableComparator.map(frame => {
 				return frame.filter(snapshot => {
 					return winningFrame.some(snapshotToMatchName => {
@@ -545,45 +513,24 @@ const determineContestedHierarchy = (sortedComparator, handRank) => {
 	}
 
 	const processLowTierComparators = (loserHierarchyFrame) => {
-// LOSER HIERARCHY OBJECT MUST KNOW WHEN TO START THE BETTING PROCESS TO
 		if (loserHierarchy.length > 0) {
-			console.log("Processing a round of losers.")
-			console.log("Current Loser Hierarchy Frame:")
-			console.log(loserHierarchyFrame)
-			console.log("Processing first index, slicing it out. Logging Extracted Losers, and then new reference with loser omitted")
 			const loserComparatorToProcess = loserHierarchyFrame[0];
-			console.log(loserComparatorToProcess);
 			loserHierarchy = loserHierarchyFrame.slice(1);
-			console.log(loserHierarchy);
-			console.log("Sending loser to COMPARATOR PROCESSING.")
 			processComparator(loserComparatorToProcess);
-			console.log("Loser Processed. We may have a new loserHierarchy Frame: ")
-			console.log(loserHierarchy)
-			console.log("Recursively calling ProcessLowTierComparators, and passing in that loserHierarchFrame.")
 			processLowTierComparators(loserHierarchy);
 		}
 	}
-	console.log("Initializing Processing for Current Comparator.")
 	processComparator(sortedComparator);
-	console.log("One round of winners has been determined. Time to process the losers.")
 	processLowTierComparators(loserHierarchy);
-	console.log("Finished building winner hierarchy.")
 	return winnerHierarchy;
 }
 
 
 
 const processSnapshotFrame = (frame) => {
-	console.log("Processing snapshot frame:")
-	console.log(frame);
 	const highValue = frame[0].card.value;
-	console.log(`High Value: ${highValue}`)
 	const winningFrame = frame.filter(snapshot => snapshot.card.value === highValue);
 	const losingFrame = frame.filter(snapshot => snapshot.card.value < highValue);
-	console.log("Snapshots who won/tied with this value:")
-	console.log(winningFrame);
-	console.log("Lower Tier Snapshots")
-	console.log(losingFrame)
 	return { winningFrame, losingFrame }
 }
 
@@ -840,12 +787,8 @@ const determineWinner = (comparator, rank) => {
 	// We can definitely refactor this.
 	if (rank === 'Royal Flush') return comparator
 		for (let i = 0; i < comparator.length; i++) {
-			console.log(comparator);
 			let highValue = 0;
 			let losers = [];
-			console.log("Are markers refreshed?")
-			console.log(highValue);
-			console.log(losers)
 			// Sort Comparator, highest card first
 			winners = comparator[i].sort((a, b) => b.card.value - a.card.value).reduce((acc, cur, index) => {
 				if (cur.card.value > highValue) {

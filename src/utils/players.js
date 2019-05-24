@@ -31,7 +31,6 @@ const generateTable = async () => {
 	response.data.results
 		.map(user => {
 			const randomizedChips = Math.floor(Math.random() * (20000 - 18000)) + 18000;
-			console.log(randomizedChips)
 			return ({
 				id: uuid(),
 				name: `${user.name.first.charAt(0).toUpperCase()}${user.name.first.slice(1)} ${user.name.last.charAt(0).toUpperCase()}${user.name.last.slice(1)}`,
@@ -178,7 +177,7 @@ const filterBrokePlayers = (state, dealerID) => {
 				hand: [],
 				descendingSortHand: [],
 			},
-			roundStartChips: player.chips,
+			roundStartChips: player.chips + player.bet,
 			currentRoundChipsInvested: 0,
 			betReconciled: false,
 			folded: false,
@@ -200,7 +199,7 @@ const filterBrokePlayers = (state, dealerID) => {
 				hand: [],
 				descendingSortHand: [],
 			},
-			roundStartChips: player.chips,
+			roundStartChips: player.chips + player.bet,
 			currentRoundChipsInvested: 0,
 			betReconciled: false,
 			folded: false,

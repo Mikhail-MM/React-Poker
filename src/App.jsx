@@ -248,7 +248,6 @@ class App extends Component {
   renderRankWinner = (player) => {
     const { name, bestHand, handRank } = player;
     const playerStateData = this.state.players.find(statePlayer => statePlayer.name === name);
-    console.log(playerStateData);
     return (
       <div className="showdown-player--entity" key={name}>
         <ShowdownPlayer

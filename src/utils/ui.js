@@ -62,11 +62,11 @@ const renderNetPlayerEarnings = (endChips, startChips) => {
 }
 
 const renderShowdownMessages = (showDownMessages) => {
-    return showDownMessages.map(message => {
+    return showDownMessages.map((message, index) => {
 		const { users, prize, rank } = message;
 		if (users.length > 1) {
 			return (
-				<React.Fragment>
+				<React.Fragment key={index}>
 					<div className="message--container">
 						<span className="message--user">
 							{`${users.length} players `}
@@ -81,7 +81,7 @@ const renderShowdownMessages = (showDownMessages) => {
 					{ 
 						users.map(user => {
 							return(
-								<div class="message--container">
+								<div key={index + user} class="message--container">
 									<span className="message--player">
 										{`${user} `}
 									</span>
@@ -102,7 +102,7 @@ const renderShowdownMessages = (showDownMessages) => {
 			)
 		} else if (users.length === 1) {
 			return(
-				<div class="message--container">
+				<div key={index} className="message--container">
 					<span className="message--player">
 						{`${users[0]} `}
 					</span>
