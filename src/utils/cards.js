@@ -80,6 +80,25 @@ const popCards = (deck, numToPop) => {
 		return { mutableDeckCopy, chosenCards }
 }
 
+const popShowdownCards = (deck, numToPop) => {
+	// When dealMissingCommunityCards was calling popCards() with the condition numToPop === 1
+	// It was returning a raw object instead of an array, and calling a for...of loop, causing the program to crash
+	// Until we can refactor this code and all of its calling functions 
+	// (change the code for dealFlop/River/Turn to use a consistent .concat function instead of .push())
+	// We'll just duplicat this code here and utilize it in dealMissingCommunityCards
+	const mutableDeckCopy = [...deck];
+	let chosenCards;
+	if (numToPop === 1) {
+		chosenCards = [mutableDeckCopy.pop()];
+	} else {
+		chosenCards = [];
+		for(let i = 0; i < numToPop; i++) {
+			chosenCards.push(mutableDeckCopy.pop());
+		}
+	}
+		return { mutableDeckCopy, chosenCards }
+}
+
 const dealPrivateCards = (state) => {
 	state.clearCards = false;
 	let animationDelay = 0;
@@ -1025,7 +1044,7 @@ const dealMissingCommunityCards = (state) => {
 	const cardsToPop = 5 - state.communityCards.length
 	if (cardsToPop >= 1) {
 		let animationDelay = 0;
-		const { mutableDeckCopy, chosenCards } = popCards(state.deck, cardsToPop);
+		const { mutableDeckCopy, chosenCards } = popShowdownCards(state.deck, cardsToPop);
 			
 			for (let card of chosenCards) {
 				card.animationDelay = animationDelay;
