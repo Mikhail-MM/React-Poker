@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
-    "axios": "^0.18.0",
+    "axios": "^0.19.0",
     "core-js": "^2.5.7",
     "immer": "^1.7.2",
     "lodash": "^4.17.11",
