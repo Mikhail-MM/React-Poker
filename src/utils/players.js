@@ -236,6 +236,10 @@ const beginNextRound = (state) => {
 	return passDealerChip(state)
 }
 
+const checkWin = players => {
+	return (players.filter(player => player.chips > 0).length === 1)
+}
+
 // NEED INITIAL PLAYER STATE
 // INITIAL TABLE STATE
-export { generateTable, handleOverflowIndex, determineNextActivePlayer, determinePhaseStartActivePlayer, beginNextRound }
+export { generateTable, handleOverflowIndex, determineNextActivePlayer, determinePhaseStartActivePlayer, beginNextRound, checkWin }

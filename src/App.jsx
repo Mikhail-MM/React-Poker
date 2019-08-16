@@ -7,7 +7,9 @@ import 'raf/polyfill';
 import React, { Component } from 'react';
 import './App.css';
 import './Poker.css';
+
 import Spinner from './Spinner';
+import WinScreen from './WinScreen'
 
 import Player from "./components/players/Player";
 import ShowdownPlayer from "./components/players/ShowdownPlayer";
@@ -21,7 +23,8 @@ import {
 
 import { 
   generateTable, 
-  beginNextRound 
+  beginNextRound,
+  checkWin
 } from './utils/players.js';
 
 import { 
@@ -48,6 +51,7 @@ import { cloneDeep } from 'lodash';
 class App extends Component {
   state = {
     loading: true,
+    winnerFound: null,
     players: null,
     numPlayersActive: null,
     numPlayersFolded: null,
@@ -291,7 +295,11 @@ class App extends Component {
   handleNextRound = () => {
     this.setState({clearCards: true})
     const newState = beginNextRound(cloneDeep(this.state))
-    // TODO: CHECK WIN CONDITION HERE
+    // Check win condition
+    if(checkWin(newState.players)) {
+      this.setState({ winnerFound: true })
+      return;
+    }
       this.setState(newState, () => {
         if((this.state.players[this.state.activePlayerIndex].robot) && (this.state.phase !== 'showdown')) {
           setTimeout(() => this.handleAI(), 1200)
@@ -367,7 +375,11 @@ class App extends Component {
     return (
       <div className="App">
         <div className='poker-table--wrapper'> 
-          { (this.state.loading) ? <Spinner/> : this.renderGame()}
+          { 
+            (this.state.loading) ? <Spinner/> : 
+            (this.state.winnerFound) ? <WinScreen /> : 
+            this.renderGame()
+          }
         </div>
       </div>
     );
