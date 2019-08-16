@@ -120,6 +120,14 @@ const determineNextActivePlayer = (state) => {
 		return determineNextActivePlayer(state);
 	}
 
+	if (
+		allButOnePlayersAreAllIn &&
+		!activePlayer.folded &&
+		activePlayer.betReconciled
+	) {
+		return(showDown(reconcilePot(dealMissingCommunityCards(state))));
+	}
+
 	if (activePlayer.chips === 0) {
 		if (state.numPlayersAllIn === state.numPlayersActive) {
 			console.log("All players are all in.")
