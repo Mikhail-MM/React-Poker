@@ -5,11 +5,12 @@ import 'core-js/es6/set';
 import 'raf/polyfill';
 
 import React, { Component } from 'react';
-import './App.css';
-import './Poker.css';
+import {useMediaQuery} from 'react-responsive';
 
-import Spinner from './Spinner';
-import WinScreen from './WinScreen'
+import './styles/Poker.css'
+
+import Spinner from './components/Spinner';
+import WinScreen from './components/WinScreen'
 
 import Player from "./components/players/Player";
 import ShowdownPlayer from "./components/players/ShowdownPlayer";
@@ -48,6 +49,37 @@ import {
 
 import { cloneDeep } from 'lodash';
 
+const CheckScreen = () => {
+  const isDesktopOrLaptop = useMediaQuery({
+    query: '(min-device-width: 1224px)'
+  })
+  const isBigScreen = useMediaQuery({ query: '(min-device-width: 1824px)' })
+  const isTabletOrMobile = useMediaQuery({ query: '(max-width: 1224px)' })
+  const isTabletOrMobileDevice = useMediaQuery({
+    query: '(max-device-width: 1224px)'
+  })
+  const isPortrait = useMediaQuery({ query: '(orientation: portrait)' })
+  const isRetina = useMediaQuery({ query: '(min-resolution: 2dppx)' })
+ 
+  return (
+    <div>
+      <h1>Device Test!</h1>
+      {isDesktopOrLaptop && <div>
+        <p>You are a desktop or laptop</p>
+        {isBigScreen && <p>You also have a huge screen</p>}
+        {isTabletOrMobile && <p>You are sized like a tablet or mobile phone though</p>}
+      </div>}
+      {isTabletOrMobileDevice && <p>You are a tablet or mobile phone</p>}
+      <p>Your are in {isPortrait ? 'portrait' : 'landscape'} orientation</p>
+      {isRetina && <p>You are retina</p>}
+    </div>
+  )
+}
+
+function analyzeScreen() {
+  console.log(window)
+}
+
 class App extends Component {
   state = {
     loading: true,
@@ -77,16 +109,17 @@ class App extends Component {
       3: {isAnimating: false, content: null},
       4: {isAnimating: false, content: null},
       5: {isAnimating: false, content: null}
+    },
+    animeSwitchboard: {
+      
     }
   }
 
   cardAnimationDelay = 0;
   
-  loadTable = () => {
-
-  }
 
   async componentDidMount() {
+    analyzeScreen();
     const players = await generateTable();
     const dealerIndex = Math.floor(Math.random() * Math.floor(players.length));
     const blindIndicies = determineBlindIndices(dealerIndex, players.length);
@@ -94,43 +127,13 @@ class App extends Component {
     
     const imageLoaderRequest = new XMLHttpRequest();
 
-imageLoaderRequest.addEventListener("load", e => {
-    console.log(`${e.type}`);
-    console.log(e);
-    console.log("Image Loaded!");
-    this.setState({
-      loading: false,
-    })
-});
-
-imageLoaderRequest.addEventListener("error", e => {
-    console.log(`${e.type}`);
-    console.log(e);
-});
-
-
-imageLoaderRequest.addEventListener("loadstart", e => {
-    console.log(`${e.type}`);
-    console.log(e);
-});
-
-imageLoaderRequest.addEventListener("loadend", e => {
-    console.log(`${e.type}`);
-    console.log(e);
-});
-
-imageLoaderRequest.addEventListener("abort", e => {
-    console.log(`${e.type}`);
-    console.log(e);
-});
-
-imageLoaderRequest.addEventListener("progress", e => {
-    console.log(`${e.type}`);
-    console.log(e);
-});
-
-imageLoaderRequest.open("GET", "./assets/table-nobg-svg-01.svg");
-imageLoaderRequest.send();
+    imageLoaderRequest.addEventListener("load", e => {
+      this.setState({
+        loading: false,
+      })
+    });
+    imageLoaderRequest.open("GET", "./assets/table-nobg-svg-01.svg");
+    imageLoaderRequest.send();
 
     this.setState(prevState => ({
       // loading: false,
@@ -426,6 +429,7 @@ imageLoaderRequest.send();
             this.renderGame()
           }
         </div>
+        <CheckScreen />
       </div>
     );
   }

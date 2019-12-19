@@ -1,3 +1,18 @@
+@font-face{
+  font-family:'poker-font';
+  src: url("/assets/fonts/poker-font.woff") format("woff"), 
+  url("/assets/fonts/poker-font.woff2") format("woff2"),
+  url("/assets/fonts/poker-font.eot") format("eot"), 
+  url("/assets/fonts/poker-font.ttf") format("ttf");
+  font-display: swap
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'poker-font';
+}
+
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }

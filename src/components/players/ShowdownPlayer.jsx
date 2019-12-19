@@ -26,11 +26,11 @@ const ShowdownPlayer = (props) => {
             {`${name}`}
         </h5>
       </div>
-      <div class="showdownPlayer--privateCards">
-        <h5 class="showdownPlayer--cards--heading">
+      <div className="showdownPlayer--privateCards">
+        <h5 className="showdownPlayer--cards--heading">
           Private Cards
         </h5>
-        <div class="showdownPlayer--cards">
+        <div className="showdownPlayer--cards">
           { renderCards(cards) }
         </div>    
       </div>

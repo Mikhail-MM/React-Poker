@@ -622,11 +622,13 @@ img {
 	}
 }
 
+/* 
 @media (max-width: 552px) {
 	.poker-table--container {
 		transform: rotate(90deg);
 	}
 }
+*/ 
 /*
 @media (min-width: 1280px) {
 	.poker-table--container {
@@ -644,3 +646,36 @@ img {
 }
 
 */
+
+@media (max-width: 872px) {
+	.game-action-bar {
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		height: 30px;
+		border-bottom: 1px solid rgba(255,255,255,0.8);
+	}
+	.slider-boi {
+		margin-left: 15px;
+	}
+	.action-button, 
+	.fold-button, 
+	.action-button:hover,
+	.fold-button:hover {
+		color: white;
+		background-color: transparent;
+	}
+	.action-button, 
+	.fold-button {
+		height: 100%;
+		width: 58px;
+		font-size: 14px;
+		border-radius: 0;
+		padding: 2px;
+		margin: 0;
+		border: none;
+		border-right:1px solid rgba(255, 255, 255, 0.8);
+
+	}
+
+}
