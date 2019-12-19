@@ -28,6 +28,14 @@ img {
 	animation: App-logo-spin infinite 20s linear;
 }
 
+.loading-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	width: 100%
+}
+
 .flex-centered-column {
 	display: flex;
 	flex-direction: column;

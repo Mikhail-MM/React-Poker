@@ -81,14 +81,59 @@ class App extends Component {
   }
 
   cardAnimationDelay = 0;
+  
+  loadTable = () => {
+
+  }
 
   async componentDidMount() {
     const players = await generateTable();
     const dealerIndex = Math.floor(Math.random() * Math.floor(players.length));
     const blindIndicies = determineBlindIndices(dealerIndex, players.length);
     const playersBoughtIn = anteUpBlinds(players, blindIndicies, this.state.minBet);
-    this.setState(prevState => ({
+    
+    const imageLoaderRequest = new XMLHttpRequest();
+
+imageLoaderRequest.addEventListener("load", e => {
+    console.log(`${e.type}`);
+    console.log(e);
+    console.log("Image Loaded!");
+    this.setState({
       loading: false,
+    })
+});
+
+imageLoaderRequest.addEventListener("error", e => {
+    console.log(`${e.type}`);
+    console.log(e);
+});
+
+
+imageLoaderRequest.addEventListener("loadstart", e => {
+    console.log(`${e.type}`);
+    console.log(e);
+});
+
+imageLoaderRequest.addEventListener("loadend", e => {
+    console.log(`${e.type}`);
+    console.log(e);
+});
+
+imageLoaderRequest.addEventListener("abort", e => {
+    console.log(`${e.type}`);
+    console.log(e);
+});
+
+imageLoaderRequest.addEventListener("progress", e => {
+    console.log(`${e.type}`);
+    console.log(e);
+});
+
+imageLoaderRequest.open("GET", "./assets/table-nobg-svg-01.svg");
+imageLoaderRequest.send();
+
+    this.setState(prevState => ({
+      // loading: false,
       players: playersBoughtIn,
       numPlayersActive: players.length,
       numPlayersFolded: 0,
