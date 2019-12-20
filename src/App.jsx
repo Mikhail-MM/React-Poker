@@ -108,18 +108,23 @@ class App extends Component {
       2: {isAnimating: false, content: null},
       3: {isAnimating: false, content: null},
       4: {isAnimating: false, content: null},
-      5: {isAnimating: false, content: null}
+      5: {isAnimating: false, content: null},
+      6: {isAnimating: false, content: null},
     },
     animeSwitchboard: {
-      
     }
   }
 
   cardAnimationDelay = 0;
   
+  tableRef = React.createRef();
+
+
 
   async componentDidMount() {
     analyzeScreen();
+    console.log("HELLO!?")
+    console.log(this.tableRef.current);
     const players = await generateTable();
     const dealerIndex = Math.floor(Math.random() * Math.floor(players.length));
     const blindIndicies = determineBlindIndices(dealerIndex, players.length);
@@ -397,7 +402,31 @@ class App extends Component {
     return (
       <div className='poker-app--background'>
         <div className="poker-table--container">
-          <img className="poker-table--table-image" src={"./assets/table-nobg-svg-01.svg"} alt="Poker Table" />
+          <img ref={this.tableRef} className="poker-table--table-image" src={"./assets/table-nobg-svg-01.svg"} alt="Poker Table" />
+          { (() => { 
+            const arr = [0,0,0,0,0,0,0]
+            return players.map((player, arrayIndex) => {
+              return <div 
+                id={`ps-${arrayIndex}`} 
+                className="player-shadow-container">
+                <div id={`pb-${arrayIndex}`} className="player-shadow-box">
+                  <div className="nm">
+                    {player.name}
+                  </div>
+                  <div className='chp'>
+                    {player.chips}
+                  </div>
+                  <div className="bt">
+                    {player.bet}
+                  </div>
+                </div>
+                <div 
+                  id={`bp-${arrayIndex}`}
+                  className="betting-pinpoint"/>
+                <pre style={{color: 'red'}}>{`${arrayIndex}`}</pre>
+              </div>
+            })
+          })()}
           { this.renderBoard() }
           <div className='community-card-container' >
             { this.renderCommunityCards() }

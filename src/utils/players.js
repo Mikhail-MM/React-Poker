@@ -27,7 +27,7 @@ const generateTable = async () => {
 		robot: false
 	}];
 
-	const response = await axios.get(`https://randomuser.me/api/?results=4&nat=us,gb,fr`);
+	const response = await axios.get(`https://randomuser.me/api/?results=6&nat=us,gb,fr`);
 	response.data.results
 		.map(user => {
 			const randomizedChips = Math.floor(Math.random() * (20000 - 18000)) + 18000;
