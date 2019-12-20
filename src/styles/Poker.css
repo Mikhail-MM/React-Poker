@@ -340,9 +340,11 @@ img {
 	margin: 4px 0;
 }
 
+/* SLIDER FONT */
  .slider-handles > div > div {
 	 color: white !important;
-	 font-size: 24px !important;
+	 font-size: 22px !important;
+	 transform: translateY(-35px);
  }
 
  .showdown-row {
@@ -823,5 +825,9 @@ img {
 	.bt {
 		color: crimson;
 		text-shadow: 1px 1px 1px black;
+	}
+	.slider-boi {
+		width: 100%;
+		padding-right: 45px;
 	}
 }

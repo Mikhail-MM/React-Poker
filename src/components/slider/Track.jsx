@@ -5,9 +5,9 @@ function Track ({ source, target, getTrackProps }) {
     <div
     style={{
         position: 'absolute',
-        height: 10,
+        height: 5,
         zIndex: 1,
-        marginTop: 35,
+        marginTop: 0,
         backgroundColor: '#546C91',
         borderRadius: 5,
         cursor: 'pointer',

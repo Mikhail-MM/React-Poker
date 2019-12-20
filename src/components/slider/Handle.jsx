@@ -9,17 +9,15 @@ function Handle({
       style={{
         left: `${percent}%`,
         position: 'absolute',
-        marginLeft: -15,
-        marginTop: 25,
         zIndex: 2,
-        width: 30,
-        height: 30,
+        width: '15px',
+        height: '15px',
         border: 0,
         textAlign: 'center',
         cursor: 'pointer',
         borderRadius: '50%',
-        backgroundColor: '#2C4870',
-        color: '#aaa',
+        backgroundColor: 'red',
+        color: 'red',
       }}
       {...getHandleProps(id)}
     >
