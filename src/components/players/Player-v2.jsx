@@ -87,7 +87,7 @@ const PlayerContainer = sc.div`
   transform: ${props => props.transform};
 `
 const PlayerInfoBox = sc.div`
-  display: flex;
+  display: ${props => props.arrayIndex === 0 ? 'none' : 'flex' };
   position: absolute;
   height: 50px;
   width: 150px;
