@@ -664,7 +664,7 @@ img {
 		height: 30px;
 		bottom: 0;
 		top: unset;
-		border-bottom: 1px solid rgba(255,255,255,0.8);
+		border-top: 1px solid rgba(255,255,255,0.8);
 	}
 	.slider-boi {
 		margin-left: 15px;

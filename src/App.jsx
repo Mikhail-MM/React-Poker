@@ -403,7 +403,7 @@ class App extends Component {
       <div className='poker-app--background'>
         <div className="poker-table--container">
           <img ref={this.tableRef} className="poker-table--table-image" src={"./assets/table-nobg-svg-01.svg"} alt="Poker Table" />
-          { (() => { 
+          {(() => { 
             const arr = [0,0,0,0,0,0,0]
             return players.map((player, arrayIndex) => {
               return <div 
