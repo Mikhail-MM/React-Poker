@@ -687,15 +687,7 @@ img {
 		border: none;
 		border-right:1px solid rgba(255, 255, 255, 0.8);
 	}
-	.player-shadow-container {
-		position: absolute;
-		width: 50px;
-		height: 50px;
-		background-color: black;
-		border: 0px solid white;
-		border-radius: 100%;
-		box-sizing: border-box;
-	}
+
 	.betting-pinpoint {
 		position: absolute;
 		height: 15px;
@@ -717,11 +709,7 @@ img {
 		font-size: 12px;
 		text-shadow: 1px 1px 1px black;
 	}
-	#ps-4 {
-		top:30px;
-		left: 12.5%;
-		border-color: violet;
-	}
+
 	#bp-4 {
 		bottom: 0;
 		right: 0;
@@ -730,11 +718,7 @@ img {
 	#pb-0 {
 
 	}
-	#ps-3 {
-		top: 30px;
-		right: 12.5%;
-		border-color: red;
-	}
+
 	#bp-3 {
 		bottom: 0;
 		left: 0;
@@ -744,12 +728,7 @@ img {
 		left: 0;
 		transform: translateX(-100px);
 	}
-	#ps-2 {
-		top: 50%;
-		transform: translateY(-50%);
-		right: 5%;
-		border-color: cyan;
-	}
+
 	#bp-2 {
 		top: 50%;
 		transform: translateX(-300%) translateY(-50%);
@@ -757,11 +736,7 @@ img {
 	#pb-2 {
 		transform: translateX(-100px);
 	}
-	#ps-1 {
-		bottom: 30px;
-		right: 12.5%;
-		color: coral;
-	}
+
 	#bp-1 {
 		top: 0;
 		left: 0;
@@ -770,35 +745,22 @@ img {
 	#pb-1 {
 		transform: translateX(-100px);
 	}
-	#ps-0 {
-		bottom: 5%;
-		left: 50%;
-		transform: translateX(-50%);
-		border-color: mediumslateblue;
-	}
+
 	#bp-0 {
 		top: 0;
 		left: 50%;
 		transform: translateY(-150%) translateX(-50%);
 	}
+
 	#pb-0 {
 		display: none;
 	}
-	#ps-6 {
-		bottom: 30px;
-		left: 12.5%;
-		border-color: cornflowerblue;
-	}
+
 	#bp-6 {
 		right: 0;
 		transform: translateX(150%) translateY(-150%);
 	}
-	#ps-5 {
-		top: 50%;
-		transform: translateY(-50%);
-		left: 5%;
-		border-color: cyan;
-	}
+
 	#bp-5 {
 		top: 50%;
 		right:0;

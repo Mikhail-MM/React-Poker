@@ -25,7 +25,7 @@ import {
 import { 
   generateTable, 
   beginNextRound,
-  checkWin
+  checkWin,
 } from './utils/players.js';
 
 import { 
@@ -48,6 +48,88 @@ import {
 } from './utils/ui.js';
 
 import { cloneDeep } from 'lodash';
+import sc from 'styled-components';
+
+const NUM_AI_PLAYERS = 6;
+const markerSize = 50
+const TABLE_CENTER_MARKER = sc.div`
+  position: absolute;
+  width: ${markerSize}px;
+  height: ${markerSize}px;
+  z-index: 10000;
+  background-color: black;
+  border: white;
+  top: 3%;
+  left: calc(50% - ${markerSize/2}px);
+`;
+
+const playerRenderStyles = {
+  0: {
+    playerShadowContainer: {
+      bottom: '5%',
+      top: 'unset',
+      right: 'unset',
+      left: '50%',
+      transform: 'translateX(-50%)',
+    }
+  },
+  1: {
+    playerShadowContainer: {
+      bottom: '30px;',
+      top: 'unset',
+      right: '12.5%',
+      left: 'unset',
+      transform: '',
+    }
+  },
+  2: {
+    playerShadowContainer: {
+      top: '50%',
+      transform: 'translateY(-50%)',
+      right: '5%',
+    }
+  },
+  3: {
+    playerShadowContainer: {
+      top: '30px',
+      right: '12.5%',
+    }
+  },
+  4: {
+    playerShadowContainer: {
+      top: '30px',
+      left: '12.5%',
+    }
+  },
+  5: {
+    playerShadowContainer: {
+      top: '50%',
+      transform: 'translateY(-50%)',
+      left: '5%',
+    }
+  },
+  6: {
+    playerShadowContainer: {
+      bottom: '30px',
+      left: '12.5%',
+    }
+  },
+}
+
+const PlayerContainer = sc.div`
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: black;
+  border: 0px solid white;
+  border-radius: 100%;
+  box-sizing: border-box;
+  bottom: ${props => props.bottom};
+  top: ${props => props.top};
+  left: ${props => props.left};
+  right: ${props => props.right};
+  color: ${props => props.color};
+`
 
 const CheckScreen = () => {
   const isDesktopOrLaptop = useMediaQuery({
@@ -102,30 +184,29 @@ class App extends Component {
     playerHierarchy: [],
     showDownMessages: [],
     playActionMessages: [],
-    playerAnimationSwitchboard: {
-      0: {isAnimating: false, content: null},
-      1: {isAnimating: false, content: null},
-      2: {isAnimating: false, content: null},
-      3: {isAnimating: false, content: null},
-      4: {isAnimating: false, content: null},
-      5: {isAnimating: false, content: null},
-      6: {isAnimating: false, content: null},
-    },
-    animeSwitchboard: {
-    }
+    playerAnimationSwitchboard: {},
+    animeSwitchboard: {},
   }
 
   cardAnimationDelay = 0;
+
   
-  tableRef = React.createRef();
-
-
+    tableRef = React.createRef();
+    tableCenterMarker = React.createRef();
+    cards0 = React.createRef();
+    cards1 = React.createRef();
+    cards2 = React.createRef();
+    cards3 = React.createRef();
+    cards4 = React.createRef();
+    cards5 = React.createRef();
+    cards6 = React.createRef();
+    cards7 = React.createRef();
 
   async componentDidMount() {
     analyzeScreen();
     console.log("HELLO!?")
-    console.log(this.tableRef.current);
-    const players = await generateTable();
+
+    const { players, playerAnimationSwitchboard } = await generateTable(NUM_AI_PLAYERS);
     const dealerIndex = Math.floor(Math.random() * Math.floor(players.length));
     const blindIndicies = determineBlindIndices(dealerIndex, players.length);
     const playersBoughtIn = anteUpBlinds(players, blindIndicies, this.state.minBet);
@@ -143,6 +224,7 @@ class App extends Component {
     this.setState(prevState => ({
       // loading: false,
       players: playersBoughtIn,
+      playerAnimationSwitchboard,
       numPlayersActive: players.length,
       numPlayersFolded: 0,
       numPlayersAllIn: 0,
@@ -159,6 +241,12 @@ class App extends Component {
       phase: 'initialDeal',
     }))
     this.runGameLoop();
+  }
+
+  componentDidUpdate() {
+    console.log(this.tableRef);
+    console.log(this.tableCenterMarker)
+    console.log(this.cards0);
   }
 
   handleBetInputChange = (val, min, max) => {
@@ -397,18 +485,31 @@ class App extends Component {
     )
   }
 
+  /*
+  player = ({ player: { cards, name, chips, bet}, arrayIndex }) => {
+    return 
+  }
+  */
   renderGame = () => {
     const { highBet, players, activePlayerIndex, phase } = this.state;
     return (
       <div className='poker-app--background'>
-        <div className="poker-table--container">
-          <img ref={this.tableRef} className="poker-table--table-image" src={"./assets/table-nobg-svg-01.svg"} alt="Poker Table" />
+        <div ref={this.tableRef} className="poker-table--container">
+        <TABLE_CENTER_MARKER ref={this.tableCenterMarker}/>
+          <img className="poker-table--table-image" src={"./assets/table-nobg-svg-01.svg"} alt="Poker Table" />
           {(() => { 
             const arr = [0,0,0,0,0,0,0]
             return players.map((player, arrayIndex) => {
-              return <div 
-                id={`ps-${arrayIndex}`} 
-                className="player-shadow-container">
+              return (
+              <PlayerContainer 
+                key={arrayIndex}
+                top={playerRenderStyles[arrayIndex].playerShadowContainer.top}
+                bottom={playerRenderStyles[arrayIndex].playerShadowContainer.bottom}
+                left={playerRenderStyles[arrayIndex].playerShadowContainer.left}
+                right={playerRenderStyles[arrayIndex].playerShadowContainer.right}
+                color={playerRenderStyles[arrayIndex].playerShadowContainer.color}
+                transform={playerRenderStyles[arrayIndex].playerShadowContainer.transform}
+              >
                 <div id={`pb-${arrayIndex}`} className="player-shadow-box">
                   <div className="nm">
                     {player.name}
@@ -421,10 +522,12 @@ class App extends Component {
                   </div>
                 </div>
                 <div 
+                  ref={this[`cards${arrayIndex}`]} // this.card0 should be ref
                   id={`bp-${arrayIndex}`}
                   className="betting-pinpoint"/>
                 <pre style={{color: 'red'}}>{`${arrayIndex}`}</pre>
-              </div>
+              </PlayerContainer>
+              )
             })
           })()}
           { this.renderBoard() }

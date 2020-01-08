@@ -4,15 +4,18 @@ import { dealMissingCommunityCards, showDown, generateDeckOfCards, shuffle, deal
 
 const axios = require('axios')
 // TODO Generate UUID to simulate User ID and really get a perf match on binding to players when determining winnings
-const generateTable = async () => {
-	const users = [{
+const generateTable = async (numPlayers) => {
+	if (numPlayers < 1 || numPlayers > 6) {
+		throw new Error("generateTableOpts = 1 to 6")
+	}
+	const players = [{
 		id: uuid(),
-		name: 'Player 1',
+		name: 'Mikeypoo',
 		avatarURL: '/assets/boy.svg',
 		cards: [],
 		showDownHand: {
 			hand: [],
-			descendingSortHand: [], 
+			descendingSortHand: [],
 		},
 		chips: 20000,
 		roundStartChips: 20000,
@@ -27,7 +30,7 @@ const generateTable = async () => {
 		robot: false
 	}];
 
-	const response = await axios.get(`https://randomuser.me/api/?results=6&nat=us,gb,fr`);
+	const response = await axios.get(`https://randomuser.me/api/?results=${numPlayers}&nat=us,gb,fr`);
 	response.data.results
 		.map(user => {
 			const randomizedChips = Math.floor(Math.random() * (20000 - 18000)) + 18000;
@@ -51,35 +54,44 @@ const generateTable = async () => {
 				robot: true,
 				canRaise: true,
 				stackInvestment: 0,
-			})
+			});
 		})
-		.forEach(user => users.push(user))
+		.forEach(user => players.push(user))
 
-	return users
+
+	const playerAnimationSwitchboard = players.reduce((board, user, index) => {
+		board[index] = { isAnimating: false, content: null };
+		return board;
+	}, {});
+
+	return {
+		players,
+		playerAnimationSwitchboard
+	}
 }
 
 const generatePersonality = (seed) => {
-	switch(seed) {
-		case (seed > 0.5): 
+	switch (seed) {
+		case (seed > 0.5):
 			return 'standard'
-		case (seed > 0.35): 
+		case (seed > 0.35):
 			return 'aggressive'
 		case (seed > 0):
-		default: 
+		default:
 			return 'conservative'
 	}
 }
 
 const handleOverflowIndex = (currentIndex, incrementBy, arrayLength, direction) => {
 	switch (direction) {
-		case('up'): {
+		case ('up'): {
 			return (
 				(currentIndex + incrementBy) % arrayLength
 			)
 		}
-		case('down'): {
+		case ('down'): {
 			return (
-				((currentIndex - incrementBy) % arrayLength) + arrayLength 
+				((currentIndex - incrementBy) % arrayLength) + arrayLength
 			)
 		}
 		default: throw Error("Attempted to overfow index on unfamiliar direction");
@@ -92,13 +104,13 @@ const determinePhaseStartActivePlayer = (state, recursion = false) => {
 	} else if (recursion) {
 		state.activePlayerIndex = handleOverflowIndex(state.activePlayerIndex, 1, state.players.length, 'up');
 	}
-		if (state.players[state.activePlayerIndex].folded) {
-			return determinePhaseStartActivePlayer(state, true)
-		}
-		if (state.players[state.activePlayerIndex].chips === 0) {
-			return determinePhaseStartActivePlayer(state, true)
-		}
-				return state
+	if (state.players[state.activePlayerIndex].folded) {
+		return determinePhaseStartActivePlayer(state, true)
+	}
+	if (state.players[state.activePlayerIndex].chips === 0) {
+		return determinePhaseStartActivePlayer(state, true)
+	}
+	return state
 }
 
 
@@ -111,9 +123,9 @@ const determineNextActivePlayer = (state) => {
 	const activePlayer = state.players[state.activePlayerIndex];
 
 	const allButOnePlayersAreAllIn = (state.numPlayersActive - state.numPlayersAllIn === 1);
-	if (state.numPlayersActive ===  1) {
+	if (state.numPlayersActive === 1) {
 		console.log("Only one player active, skipping to showdown.")
-		return(showDown(reconcilePot(dealMissingCommunityCards(state))));
+		return (showDown(reconcilePot(dealMissingCommunityCards(state))));
 	}
 	if (activePlayer.folded) {
 		console.log("Current player index is folded, going to next active player.")
@@ -125,15 +137,15 @@ const determineNextActivePlayer = (state) => {
 		!activePlayer.folded &&
 		activePlayer.betReconciled
 	) {
-		return(showDown(reconcilePot(dealMissingCommunityCards(state))));
+		return (showDown(reconcilePot(dealMissingCommunityCards(state))));
 	}
 
 	if (activePlayer.chips === 0) {
 		if (state.numPlayersAllIn === state.numPlayersActive) {
 			console.log("All players are all in.")
-			return(showDown(reconcilePot(dealMissingCommunityCards(state))));
+			return (showDown(reconcilePot(dealMissingCommunityCards(state))));
 		} else if (allButOnePlayersAreAllIn && activePlayer.allIn) {
-			return(showDown(reconcilePot(dealMissingCommunityCards(state))));
+			return (showDown(reconcilePot(dealMissingCommunityCards(state))));
 		} else {
 			return determineNextActivePlayer(state);
 		}
@@ -158,7 +170,7 @@ const passDealerChip = (state) => {
 		return passDealerChip(state)
 	}
 
-		return filterBrokePlayers(state, nextDealer.name);
+	return filterBrokePlayers(state, nextDealer.name);
 }
 
 
@@ -180,7 +192,7 @@ const filterBrokePlayers = (state, dealerID) => {
 		state.blindIndex.big = handleOverflowIndex(newDealerIndex, 1, state.players.length, 'up');
 		state.players = anteUpBlinds(state.players, { bigBlindIndex: state.blindIndex.big, smallBlindIndex: state.blindIndex.small }, state.minBet).map(player => ({
 			...player,
-			cards:[],
+			cards: [],
 			showDownHand: {
 				hand: [],
 				descendingSortHand: [],
@@ -197,9 +209,9 @@ const filterBrokePlayers = (state, dealerID) => {
 	} else {
 		const blindIndicies = determineBlindIndices(newDealerIndex, state.players.length);
 		state.blindIndex = {
-        	big: blindIndicies.bigBlindIndex,
-        	small: blindIndicies.smallBlindIndex,
-      	}
+			big: blindIndicies.bigBlindIndex,
+			small: blindIndicies.smallBlindIndex,
+		}
 		state.players = anteUpBlinds(state.players, blindIndicies, state.minBet).map(player => ({
 			...player,
 			cards: [],
@@ -217,7 +229,7 @@ const filterBrokePlayers = (state, dealerID) => {
 		state.numPlayersFolded = 0;
 		state.numPlayersActive = state.players.length;
 	}
-		return dealPrivateCards(state)
+	return dealPrivateCards(state)
 }
 
 const beginNextRound = (state) => {
@@ -231,7 +243,7 @@ const beginNextRound = (state) => {
 	state.minBet = 20; // can export out to initialState
 	// Unmount all cards so react can re-trigger animations
 	const { players } = state;
-	const clearPlayerCards = players.map(player => ({...player, cards: player.cards.map(card => {})}))
+	const clearPlayerCards = players.map(player => ({ ...player, cards: player.cards.map(card => { }) }))
 	state.players = clearPlayerCards;
 	return passDealerChip(state)
 }
