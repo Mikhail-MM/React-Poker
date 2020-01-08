@@ -13,6 +13,8 @@ import Spinner from './components/Spinner';
 import WinScreen from './components/WinScreen'
 
 import Player from "./components/players/Player";
+import PlayerNew from "./components/players/Player-v2";
+
 import ShowdownPlayer from "./components/players/ShowdownPlayer";
 import Card from "./components/cards/Card";
 
@@ -51,7 +53,9 @@ import { cloneDeep } from 'lodash';
 import sc from 'styled-components';
 
 const NUM_AI_PLAYERS = 6;
+
 const markerSize = 50
+
 const TABLE_CENTER_MARKER = sc.div`
   position: absolute;
   width: ${markerSize}px;
@@ -62,74 +66,6 @@ const TABLE_CENTER_MARKER = sc.div`
   top: 3%;
   left: calc(50% - ${markerSize/2}px);
 `;
-
-const playerRenderStyles = {
-  0: {
-    playerShadowContainer: {
-      bottom: '5%',
-      top: 'unset',
-      right: 'unset',
-      left: '50%',
-      transform: 'translateX(-50%)',
-    }
-  },
-  1: {
-    playerShadowContainer: {
-      bottom: '30px;',
-      top: 'unset',
-      right: '12.5%',
-      left: 'unset',
-      transform: '',
-    }
-  },
-  2: {
-    playerShadowContainer: {
-      top: '50%',
-      transform: 'translateY(-50%)',
-      right: '5%',
-    }
-  },
-  3: {
-    playerShadowContainer: {
-      top: '30px',
-      right: '12.5%',
-    }
-  },
-  4: {
-    playerShadowContainer: {
-      top: '30px',
-      left: '12.5%',
-    }
-  },
-  5: {
-    playerShadowContainer: {
-      top: '50%',
-      transform: 'translateY(-50%)',
-      left: '5%',
-    }
-  },
-  6: {
-    playerShadowContainer: {
-      bottom: '30px',
-      left: '12.5%',
-    }
-  },
-}
-
-const PlayerContainer = sc.div`
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  background-color: black;
-  border: 0px solid white;
-  border-radius: 100%;
-  box-sizing: border-box;
-  bottom: ${props => props.bottom};
-  top: ${props => props.top};
-  left: ${props => props.left};
-  right: ${props => props.right};
-  color: ${props => props.color};
-`
 
 const CheckScreen = () => {
   const isDesktopOrLaptop = useMediaQuery({
@@ -484,12 +420,7 @@ class App extends Component {
       </div>
     )
   }
-
-  /*
-  player = ({ player: { cards, name, chips, bet}, arrayIndex }) => {
-    return 
-  }
-  */
+  
   renderGame = () => {
     const { highBet, players, activePlayerIndex, phase } = this.state;
     return (
@@ -497,39 +428,19 @@ class App extends Component {
         <div ref={this.tableRef} className="poker-table--container">
         <TABLE_CENTER_MARKER ref={this.tableCenterMarker}/>
           <img className="poker-table--table-image" src={"./assets/table-nobg-svg-01.svg"} alt="Poker Table" />
-          {(() => { 
-            const arr = [0,0,0,0,0,0,0]
-            return players.map((player, arrayIndex) => {
-              return (
-              <PlayerContainer 
-                key={arrayIndex}
-                top={playerRenderStyles[arrayIndex].playerShadowContainer.top}
-                bottom={playerRenderStyles[arrayIndex].playerShadowContainer.bottom}
-                left={playerRenderStyles[arrayIndex].playerShadowContainer.left}
-                right={playerRenderStyles[arrayIndex].playerShadowContainer.right}
-                color={playerRenderStyles[arrayIndex].playerShadowContainer.color}
-                transform={playerRenderStyles[arrayIndex].playerShadowContainer.transform}
-              >
-                <div id={`pb-${arrayIndex}`} className="player-shadow-box">
-                  <div className="nm">
-                    {player.name}
-                  </div>
-                  <div className='chp'>
-                    {player.chips}
-                  </div>
-                  <div className="bt">
-                    {player.bet}
-                  </div>
-                </div>
-                <div 
-                  ref={this[`cards${arrayIndex}`]} // this.card0 should be ref
-                  id={`bp-${arrayIndex}`}
-                  className="betting-pinpoint"/>
-                <pre style={{color: 'red'}}>{`${arrayIndex}`}</pre>
-              </PlayerContainer>
-              )
+          {players.map(({ cards, name, chips, bet, avatarURL }, arrayIndex) => {
+              return <PlayerNew
+                key={arrayIndex}  
+                player={{
+                    cards: cards,
+                    name: name,
+                    chips: chips,
+                    bet: bet,
+                    avatarURL: avatarURL,
+                  }}
+                arrayIndex={arrayIndex}/>
             })
-          })()}
+          }
           { this.renderBoard() }
           <div className='community-card-container' >
             { this.renderCommunityCards() }
