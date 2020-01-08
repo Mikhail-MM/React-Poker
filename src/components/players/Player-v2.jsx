@@ -1,4 +1,8 @@
 import React from 'react';
+
+import Card from '../cards/Card';
+import HiddenCard from '../cards/HiddenCard';
+
 import sc from 'styled-components';
 
 const playerRenderStyles = {
@@ -119,8 +123,53 @@ const Avatar = sc.img`
   top: 0;
   left: 0;
 `
+const CardContainer = sc.div`
+display: flex;
+  position: absolute;
+  width: auto;
+  height: 25px;
+  background-color: purple; 
+  z-index: 1000;
+`
 
-const PlayerNew = ({ player: { cards, name, chips, bet, avatarURL }, arrayIndex }) => {
+const PlayerNew = ({ 
+  player: { cards, name, chips, bet, avatarURL, robot, folded },
+  phase, 
+  arrayIndex,
+  clearCards, 
+  cardAnimationState, 
+  setCardAnimationState 
+}) => {
+  const renderPlayerCards = () => {
+    let applyFoldedClassname;
+  
+    if (folded || clearCards) {
+      applyFoldedClassname = true
+    }
+  
+    if (robot) {
+      return cards.map((card, index)=> {
+        if (phase !== 'showdown') {
+          return(
+            <HiddenCard key={index} cardData={card} applyFoldedClassname={applyFoldedClassname}/>
+          );
+        } else {
+          // Reset Animation Delay
+          const cardData = {...card, animationDelay: 0}
+          return(
+            <Card key={index} cardData={cardData} applyFoldedClassname={applyFoldedClassname}/>
+          );
+        }
+      });
+    }
+    else {
+      return cards.map((card, index) => {
+        return(
+          <Card key={index} cardData={card} applyFoldedClassname={applyFoldedClassname}/>
+        );
+      });
+    }
+  }
   return(
     <PlayerContainer 
       key={arrayIndex}
@@ -148,7 +197,11 @@ const PlayerNew = ({ player: { cards, name, chips, bet, avatarURL }, arrayIndex 
     <div 
       ref={this[`cards${arrayIndex}`]} // this.card0 should be ref
       id={`bp-${arrayIndex}`}
-      className="betting-pinpoint"/>
+      className="betting-pinpoint"> 
+      <CardContainer>
+        { renderPlayerCards() }
+      </CardContainer>
+    </div>
     <pre style={{color: 'red'}}>{`${arrayIndex}`}</pre>
     </PlayerContainer>
   )

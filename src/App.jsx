@@ -422,26 +422,25 @@ class App extends Component {
   }
   
   renderGame = () => {
-    const { highBet, players, activePlayerIndex, phase } = this.state;
+    const { highBet, players, activePlayerIndex, clearCards, phase } = this.state;
     return (
       <div className='poker-app--background'>
         <div ref={this.tableRef} className="poker-table--container">
         <TABLE_CENTER_MARKER ref={this.tableCenterMarker}/>
           <img className="poker-table--table-image" src={"./assets/table-nobg-svg-01.svg"} alt="Poker Table" />
-          {players.map(({ cards, name, chips, bet, avatarURL }, arrayIndex) => {
+          {players.map((player, arrayIndex) => {
               return <PlayerNew
                 key={arrayIndex}  
-                player={{
-                    cards: cards,
-                    name: name,
-                    chips: chips,
-                    bet: bet,
-                    avatarURL: avatarURL,
-                  }}
+                player={player}
+                activePlayerIndex={activePlayerIndex}
+                phase={phase}
+                clearCards={clearCards}
                 arrayIndex={arrayIndex}/>
             })
           }
-          { this.renderBoard() }
+          {/* Old players method -- uncomment and remove display:none style to revert
+             this.renderBoard() 
+          */}
           <div className='community-card-container' >
             { this.renderCommunityCards() }
           </div>

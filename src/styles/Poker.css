@@ -695,6 +695,7 @@ img {
 		background-color: white;
 		transform: translateX(-50%) translateY(-50%);
 	}
+	/*
 	.player-shadow-box {
 		position: absolute;
 		border: 2px solid rgba(255, 255, 255, 0.85);
@@ -709,14 +710,11 @@ img {
 		font-size: 12px;
 		text-shadow: 1px 1px 1px black;
 	}
-
+	*/
 	#bp-4 {
 		bottom: 0;
 		right: 0;
 		transform: translateX(150%) translateY(150%);
-	}
-	#pb-0 {
-
 	}
 
 	#bp-3 {
@@ -724,37 +722,43 @@ img {
 		left: 0;
 		transform: translateX(-150%) translateY(150%);
 	}
+	/*
 	#pb-3 {
 		left: 0;
 		transform: translateX(-100px);
 	}
+	*/
 
 	#bp-2 {
 		top: 50%;
 		transform: translateX(-300%) translateY(-50%);
 	}
+	
+	/*
 	#pb-2 {
 		transform: translateX(-100px);
 	}
-
+	*/
 	#bp-1 {
 		top: 0;
 		left: 0;
 		transform: translateX(-150%) translateY(-150%);
 	}
+	/*
 	#pb-1 {
 		transform: translateX(-100px);
 	}
-
+	*/
 	#bp-0 {
 		top: 0;
 		left: 50%;
 		transform: translateY(-150%) translateX(-50%);
 	}
-
+	/*
 	#pb-0 {
 		display: none;
 	}
+	*/
 
 	#bp-6 {
 		right: 0;
