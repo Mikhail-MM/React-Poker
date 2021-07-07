@@ -11,7 +11,11 @@ function PlayerStatusNotificationBox({index, isActive, content, endTransition}) 
                 exit: 1250,
                }}
             classNames="transitionable-actionBox" 
-            onEntered={() => endTransition(index)}
+            onEntered={() => {
+              setTimeout(() => {
+                endTransition(index)
+              }, 25)
+            }}
         >
             <div className="actionBox">
             {`${content}`}
