@@ -36,6 +36,18 @@ export const c = (code) => {
 // cc('AH KH QH') -> [card, card, card]
 export const cc = (codes) => codes.trim().split(/\s+/).map(c);
 
+const SUIT_LETTER = {
+	Heart: 'H',
+	Spade: 'S',
+	Club: 'C',
+	Diamond: 'D',
+};
+
+// Inverse of c()/cc(), for compact human-readable snapshots.
+// code({cardFace: 'A', suit: 'Heart'}) -> 'AH'
+export const code = (card) => `${card.cardFace}${SUIT_LETTER[card.suit]}`;
+export const codes = (cards) => cards.map(code);
+
 export const mkPlayer = (name, overrides = {}) => {
 	const player = {
 		id: name,
@@ -71,10 +83,11 @@ export const mkState = (players, overrides = {}) => ({
 	numPlayersAllIn: players.filter(p => p.allIn).length,
 	activePlayerIndex: 0,
 	dealerIndex: 0,
-	blindIndex: {
-		big: Math.min(2, players.length - 1),
-		small: Math.min(1, players.length - 1),
-	},
+	// Matches determineBlindIndices(dealer 0) for 3+; heads-up the dealer (0)
+	// posts the small blind, per filterBrokePlayers' convention.
+	blindIndex: players.length >= 3
+		? { big: 2, small: 1 }
+		: { big: players.length - 1, small: 0 },
 	deck: [],
 	communityCards: [],
 	pot: 0,

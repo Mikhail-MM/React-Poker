@@ -1,0 +1,374 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`best-hand construction per rank flush 1`] = `
+Object {
+  "bestHand": Array [
+    "AH",
+    "KH",
+    "9H",
+    "4H",
+    "2H",
+  ],
+  "rank": "Flush",
+}
+`;
+
+exports[`best-hand construction per rank four of a kind with kicker 1`] = `
+Object {
+  "bestHand": Array [
+    "AS",
+    "AC",
+    "AH",
+    "AD",
+    "KS",
+  ],
+  "rank": "Four Of A Kind",
+}
+`;
+
+exports[`best-hand construction per rank full house 1`] = `
+Object {
+  "bestHand": Array [
+    "KS",
+    "KC",
+    "KH",
+    "QS",
+    "QC",
+  ],
+  "rank": "Full House",
+}
+`;
+
+exports[`best-hand construction per rank full house from two trips takes the higher trip 1`] = `
+Object {
+  "bestHand": Array [
+    "KS",
+    "KC",
+    "KH",
+    "QS",
+    "QC",
+  ],
+  "rank": "Full House",
+}
+`;
+
+exports[`best-hand construction per rank no pair takes the top five cards 1`] = `
+Object {
+  "bestHand": Array [
+    "AS",
+    "QH",
+    "JD",
+    "9H",
+    "7C",
+  ],
+  "rank": "No Pair",
+}
+`;
+
+exports[`best-hand construction per rank pair with three kickers 1`] = `
+Object {
+  "bestHand": Array [
+    "JS",
+    "JD",
+    "AH",
+    "8C",
+    "5S",
+  ],
+  "rank": "Pair",
+}
+`;
+
+exports[`best-hand construction per rank royal flush (KNOWN BUG #1: reported as Straight Flush) 1`] = `
+Object {
+  "bestHand": Array [
+    "AH",
+    "KH",
+    "QH",
+    "JH",
+    "10H",
+  ],
+  "rank": "Straight Flush",
+}
+`;
+
+exports[`best-hand construction per rank steel wheel (ace-low straight flush) 1`] = `
+Object {
+  "bestHand": Array [
+    "5H",
+    "4H",
+    "3H",
+    "2H",
+    "AH",
+  ],
+  "rank": "Straight Flush",
+}
+`;
+
+exports[`best-hand construction per rank straight 1`] = `
+Object {
+  "bestHand": Array [
+    "9S",
+    "8D",
+    "7H",
+    "6C",
+    "5S",
+  ],
+  "rank": "Straight",
+}
+`;
+
+exports[`best-hand construction per rank straight flush 1`] = `
+Object {
+  "bestHand": Array [
+    "9H",
+    "8H",
+    "7H",
+    "6H",
+    "5H",
+  ],
+  "rank": "Straight Flush",
+}
+`;
+
+exports[`best-hand construction per rank three of a kind with two kickers 1`] = `
+Object {
+  "bestHand": Array [
+    "7C",
+    "7D",
+    "7H",
+    "KS",
+    "QD",
+  ],
+  "rank": "Three Of A Kind",
+}
+`;
+
+exports[`best-hand construction per rank two pair with kicker 1`] = `
+Object {
+  "bestHand": Array [
+    "KS",
+    "KH",
+    "QD",
+    "QC",
+    "9S",
+  ],
+  "rank": "Two Pair",
+}
+`;
+
+exports[`best-hand construction per rank wheel (ace-low straight) 1`] = `
+Object {
+  "bestHand": Array [
+    "5S",
+    "4H",
+    "3C",
+    "2D",
+    "AS",
+  ],
+  "rank": "Straight",
+}
+`;
+
+exports[`full showdown outcomes capped all-in with layered side pots and dead money 1`] = `
+Object {
+  "hierarchy": Array [
+    Object {
+      "bestHand": Array [
+        "AH",
+        "KH",
+        "QH",
+        "JH",
+        "10H",
+      ],
+      "handRank": "Straight Flush",
+      "name": "Alice",
+    },
+    Object {
+      "bestHand": Array [
+        "QH",
+        "JH",
+        "10H",
+        "8H",
+        "3H",
+      ],
+      "handRank": "Flush",
+      "name": "Bob",
+    },
+    Object {
+      "bestHand": Array [
+        "QH",
+        "JH",
+        "10H",
+        "5H",
+        "4H",
+      ],
+      "handRank": "Flush",
+      "name": "Carol",
+    },
+    Object {
+      "bestHand": Array [
+        "7C",
+        "7D",
+        "2D",
+        "2S",
+        "QH",
+      ],
+      "handRank": "Two Pair",
+      "name": "Dave",
+    },
+  ],
+  "messages": Array [
+    Object {
+      "prize": 900,
+      "rank": "Straight Flush",
+      "users": Array [
+        "Alice",
+      ],
+    },
+    Object {
+      "prize": 1200,
+      "rank": "Flush",
+      "users": Array [
+        "Bob",
+      ],
+    },
+    Object {
+      "prize": 400,
+      "rank": "Flush",
+      "users": Array [
+        "Bob",
+      ],
+    },
+  ],
+  "players": Array [
+    Object {
+      "chips": 900,
+      "folded": false,
+      "name": "Alice",
+      "rank": "Straight Flush",
+    },
+    Object {
+      "chips": 2800,
+      "folded": false,
+      "name": "Bob",
+      "rank": "Flush",
+    },
+    Object {
+      "chips": 1200,
+      "folded": false,
+      "name": "Carol",
+      "rank": "Flush",
+    },
+    Object {
+      "chips": 0,
+      "folded": false,
+      "name": "Dave",
+      "rank": "Two Pair",
+    },
+    Object {
+      "chips": 900,
+      "folded": true,
+      "name": "Eve",
+      "rank": "No Pair",
+    },
+  ],
+  "residualPot": 0,
+  "sidePots": Array [
+    Object {
+      "contestants": Array [
+        "Alice",
+        "Dave",
+        "Bob",
+        "Carol",
+      ],
+      "potValue": 900,
+    },
+    Object {
+      "contestants": Array [
+        "Dave",
+        "Bob",
+        "Carol",
+      ],
+      "potValue": 1200,
+    },
+    Object {
+      "contestants": Array [
+        "Bob",
+        "Carol",
+      ],
+      "potValue": 400,
+    },
+  ],
+}
+`;
+
+exports[`full showdown outcomes exact tie with an odd chip (KNOWN BUG #3: chip stranded in pot) 1`] = `
+Object {
+  "hierarchy": Array [
+    Array [
+      Object {
+        "bestHand": Array [
+          "9S",
+          "8C",
+          "7H",
+          "6D",
+          "5S",
+        ],
+        "handRank": "Straight",
+        "name": "Xavier",
+      },
+      Object {
+        "bestHand": Array [
+          "9S",
+          "8C",
+          "7H",
+          "6D",
+          "5S",
+        ],
+        "handRank": "Straight",
+        "name": "Yvonne",
+      },
+    ],
+  ],
+  "messages": Array [
+    Object {
+      "prize": 400,
+      "rank": "Straight",
+      "users": Array [
+        "Xavier",
+        "Yvonne",
+      ],
+    },
+  ],
+  "players": Array [
+    Object {
+      "chips": 900,
+      "folded": false,
+      "name": "Xavier",
+      "rank": "Straight",
+    },
+    Object {
+      "chips": 900,
+      "folded": false,
+      "name": "Yvonne",
+      "rank": "Straight",
+    },
+    Object {
+      "chips": 500,
+      "folded": true,
+      "name": "Zed",
+      "rank": "Straight",
+    },
+  ],
+  "residualPot": 1,
+  "sidePots": Array [
+    Object {
+      "contestants": Array [
+        "Xavier",
+        "Yvonne",
+      ],
+      "potValue": 801,
+    },
+  ],
+}
+`;
