@@ -110,7 +110,7 @@ describe('full showdown outcomes', () => {
 		expect(summarizeShowdown(state)).toMatchSnapshot();
 	});
 
-	it('exact tie with an odd chip (KNOWN BUG #3: chip stranded in pot)', () => {
+	it('exact tie with an odd chip (first winner takes the remainder)', () => {
 		let state = mkState(
 			[
 				mkPlayer('Xavier', { chips: 500, bet: 375, cards: cc('2H 3H') }),

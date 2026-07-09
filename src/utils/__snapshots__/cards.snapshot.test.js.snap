@@ -302,7 +302,7 @@ Object {
 }
 `;
 
-exports[`full showdown outcomes exact tie with an odd chip (KNOWN BUG #3: chip stranded in pot) 1`] = `
+exports[`full showdown outcomes exact tie with an odd chip (first winner takes the remainder) 1`] = `
 Object {
   "hierarchy": Array [
     Array [
@@ -342,7 +342,7 @@ Object {
   ],
   "players": Array [
     Object {
-      "chips": 900,
+      "chips": 901,
       "folded": false,
       "name": "Xavier",
       "rank": "Straight",
@@ -360,7 +360,7 @@ Object {
       "rank": "Straight",
     },
   ],
-  "residualPot": 1,
+  "residualPot": 0,
   "sidePots": Array [
     Object {
       "contestants": Array [

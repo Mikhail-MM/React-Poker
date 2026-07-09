@@ -139,43 +139,36 @@ describe('showdown: exact tie splits the pot', () => {
 		expect(hierarchyNames(play())).toEqual([['Xavier', 'Yvonne']]);
 	});
 
-	it('pays each winner an equal floor share', () => {
+	it('pays equal floor shares, with the odd chip going to the first winner (bug #3 fixed)', () => {
+		// House rule chosen over carryover: remainders are paid out immediately
+		// (standard card-room practice), so the pot always drains to 0 and the
+		// next hand starts from a clean slate.
 		const state = play();
-		expect(state.players.find(p => p.name === 'Xavier').chips).toBe(900);
+		expect(state.players.find(p => p.name === 'Xavier').chips).toBe(901); // 400 + the odd chip
 		expect(state.players.find(p => p.name === 'Yvonne').chips).toBe(900);
+		expect(state.pot).toBe(0);
 		expect(state.showDownMessages).toEqual([
-			{ users: ['Xavier', 'Yvonne'], prize: 400, rank: 'Straight' },
+			{ users: ['Xavier', 'Yvonne'], prize: 400, rank: 'Straight' }, // per-winner share
 		]);
 	});
 
-	it('KNOWN BUG #3: the odd chip stays behind in state.pot', () => {
-		// payWinners pays floor(801/2) to each winner and leaves the remainder
-		// in the pot. Leaving it there is arguably BY DESIGN — an "odd chip
-		// carries to the next hand" house rule (beginNextRound deliberately
-		// preserves pot). The actual defect is downstream: the carried chip is
-		// never claimable (see the lifecycle test below). Under a carryover fix
-		// this assertion stays 1; under the card-room rule (odd chip to a fixed
-		// winner) it becomes 0.
-		expect(play().pot).toBe(1);
-	});
-
-	it('KNOWN BUG #3 (lifecycle): the carried-over chip is never claimable in later rounds', () => {
-		// The carryover intent fails because payouts flow exclusively through
-		// sidePots[].potValue, and side pots are built from each round's BETS
-		// alone (calculateSidePots layers player.sidePotStack = player.bet).
-		// A pot seeded with a remainder pays out only the bets: the winner of
-		// the next hand does not receive the extra chip, and it rides forever.
-		// When fixed (carryover option), the winner here should get 1501.
+	it('a three-way odd split pays the whole remainder to the first winner', () => {
+		// Pot 1001 (three 300 bets + 101 of dead money) splits 333/333/333
+		// with remainder 2 — all of it to the first winner, none stranded.
 		const state = runShowdown(
 			[
-				mkPlayer('NextWinner', { chips: 500, bet: 500, cards: cc('AH KH') }),
-				mkPlayer('NextLoser', { chips: 500, bet: 500, cards: cc('2C 7D') }),
+				mkPlayer('Trey', { chips: 700, bet: 300, cards: cc('2H 3H') }),
+				mkPlayer('Jude', { chips: 700, bet: 300, cards: cc('2D 4D') }),
+				mkPlayer('Quin', { chips: 700, bet: 300, cards: cc('JC QC') }),
+				mkPlayer('Folder', { chips: 899, bet: 101, folded: true, cards: cc('KH KD') }),
 			],
-			'QH JH 10H 2S 7S',
-			{ pot: 1 } // the remainder carried in from the previous hand's odd split
+			'5S 6D 7H 8C 9S' // everyone live plays the board straight
 		);
-		expect(state.players.find(p => p.name === 'NextWinner').chips).toBe(1500); // bets only
-		expect(state.pot).toBe(1); // still stranded, one hand later
+		expect(state.players.find(p => p.name === 'Trey').chips).toBe(1035); // 333 + 2
+		expect(state.players.find(p => p.name === 'Jude').chips).toBe(1033);
+		expect(state.players.find(p => p.name === 'Quin').chips).toBe(1033);
+		expect(state.pot).toBe(0);
+		expect(totalChipsInPlay(state)).toBe(4000); // nothing minted, nothing lost
 	});
 });
 

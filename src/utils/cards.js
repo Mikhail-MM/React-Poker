@@ -626,6 +626,11 @@ const payWinners = (state, winners, prize, rank) => {
 			state.players[winner.playerIndex].chips += splitPot
 			state.pot -= splitPot
 		})
+		// House rule: the indivisible remainder goes to the first winner instead
+		// of carrying over, so the pot always drains to 0 by the end of a hand.
+		// (The split message above reports the per-winner share only.)
+		state.players[winners[0].playerIndex].chips += overflow
+		state.pot -= overflow
 	}
 		return state
 }

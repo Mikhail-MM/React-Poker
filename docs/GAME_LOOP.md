@@ -54,10 +54,11 @@ is no way to pause mid-cascade for an animation beat.
 
 `player.chips + player.bet` is a player's total liquid stack at any moment. Chips
 move: `chips → bet` (during a betting round) `→ pot` + `sidePots[].potValue`
-(at `reconcilePot`) `→ winner.chips` (at `payWinners`). Simulation confirmed chip
-conservation across the full pipeline, with one exception: the odd-chip remainder
-of split pots is meant to carry to the next hand but is never claimable — it
-accumulates in `state.pot` forever (bug #3).
+(at `reconcilePot`) `→ winner.chips` (at `payWinners`). Chip conservation holds
+across the full pipeline, verified by simulation and enforced by the test
+suites. (Historically the odd-chip remainder of split pots accumulated in
+`state.pot` forever — bug #3, fixed 2026-07-09: the first winner takes the
+remainder and every pot drains to 0.)
 
 ---
 
@@ -76,7 +77,7 @@ accumulates in `state.pot` forever (bug #3).
 | `dealerIndex`, `blindIndex {big, small}` | int | Positions. SB = dealer+1, BB = dealer+2 |
 | `deck` | Card[] | `{cardFace, suit, value}`; `value` is `VALUE_MAP` 1–13 (**2→1 … A→13, so a Ten is `9`**) |
 | `communityCards` | Card[] | 0/3/4/5 cards |
-| `pot` | int | Display total. Filled by `reconcilePot`, drained by `payWinners`. **Never reset between rounds** |
+| `pot` | int | Display total. Filled by `reconcilePot`, fully drained by `payWinners` (split remainders go to the first winner), and reset to 0 by `beginNextRound` |
 | `sidePots` | `{potValue, contestants: name[]}[]` | The bucketed pot system. Accumulates across betting rounds, condensed on each reconcile |
 | `highBet` | int | Current bet to match. Reset to 0 each phase (post-flop rounds open with checking allowed) |
 | `minBet`, `betInputValue` | int | Slider/validation bookkeeping |
@@ -341,7 +342,7 @@ distributeSidePots(state)
  │    │         1 player  → payWinners (uncontested)
  │    │         2+ players → determineWinner(buildComparator(...)) → payWinners
  │    └─ payWinners: winner.chips += prize; state.pot -= prize
- │         ties: each gets floor(prize/n); the remainder stays in state.pot (bug #3)
+ │         ties: each gets floor(prize/n); the first winner takes the remainder (bug #3 fix)
  └─ every player: roundEndChips = chips                            // for ± display
 ```
 
@@ -363,8 +364,8 @@ and Dave lose their stakes; folded Eve's 100 was dead money inside the main pot.
 1. `setState({clearCards: true})` — unmounts card components so deal animations
    re-trigger next round.
 2. `beginNextRound` (`players.js:223`): resets community cards, `sidePots`,
-   `playerHierarchy`, `showDownMessages`; fresh shuffled deck; blinds/bet markers
-   back to 20. (**`pot` is not reset** — bug #3.)
+   `playerHierarchy`, `showDownMessages`, and `pot` (clean slate — bug #3 fix);
+   fresh shuffled deck; blinds/bet markers back to 20.
 3. `passDealerChip` (`players.js:152`): advance dealer to next player who still has
    chips, then `filterBrokePlayers`:
    - **removes** players with 0 chips from the array (indices shift — dealer index is
@@ -458,24 +459,23 @@ the real code; 👁 = established by inspection.
    would still be fatal for a robot. Deliberately not papered over with silent
    clamping — that would mask upstream bugs; if hardened later, prefer a
    descriptive throw at the rejection site.
-3. ✅ **Odd-chip remainder is carried over but never claimable.** Design intent
-   (per the author): a non-splittable remainder rides into the next hand's pot —
-   a legitimate "odd chip carries" house rule, and `beginNextRound` preserving
-   `pot` is consistent with it. The defect is downstream: **payouts flow
-   exclusively through `sidePots[].potValue`**, and side pots are built from each
-   round's bets alone (`calculateSidePots` layers `sidePotStack = bet`), so the
-   carried chip is invisible to the payout machinery. Verified across two hands:
-   an 801 pot splits 400/400 leaving `pot === 1`; the *next* hand's winner is
-   paid only that hand's bets and `pot === 1` survives its showdown too. The pot
-   display drifts up monotonically and the chips permanently leave the table
-   economy. Fix options: **(a) implement the carryover** — fold the un-bucketed
-   remainder (`pot − Σ sidePots`) into the first side pot built in the next
-   round, making it claimable by the main-pot contestants (matches the original
-   intent); or **(b) the standard card-room rule** — award the odd chip(s) to
-   one winner deterministically in `payWinners` (e.g. first winner left of the
-   dealer) and never carry. Pinned in `cards.showdown.test.js` (remainder +
-   lifecycle tests, with per-option expectations) and `players.test.js` (pot
-   preserved across rounds).
+3. ✅ **Odd-chip remainder was carried over but never claimable — FIXED
+   2026-07-09.** Original design intent: a non-splittable remainder rides into
+   the next hand's pot (an "odd chip carries" house rule), and `beginNextRound`
+   preserved `pot` accordingly. The defect was downstream: payouts flow
+   exclusively through `sidePots[].potValue`, which are built from each round's
+   bets alone, so the carried chip was invisible to the payout machinery —
+   verified across two consecutive hands, the remainder was never paid to
+   anyone and the pot display drifted up monotonically while chips permanently
+   left the table economy. **Fix (card-room rule, chosen for simplicity over
+   implementing the carryover):** `payWinners` now awards the indivisible
+   remainder to the first winner at split time, so every pot fully drains to 0
+   at the end of the hand, and `beginNextRound` explicitly resets `pot = 0`
+   (clean slate — anything left there would be unclaimable by construction).
+   Chip conservation now holds unconditionally. Verified in
+   `cards.showdown.test.js` (two- and three-way odd splits) and
+   `players.test.js`. Note: the split showdown message reports the per-winner
+   floor share; the extra chip is not called out in the UI.
 4. 👁 **Boolean-vs-number comparison in raise un-reconciliation.**
    `if (!player.folded || !player.chips === 0)` (`bet.js:43`): `!player.chips === 0`
    compares a boolean to a number — always false — so the condition is just
@@ -603,6 +603,8 @@ Carol took the whole 1500 pot.
 **Scenario 3 — exact tie + odd chip.** Both live players play the board straight
 9-8-7-6-5; pot 801 (51 dead money from a folder). Result: tie detected, nested-array
 hierarchy, 400 paid to each, **1 chip stranded in `state.pot`** (bug #3).
+*(Fixed 2026-07-09: the first winner now takes the odd chip — 401/400 — and the
+pot drains to 0.)*
 
 **Scenario 4 — AI freeze repro.** Heads-up, opponent all-in for 5000, AI stack 1000
 holding a full house, RNG forced to the raise path: `handleAI` returned `undefined`
