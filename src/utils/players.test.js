@@ -139,7 +139,7 @@ describe('determineNextActivePlayer', () => {
 		);
 		const next = determineNextActivePlayer(state);
 		expect(next.phase).toBe('showdown');
-		expect(next.players[0].chips).toBe(1000); // royal (reported straight) flush scoops
+		expect(next.players[0].chips).toBe(1000); // royal flush scoops the whole pot
 		expect(next.players[1].chips).toBe(0);
 	});
 });

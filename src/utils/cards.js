@@ -866,7 +866,7 @@ const checkRoyalFlush = (flushMatchCards) => {
 		(flushMatchCards[1].value === 12) &&
 		(flushMatchCards[2].value === 11) &&
 		(flushMatchCards[3].value === 10) &&
-		(flushMatchCards[4].value === 10)) { 
+		(flushMatchCards[4].value === 9)) { 
 			return true  
 		} else { return false } 
 }

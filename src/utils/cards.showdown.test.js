@@ -69,18 +69,16 @@ describe('showdown: capped all-in with layered side pots', () => {
 	it('emits one showdown message per pot payout', () => {
 		const state = play();
 		expect(state.showDownMessages).toEqual([
-			{ users: ['Alice'], prize: 900, rank: 'Straight Flush' },
+			{ users: ['Alice'], prize: 900, rank: 'Royal Flush' },
 			{ users: ['Bob'], prize: 1200, rank: 'Flush' },
 			{ users: ['Bob'], prize: 400, rank: 'Flush' },
 		]);
 	});
 
-	it('KNOWN BUG #1: the royal flush is reported as a Straight Flush', () => {
-		// checkRoyalFlush can never pass (see cards.evaluation.test.js).
-		// When fixed, Alice's rank becomes 'Royal Flush'.
+	it('detects the royal flush (bug #1 fixed)', () => {
 		const state = play();
 		const alice = state.players.find(p => p.name === 'Alice');
-		expect(alice.showDownHand.bestHandRank).toBe('Straight Flush');
+		expect(alice.showDownHand.bestHandRank).toBe('Royal Flush');
 	});
 
 	it('QUIRK: folded players still get their hands fully evaluated', () => {
@@ -174,6 +172,27 @@ describe('showdown: everyone folded to one player', () => {
 		// QUIRK: the survivor's hand is still evaluated and ranked (no mucked win);
 		// they "win" with whatever they hold, even a weak hand.
 		expect(hierarchyNames(state)).toEqual(['Winner']);
+	});
+});
+
+describe('showdown: tied royal flushes (board royal)', () => {
+	it('KNOWN BUG #1b: two royal flushes crash the payout machinery', () => {
+		// buildComparator's 'Royal Flush' branch seeds its winners list with
+		// Array.from({length: 1}) = [undefined] (cards.js:647), determineWinner
+		// returns it verbatim, and payWinners dereferences undefined.name. This
+		// was unreachable while bug #1 masked royal detection; fixing detection
+		// made a board royal (community A-K-Q-J-10 suited, so every live player
+		// holds a royal) reach it. The phantom entry also miscounts the split
+		// (prize / 3 for 2 winners). When fixed: a clean two-way split, 500 each.
+		expect(() =>
+			runShowdown(
+				[
+					mkPlayer('P1', { chips: 500, bet: 500, cards: cc('2C 3D') }),
+					mkPlayer('P2', { chips: 500, bet: 500, cards: cc('4S 5C') }),
+				],
+				'AH KH QH JH 10H'
+			)
+		).toThrow(TypeError);
 	});
 });
 

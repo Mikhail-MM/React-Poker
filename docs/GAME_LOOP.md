@@ -257,7 +257,8 @@ ignored — over the 7-card set (2 hole + 5 community), sorted descending:
 1. **Histograms**: `frequencyHistogram` (by card face) and `suitHistogram` (by suit).
 2. **Boolean battery**:
    - `checkFlush` — any suit count ≥ 5; keeps the flushed suit's cards (descending).
-   - `checkRoyalFlush` — *broken, always false* (bug #1).
+   - `checkRoyalFlush` — top five flush cards are exactly A-K-Q-J-10
+     (*detection fixed 2026-07-09 — see bug #1; tied royals still crash, bug #1b*).
    - `checkStraightFlush` — `checkStraight` run over only the flush-suit cards.
    - `checkStraight` (`cards.js:948`) — scans the descending *unique-value set* for a
      run of 5; the ace-low wheel is handled by `checkLowStraight` (ace 13 → 0,
@@ -304,7 +305,7 @@ that decides that rank:
 | Two Pair | 3: high pair, low pair, kicker |
 | Pair | 4: pair, kicker 1, kicker 2, kicker 3 |
 | Flush / No Pair | 5: every card |
-| Royal Flush | flat "everyone ties" list — *malformed and unreachable, see bug #1* |
+| Royal Flush | flat "everyone ties" list — *malformed: crashes on tied royals (bug #1b)* |
 
 ### 6.4 `determineContestedHierarchy` — full ordering with loser queue
 
@@ -414,16 +415,20 @@ chain in `App` (`handleAI`, `handleBetInputSubmit`, `handleFold`, `runGameLoop`,
 Numbered for cross-reference from the sections above. ✅ = reproduced by executing
 the real code; 👁 = established by inspection.
 
-1. ✅ **Royal flushes are never detected.** `checkRoyalFlush` (`cards.js:864`)
-   requires `flushCards[3].value === 10 && flushCards[4].value === 10` — but in
-   `VALUE_MAP` a Ten is `9` (J=10). Two same-suit cards of value 10 is impossible, so
-   the check never passes; a real royal (A♥K♥ on Q♥J♥10♥) classifies as "Straight
-   Flush". Payouts stay correct (a straight flush comparator still wins on top card),
-   but: the UI shows the wrong rank, **and** the bug masks a latent crash — the
-   'Royal Flush' branch of `buildComparator` (`cards.js:647`) seeds its array with
-   `Array.from({length: 1})` = `[undefined]`, and `determineWinner` returns that
-   array verbatim, so `payWinners` would dereference `undefined.playerIndex` if two
-   royals ever tied.
+1. ✅ **Royal flushes were never detected — detection FIXED 2026-07-09.**
+   `checkRoyalFlush` (`cards.js:864`) required `flushCards[4].value === 10`, but in
+   `VALUE_MAP` a Ten is `9` (J=10) — unsatisfiable, so royals classified as
+   "Straight Flush". The check now expects `[13, 12, 11, 10, 9]`; royals are
+   detected, ranked, and reported correctly (single-royal payout verified in
+   `cards.showdown.test.js`).
+   **1b. ✅ Residual — tied royals crash the showdown (LIVE, unmasked by the #1
+   fix).** The 'Royal Flush' branch of `buildComparator` (`cards.js:647`) seeds its
+   winners list with `Array.from({length: 1})` = `[undefined]`; `determineWinner`
+   returns it verbatim, and `payWinners` dereferences `undefined.name` → TypeError.
+   While #1 masked detection this was unreachable; now a **board royal** (community
+   A-K-Q-J-10 suited — every live player ties with a royal) reaches it and kills the
+   hand. The phantom entry also miscounts the split (prize ÷ 3 for 2 winners).
+   Reproduced by simulation; pinned as `KNOWN BUG #1b` in `cards.showdown.test.js`.
 2. ✅ **The documented AI freeze** (`players.js:105` "final AI will freeze").
    Mechanism, reproduced end-to-end: AI decides to raise while facing a `highBet`
    larger than its stack → `betValue` is clamped up to `highBet` (`ai.js:163-165`)
@@ -546,8 +551,9 @@ The actual `bet.js`/`cards.js`/`players.js` modules were executed under Node
 
 **Scenario 1 — capped all-in, dead money, 3 side pots** (the canonical example).
 Board 10♥ J♥ Q♥ 2♠ 7♦. Alice A♥K♥ all-in 200 (royal flush — reported as Straight
-Flush per bug #1); Bob 8♥3♥ (flush, 8 kicker) bet 800; Carol 5♥4♥ (flush, 5 kicker)
-bet 800; Dave 2♦7♣ (two pair) all-in 600; Eve folded 100.
+Flush until the bug #1 fix, now detected correctly); Bob 8♥3♥ (flush, 8 kicker) bet
+800; Carol 5♥4♥ (flush, 5 kicker) bet 800; Dave 2♦7♣ (two pair) all-in 600; Eve
+folded 100.
 
 - Pots built: `[{900: Alice,Dave,Bob,Carol}, {1200: Dave,Bob,Carol}, {400: Bob,Carol}]` — layer trace in §5.
 - Payouts: Alice +900 (net **+700** on a 200 stake despite the nut hand — correctly capped), Bob +1600 (net +800), Carol −800, Dave −600, Eve −100. `state.pot` drained to exactly 0.

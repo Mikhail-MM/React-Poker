@@ -78,7 +78,7 @@ Object {
 }
 `;
 
-exports[`best-hand construction per rank royal flush (KNOWN BUG #1: reported as Straight Flush) 1`] = `
+exports[`best-hand construction per rank royal flush 1`] = `
 Object {
   "bestHand": Array [
     "AH",
@@ -87,7 +87,7 @@ Object {
     "JH",
     "10H",
   ],
-  "rank": "Straight Flush",
+  "rank": "Royal Flush",
 }
 `;
 
@@ -180,7 +180,7 @@ Object {
         "JH",
         "10H",
       ],
-      "handRank": "Straight Flush",
+      "handRank": "Royal Flush",
       "name": "Alice",
     },
     Object {
@@ -220,7 +220,7 @@ Object {
   "messages": Array [
     Object {
       "prize": 900,
-      "rank": "Straight Flush",
+      "rank": "Royal Flush",
       "users": Array [
         "Alice",
       ],
@@ -245,7 +245,7 @@ Object {
       "chips": 900,
       "folded": false,
       "name": "Alice",
-      "rank": "Straight Flush",
+      "rank": "Royal Flush",
     },
     Object {
       "chips": 2800,

@@ -23,7 +23,7 @@ const evaluate = (holeCodes, boardCodes) => {
 };
 
 describe('best-hand construction per rank', () => {
-	it('royal flush (KNOWN BUG #1: reported as Straight Flush)', () => {
+	it('royal flush', () => {
 		expect(evaluate('AH KH', 'QH JH 10H 2S 7D')).toMatchSnapshot();
 	});
 

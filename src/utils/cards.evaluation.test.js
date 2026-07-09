@@ -120,20 +120,24 @@ describe('checkStraight', () => {
 });
 
 describe('checkRoyalFlush', () => {
-	it('KNOWN BUG #1: a genuine royal flush is NOT detected', () => {
-		// cards.js:869 requires flushCards[3].value === 10 AND flushCards[4].value === 10,
-		// but a real royal flush descends [13, 12, 11, 10, 9] (a Ten maps to 9).
-		// Two same-suit cards of value 10 is impossible, so this can never pass.
-		// When fixed, this expectation flips to true.
+	it('detects a genuine royal flush (bug #1 fixed)', () => {
 		const royal = descending(cc('AH KH QH JH 10H'));
-		expect(checkRoyalFlush(royal)).toBe(false);
+		expect(checkRoyalFlush(royal)).toBe(true);
 	});
 
-	it('a royal flush still ranks as a Straight Flush (payouts unaffected)', () => {
+	it('detects a royal at the top of a longer flush', () => {
+		expect(checkRoyalFlush(descending(cc('AH KH QH JH 10H 3H 2H')))).toBe(true);
+	});
+
+	it('rejects a king-high straight flush', () => {
+		expect(checkRoyalFlush(descending(cc('KH QH JH 10H 9H')))).toBe(false);
+	});
+
+	it('a royal flush also passes the straight-flush check (rank selection prefers Royal Flush)', () => {
 		const royal = descending(cc('AH KH QH JH 10H'));
 		const result = checkStraightFlush(royal);
 		expect(result.isStraightFlush).toBe(true);
-		expect(result.concurrentSFCardValues).toEqual([13, 12, 11, 10, 9]);
+		expect(result.concurrentSFCardValues).toEqual([13, 12, 11, 10, 9]); // Adjusted for correct royal flush values
 	});
 });
 
