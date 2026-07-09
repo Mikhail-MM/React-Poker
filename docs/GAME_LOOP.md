@@ -258,7 +258,7 @@ ignored — over the 7-card set (2 hole + 5 community), sorted descending:
 2. **Boolean battery**:
    - `checkFlush` — any suit count ≥ 5; keeps the flushed suit's cards (descending).
    - `checkRoyalFlush` — top five flush cards are exactly A-K-Q-J-10
-     (*detection fixed 2026-07-09 — see bug #1; tied royals still crash, bug #1b*).
+     (*fixed 2026-07-09 — see bug #1*).
    - `checkStraightFlush` — `checkStraight` run over only the flush-suit cards.
    - `checkStraight` (`cards.js:948`) — scans the descending *unique-value set* for a
      run of 5; the ace-low wheel is handled by `checkLowStraight` (ace 13 → 0,
@@ -298,14 +298,16 @@ that decides that rank:
 
 | Rank | Frames (compared in order) |
 |---|---|
-| Straight / Straight Flush | 1: top card of the run |
+| Straight / Straight Flush / Royal Flush | 1: top card of the run (all royals hold the ace → tied royals split) |
 | Four of a Kind | 2: quad value, kicker |
 | Full House | 2: trip value, pair value |
 | Three of a Kind | 3: trip, kicker 1, kicker 2 |
 | Two Pair | 3: high pair, low pair, kicker |
 | Pair | 4: pair, kicker 1, kicker 2, kicker 3 |
 | Flush / No Pair | 5: every card |
-| Royal Flush | flat "everyone ties" list — *malformed: crashes on tied royals (bug #1b)* |
+
+(A malformed Royal Flush special case used to bypass this table entirely and
+crashed on tied royals — removed 2026-07-09, see bug #1b.)
 
 ### 6.4 `determineContestedHierarchy` — full ordering with loser queue
 
@@ -421,14 +423,20 @@ the real code; 👁 = established by inspection.
    "Straight Flush". The check now expects `[13, 12, 11, 10, 9]`; royals are
    detected, ranked, and reported correctly (single-royal payout verified in
    `cards.showdown.test.js`).
-   **1b. ✅ Residual — tied royals crash the showdown (LIVE, unmasked by the #1
-   fix).** The 'Royal Flush' branch of `buildComparator` (`cards.js:647`) seeds its
-   winners list with `Array.from({length: 1})` = `[undefined]`; `determineWinner`
-   returns it verbatim, and `payWinners` dereferences `undefined.name` → TypeError.
-   While #1 masked detection this was unreachable; now a **board royal** (community
-   A-K-Q-J-10 suited — every live player ties with a royal) reaches it and kills the
-   hand. The phantom entry also miscounts the split (prize ÷ 3 for 2 winners).
-   Reproduced by simulation; pinned as `KNOWN BUG #1b` in `cards.showdown.test.js`.
+   **1b. ✅ Residual — tied royals crashed the showdown — FIXED 2026-07-09.**
+   The #1 fix unmasked this: `buildComparator`'s 'Royal Flush' branch seeded its
+   winners list with `Array.from({length: 1})` = `[undefined]`, `determineWinner`
+   returned it verbatim, and `payWinners` dereferenced `undefined.name` → a
+   **board royal** (community A-K-Q-J-10 suited — every live player ties) killed
+   the hand and would have miscounted the split (prize ÷ 3 for 2 winners). Fix:
+   the Royal Flush special cases were **removed** rather than repaired — royals
+   now flow through the standard Straight/Straight Flush comparator (single
+   frame, top card; all royals hold the ace, so they always tie and split), the
+   standard `determineWinner` loop (early return deleted), and the standard
+   grouping in `buildAbsolutePlayerRankings` (tied royals now nest as a tie
+   array like every other rank). Verified in `cards.showdown.test.js`; all other
+   snapshots passed unchanged, confirming no behavioral drift outside the
+   tied-royal path.
 2. ✅ **The documented AI freeze** (`players.js:105` "final AI will freeze").
    Mechanism, reproduced end-to-end: AI decides to raise while facing a `highBet`
    larger than its stack → `betValue` is clamped up to `highBet` (`ai.js:163-165`)

@@ -188,32 +188,28 @@ describe('showdown: tied royal flushes (board royal)', () => {
 			)
 		);
 
-	it('KNOWN BUG #1b: two royal flushes crash the payout machinery', () => {
-		// buildComparator's 'Royal Flush' branch seeds its winners list with
-		// Array.from({length: 1}) = [undefined] (cards.js:647), determineWinner
-		// returns it verbatim, and payWinners dereferences undefined.name. This
-		// was unreachable while bug #1 masked royal detection; fixing detection
-		// made a board royal reach it. The phantom entry also miscounts the
-		// split (prize / 3 for 2 winners) before the throw. When fixed: a clean
-		// two-way split, 500 each.
-		expect(() => showDown(boardRoyalState())).toThrow(TypeError);
+	it('tied royal flushes split the pot cleanly (bug #1b fixed)', () => {
+		// The malformed 'Royal Flush' special cases were removed; royals now
+		// tie-break through the standard Straight/Straight Flush comparator
+		// (single frame, top card — all royals hold the ace, so all tie).
+		const state = showDown(boardRoyalState());
+		expect(state.players.find(p => p.name === 'P1').chips).toBe(1000);
+		expect(state.players.find(p => p.name === 'P2').chips).toBe(1000);
+		expect(state.pot).toBe(0);
+		expect(state.showDownMessages).toEqual([
+			{ users: ['P1', 'P2'], prize: 500, rank: 'Royal Flush' },
+		]);
 	});
 
-	it('KNOWN BUG #1b (display): tied royals are not grouped as a tie in the hierarchy', () => {
-		// Every other rank nests tied players in an array (see the straight tie
-		// scenario above); the Royal Flush special case in
-		// buildAbsolutePlayerRankings concats holders as separate flat entries.
-		// The cascade mutates state in place before the payout crash, so the
-		// hierarchy it built is still observable. When fixed: [['P1', 'P2']].
-		const state = boardRoyalState();
-		expect(() => showDown(state)).toThrow(TypeError);
-		expect(hierarchyNames(state)).toEqual(['P1', 'P2']);
+	it('tied royals nest as a tie in the hierarchy like any other rank (bug #1b fixed)', () => {
+		const state = showDown(boardRoyalState());
+		expect(hierarchyNames(state)).toEqual([['P1', 'P2']]);
 	});
 
-	it('control: tied straight flushes (non-royal) split the pot cleanly', () => {
-		// The same board-tie shape one rank down takes the normal comparator
-		// path and splits without incident — the crash is specific to the
-		// Royal Flush special case, not to board ties in general.
+	it('tied straight flushes (non-royal) split the pot cleanly', () => {
+		// The same board-tie shape one rank down — this test isolated the crash
+		// to the Royal Flush special case while bug #1b was live; both paths
+		// are now literally the same code.
 		const state = runShowdown(
 			[
 				mkPlayer('P1', { chips: 500, bet: 500, cards: cc('2C 3D') }),

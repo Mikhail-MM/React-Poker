@@ -238,7 +238,7 @@ Effort: 1–2 days once fast-check is a devDependency. Independent of Stages
 |---|---|---|---|---|
 | Side-pot matrix + invariants | ✅ done | — | high | 13 scenarios, per-street ledgers |
 | Cascade seam traces | ✅ done | — | high | module-boundary blind spots documented |
-| Fix bugs #1b–#3 against the pinned tests | now | hours | high | #1 detection fixed 2026-07-09, which exposed #1b (tied-royal crash); the freeze (#2) and odd-chip leak (#3) remain |
+| Fix bugs #2–#3 against the pinned tests | now | hours | high | #1 (royal detection) and #1b (tied-royal crash) fixed 2026-07-09; the freeze (#2) and odd-chip leak (#3) remain |
 | `step()` transition log | 2 | ~1 day | high | names the action vocabulary |
 | Trace `showDown` interior (per-pot payouts) | 2 | hours | med | needs `step()`; closes the biggest blind spot |
 | Reducer + driver queue | 3 | 1–2 wks | very high | animation beats, time travel, retires bug classes #2/#10 |

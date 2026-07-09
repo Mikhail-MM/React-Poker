@@ -443,15 +443,6 @@ const buildAbsolutePlayerRankings = (state) => {
 	
 	for (const [handRank, playersWhoHoldThisRank] of rankMap) {
 		if (playersWhoHoldThisRank.length > 0) {
-			if (handRank === 'Royal Flush') {
-				const formattedPlayersWhoHoldThisRank = playersWhoHoldThisRank.map(player => ({
-					name: player.name,
-					bestHand: player.bestHand,
-					handRank
-				}))
-				hierarchy = hierarchy.concat(formattedPlayersWhoHoldThisRank);
-				continue;
-			} 
 			if (playersWhoHoldThisRank.length === 1) {
 				const { name, bestHand } = playersWhoHoldThisRank[0];
 				hierarchy = hierarchy.concat([{
@@ -643,17 +634,6 @@ const buildComparator = (rank, playerData) => {
 	let comparator;
 	switch(rank) {
 		// TODO: Make These MORE DECLARATIVE!
-		case('Royal Flush'): {
-			comparator = Array.from({length: 1});
-			playerData.forEach((playerShowdownData, index) => {
-				comparator.push({
-					name: playerData[index].name, // All Royal Flush hands are instant ties, we don't need to process these contestants further, just divide the pot between all players in this array
-					playerIndex: playerData[index].playerIndex,
-					bestHand: playerData[index].bestHand
-				})
-			})
-			break 
-		}
 		case('Four Of A Kind'): {
 			comparator = Array.from({length: 2}, () => Array.from({length: 0}))
 			playerData.forEach((playerShowdownData, index) => {
@@ -730,11 +710,12 @@ const buildComparator = (rank, playerData) => {
 			break 
 		}
 		case('Straight'):
-		case('Straight Flush'): {
+		case('Straight Flush'):
+		case('Royal Flush'): {
 			comparator = Array.from({length: 1}, () => Array.from({length: 0}))
 			playerData.forEach((playerShowdownData, index) => {
 				comparator[0].push({
-					card: playerData[index].bestHand[0], // The highest card of a straight will determine the winner, all others are concurrent and will be the same
+					card: playerData[index].bestHand[0], // The highest card of a straight will determine the winner, all others are concurrent and will be the same. Royal flushes are identical A-high runs, so they always tie here.
 					name: playerData[index].name,
 					playerIndex: playerData[index].playerIndex,
 					bestHand: playerData[index].bestHand
@@ -804,7 +785,6 @@ const buildComparator = (rank, playerData) => {
 const determineWinner = (comparator, rank) => {
 	let winners;
 	// We can definitely refactor this.
-	if (rank === 'Royal Flush') return comparator
 		for (let i = 0; i < comparator.length; i++) {
 			let highValue = 0;
 			let losers = [];
