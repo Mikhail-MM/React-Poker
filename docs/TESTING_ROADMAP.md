@@ -232,6 +232,26 @@ Effort: 1–2 days once fast-check is a devDependency. Independent of Stages
 
 ---
 
+## AI challenge track
+
+The pot-commitment wiring (2026-07-09) fixed the biggest exploit multiplier:
+stakes are now the cost-to-call (capped at the stack) measured against the
+hand-start stack via `currentRoundChipsInvested`, so bots no longer get easier
+to bluff the deeper they are invested, and they call off short stacks with
+promising hands instead of folding to the endgame shove. Remaining levers,
+ranked by challenge-per-effort:
+
+1. **Pot odds** — the pot is still not an input anywhere; a single flop
+   overbet still folds out every bot below two pair. Feed
+   `costToCall / (pot + costToCall)` into the stakes classification.
+2. **Draw awareness** — 4-flushes and open-enders rate as 'No Pair' and fold
+   to 15% of stack; rating draws ~`hidraw` makes bots peel flops and arrive
+   at strong hands far more often (which also feeds lever 1).
+3. **Bluff-catch floor** — a small random call-anything frequency (scaled by
+   commitment) makes bluff-spam statistically unprofitable over a session.
+4. **Pre-flop bucket differentiation** — K8o currently rates `beware` (never
+   folds pre-flop) identically to AK; split the top bucket by kicker quality.
+
 ## Wishlist / decision table
 
 | Item | Stage | Effort | Payoff | Notes |
@@ -245,6 +265,7 @@ Effort: 1–2 days once fast-check is a devDependency. Independent of Stages
 | Immer + patch log | 4 | days | high | keeps mutative style; `cloneDeep` retires |
 | fast-check pot properties | 5 | 1–2 days | high | independent; can precede Stage 2 |
 | Seeded RNG injection (deck + AI) | any | ~1 day | med | full-game golden replays need determinism |
+| AI challenge track (pot odds, draws, bluff-catch floor) | any | days | high | see §AI challenge track; pot commitment wired 2026-07-09 |
 | TypeScript migration | any | ongoing | high | see GAME_LOOP.md §10 — catches bug classes #2/#4/#6 at compile time |
 
 ## Suggested order

@@ -260,3 +260,76 @@ describe('post-flop decisions (betting2-4)', () => {
 		expect(state.players[0].folded).toBe(true);
 	});
 });
+
+describe('pot commitment & cost to call (stackInvestment wired)', () => {
+	// Stakes are measured as cost-to-call against the HAND-START stack
+	// (chips + bet + currentRoundChipsInvested). Before the wiring, the
+	// denominator was the shrinking remaining stack and the numerator the full
+	// highBet — both errors compounded toward folding, making multi-street
+	// bluff pressure the dominant exploit against the bots.
+
+	it('stands its ground with a made hand after heavy investment', () => {
+		// Top pair on the turn, 5000 of a 10000 hand-start stack already in the
+		// pot. A 1800 barrel reads 18% of the hand-start stack ('hidraw', at
+		// Pair's exact call limit) -> CALL. Old math: 1800/5000 remaining = 36%
+		// ('major') -> fold. Same bet, same hand — the investment is the flip.
+		pinRandom(0.9); // fails the 0.5 raise roll -> flat call
+		const state = handleAI(
+			aiState(
+				{ cards: cc('KC 4D'), chips: 5000, currentRoundChipsInvested: 5000 },
+				{
+					phase: 'betting3',
+					highBet: 1800,
+					communityCards: cc('KH 9S 2H 3S 8D'), // top pair, kings
+				}
+			),
+			jest.fn()
+		);
+		expect(state.players[0].folded).toBe(false);
+		expect(state.players[0].bet).toBe(1800);
+		expect(state.players[0].chips).toBe(3200);
+	});
+
+	it('calls off a short stack with a promising hand instead of folding to the shove', () => {
+		// The classic brute-force line: barrel until the bot is short, then
+		// shove. 8000 of 10000 already invested, 2000 behind, opponent shoves
+		// 9000. Cost is capped at the 2000 the bot actually has -> 20% of the
+		// hand-start stack ('hidraw') -> all-in call with top pair. Old math
+		// read 100%+ of remaining ('beware') and folded everything below two
+		// pair right here.
+		pinRandom(0.9);
+		const state = handleAI(
+			aiState(
+				{ cards: cc('KC 4D'), chips: 2000, currentRoundChipsInvested: 8000 },
+				{
+					phase: 'betting4',
+					highBet: 9000,
+					communityCards: cc('KH 9S 2H 3S 8D'),
+				}
+			),
+			jest.fn()
+		);
+		expect(state.players[0].folded).toBe(false);
+		expect(state.players[0].allIn).toBe(true);
+		expect(state.players[0].bet).toBe(2000);
+		expect(state.players[0].chips).toBe(0);
+	});
+
+	it('measures pressure by the cost to call, not the full highBet', () => {
+		// Pre-flop, the bot already has 3600 in front of it and faces a raise
+		// to 4000: the price of continuing is 400 (4%, 'lowdraw'), not 4000
+		// (40%, 'major'). Old math folded a suited-connector hand (callLimit
+		// 'strong') that only needed 400 more to see the flop.
+		pinRandom(0.9); // fails the 0.1 raise roll -> flat call
+		const state = handleAI(
+			aiState(
+				{ cards: cc('6H 4H'), chips: 6400, bet: 3600 },
+				{ phase: 'betting1', highBet: 4000 }
+			),
+			jest.fn()
+		);
+		expect(state.players[0].folded).toBe(false);
+		expect(state.players[0].bet).toBe(4000);
+		expect(state.players[0].chips).toBe(6000);
+	});
+});

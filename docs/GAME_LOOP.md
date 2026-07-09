@@ -99,8 +99,8 @@ remainder and every pot drains to 0.)
 | `betReconciled` | **The betting-round terminator flag** — see §4 |
 | `sidePotStack` | Scratch field: copy of `bet` consumed by `calculateSidePots` |
 | `roundStartChips`, `roundEndChips` | For the ± earnings display on the showdown screen |
-| `currentRoundChipsInvested` | Written in `reconcilePot`, **never read** (dead) |
-| `stackInvestment` | Read by AI pot-odds math, **never incremented** (dead — always 0) |
+| `currentRoundChipsInvested` | Chips committed on *prior streets* of this hand (accumulated in `reconcilePot`, reset each hand). Read by the AI's pot-commitment stakes math since 2026-07-09 |
+| `stackInvestment` | **Dead** — the reserved slot for the pot-commitment feature, superseded by `currentRoundChipsInvested` (which was already tracking it); never written, no longer read |
 | `canRaise` | Written by AI, **never read** (dead) |
 | `showDownHand` | `{hand, descendingSortHand, heldRankHierarchy, bestHandRank, bestHand, bools}` — filled by `showDown()` |
 
@@ -384,9 +384,13 @@ and Dave lose their stakes; folded Eve's 100 was dead money inside the main pot.
 A single-function rule engine, no personality/memory (a `generatePersonality` exists
 but is unused and broken). Decision inputs:
 
-1. **Stakes**: `highBet / (chips + bet + stackInvestment) × 100` — i.e. what % of
-   your remaining stack the call costs (`stackInvestment` is always 0, so it's
-   percent-of-current-stack). `classifyStakes` buckets this into a 9-tier ladder:
+1. **Stakes**: `min(highBet − bet, chips) / (chips + bet +
+   currentRoundChipsInvested) × 100` — the *cost to call*, capped at the stack,
+   as a % of the *hand-start* stack (pot commitment, wired 2026-07-09).
+   Historically this was the full `highBet` over the shrinking remaining stack,
+   which both overstated the price when partially in and made bots easier to
+   bluff the deeper they were invested. `classifyStakes` buckets this into a
+   9-tier ladder:
    `blind < insignificant < lowdraw < meddraw < hidraw < strong < major < aggro < beware`
    (`BET_HIERARCHY` gives the ordering).
 2. **Hand strength → determinant** `{callLimit, raiseChance, raiseRange}`:
@@ -532,11 +536,11 @@ the real code; 👁 = established by inspection.
     el)` copies before sorting); `popCards` returns a lone object for 1 card but an
     array otherwise, which is why the duplicate `popShowdownCards` exists
     (acknowledged at `cards.js:83-88`).
-12. 👁 **Dead state**: `stackInvestment` (AI pot-odds intends stack-across-rounds
-    but is never incremented), `canRaise`, `currentRoundChipsInvested`,
-    `playActionMessages`, `generatePersonality`, and the player `id` (names are the
-    real join key — duplicate names from randomuser.me would corrupt payouts and
-    refunds).
+12. 👁 **Dead state**: `stackInvestment` (superseded 2026-07-09 — the AI's
+    pot-commitment math now reads `currentRoundChipsInvested`, which is no
+    longer dead), `canRaise`, `playActionMessages`, `generatePersonality`, and
+    the player `id` (names are the real join key — duplicate names from
+    randomuser.me would corrupt payouts and refunds).
 13. 👁 `shuffle` (`cards.js:45`) is O(n²) rejection sampling rather than
     Fisher-Yates. Uniform, just wasteful.
 14. 👁 Folded players still get full hand evaluation in `showDown` (wasted work),

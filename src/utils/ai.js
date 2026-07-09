@@ -47,8 +47,20 @@ const handleAI = (state, pushAnimationState) => {
 	const activePlayer = state.players[state.activePlayerIndex];
 	const min = determineMinBet(highBet, activePlayer.chips, activePlayer.bet)
     const max = activePlayer.chips + activePlayer.bet
-	const totalInvestment = activePlayer.chips + activePlayer.bet + activePlayer.stackInvestment; // NOTE: StackInvestment must be incremented at each level of BETTING
-	const investmentRequiredToRemain = (highBet / totalInvestment) * 100; 
+	// Pot-commitment weighting (the "stackInvestment" feature, finally wired):
+	// reconcilePot accumulates each street's bets into currentRoundChipsInvested
+	// (reset every hand), so the denominator is the bot's HAND-START stack.
+	// Measuring against the remaining stack instead made every chip already
+	// invested shrink the denominator — bots got easier to bluff out of exactly
+	// the pots they were deepest in (inverse pot commitment).
+	const totalInvestment = activePlayer.chips + activePlayer.bet + activePlayer.currentRoundChipsInvested;
+	// The price of staying in is the cost TO CALL: highBet minus what is already
+	// in front of the bot this street (using the full highBet overstated the
+	// pressure whenever the bot was partially in — blinds, every re-raised
+	// street), capped at the stack, since an oversized shove can only take what
+	// the bot actually has behind.
+	const costToRemain = Math.min(highBet - activePlayer.bet, activePlayer.chips);
+	const investmentRequiredToRemain = (costToRemain / totalInvestment) * 100;
 	const descendingSortHand = activePlayer.cards.concat(state.communityCards).sort((a, b) => b.value - a.value)
 	const { frequencyHistogram, suitHistogram } =  generateHistogram(descendingSortHand)
 	const stakes = classifyStakes(investmentRequiredToRemain);
