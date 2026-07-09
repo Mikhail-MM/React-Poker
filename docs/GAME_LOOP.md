@@ -513,7 +513,10 @@ simulation harness used for this doc required zero refactoring, only stubbing
 suites (`src/utils/*.test.js`, factories in `src/testUtils/factories.js`, run via
 `CI=true yarn test`): every scenario in Appendix A and every bug in §9 marked
 `KNOWN BUG` is pinned by a test asserting *current* behavior. When a bug is fixed,
-its test is meant to be flipped intentionally in the same change.
+its test is meant to be flipped intentionally in the same change. The plan for
+evolving this further — cascade seam tracing, an explicit transition log, a
+reducer/driver architecture, Immer patch-level time travel, and property-based
+pot testing — lives in [TESTING_ROADMAP.md](./TESTING_ROADMAP.md).
 
 **Implicit render-loop state machine.** Because each action is
 `(state) → newState` already, migrating to a reducer is mostly mechanical:

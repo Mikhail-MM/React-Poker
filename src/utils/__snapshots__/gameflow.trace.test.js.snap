@@ -1,0 +1,365 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`cascade traces a call that closes pre-flop betting cascades through the flop deal 1`] = `
+Array [
+  Object {
+    "seam": "handleBet",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 0,
+      "communityCards": Array [],
+      "highBet": 20,
+      "phase": "betting1",
+      "players": Array [
+        "P0 chips=1000 bet=0",
+        "P1 chips=980 bet=20 reconciled",
+        "P2 chips=980 bet=20 reconciled",
+      ],
+      "pot": 0,
+      "sidePots": Array [],
+    },
+  },
+  Object {
+    "seam": "determineNextActivePlayer",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 0,
+      "communityCards": Array [],
+      "highBet": 20,
+      "phase": "betting1",
+      "players": Array [
+        "P0 chips=980 bet=20 reconciled",
+        "P1 chips=980 bet=20 reconciled",
+        "P2 chips=980 bet=20 reconciled",
+      ],
+      "pot": 0,
+      "sidePots": Array [],
+    },
+  },
+  Object {
+    "seam": "handlePhaseShift",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 1,
+      "communityCards": Array [],
+      "highBet": 20,
+      "phase": "betting1",
+      "players": Array [
+        "P0 chips=980 bet=20 reconciled",
+        "P1 chips=980 bet=20 reconciled",
+        "P2 chips=980 bet=20 reconciled",
+      ],
+      "pot": 0,
+      "sidePots": Array [],
+    },
+  },
+  Object {
+    "seam": "dealFlop",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 1,
+      "communityCards": Array [],
+      "highBet": 0,
+      "phase": "flop",
+      "players": Array [
+        "P0 chips=980 bet=0",
+        "P1 chips=980 bet=0",
+        "P2 chips=980 bet=0",
+      ],
+      "pot": 60,
+      "sidePots": Array [
+        "60: [P0, P1, P2]",
+      ],
+    },
+  },
+  Object {
+    "seam": "determinePhaseStartActivePlayer",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 1,
+      "communityCards": Array [
+        "6C",
+        "5C",
+        "4C",
+      ],
+      "highBet": 0,
+      "phase": "flop",
+      "players": Array [
+        "P0 chips=980 bet=0",
+        "P1 chips=980 bet=0",
+        "P2 chips=980 bet=0",
+      ],
+      "pot": 60,
+      "sidePots": Array [
+        "60: [P0, P1, P2]",
+      ],
+    },
+  },
+  Object {
+    "seam": "(final)",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 0,
+      "communityCards": Array [
+        "6C",
+        "5C",
+        "4C",
+      ],
+      "highBet": 0,
+      "phase": "betting2",
+      "players": Array [
+        "P0 chips=980 bet=0",
+        "P1 chips=980 bet=0",
+        "P2 chips=980 bet=0",
+      ],
+      "pot": 60,
+      "sidePots": Array [
+        "60: [P0, P1, P2]",
+      ],
+    },
+  },
+]
+`;
+
+exports[`cascade traces a fold that leaves one player cascades to a board runout and showdown 1`] = `
+Array [
+  Object {
+    "seam": "handleFold",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 2,
+      "communityCards": Array [
+        "9H",
+        "10H",
+        "JH",
+      ],
+      "highBet": 100,
+      "phase": "betting2",
+      "players": Array [
+        "P0 chips=900 bet=100 reconciled",
+        "P1 chips=900 bet=100 FOLDED reconciled",
+        "P2 chips=900 bet=100",
+      ],
+      "pot": 0,
+      "sidePots": Array [],
+    },
+  },
+  Object {
+    "seam": "determineNextActivePlayer",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 2,
+      "communityCards": Array [
+        "9H",
+        "10H",
+        "JH",
+      ],
+      "highBet": 100,
+      "phase": "betting2",
+      "players": Array [
+        "P0 chips=900 bet=100 reconciled",
+        "P1 chips=900 bet=100 FOLDED reconciled",
+        "P2 chips=900 bet=100 FOLDED reconciled",
+      ],
+      "pot": 0,
+      "sidePots": Array [],
+    },
+  },
+  Object {
+    "seam": "dealMissingCommunityCards",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 0,
+      "communityCards": Array [
+        "9H",
+        "10H",
+        "JH",
+      ],
+      "highBet": 100,
+      "phase": "betting2",
+      "players": Array [
+        "P0 chips=900 bet=100 reconciled",
+        "P1 chips=900 bet=100 FOLDED reconciled",
+        "P2 chips=900 bet=100 FOLDED reconciled",
+      ],
+      "pot": 0,
+      "sidePots": Array [],
+    },
+  },
+  Object {
+    "seam": "reconcilePot",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 0,
+      "communityCards": Array [
+        "9H",
+        "10H",
+        "JH",
+        "2D",
+        "QS",
+      ],
+      "highBet": 100,
+      "phase": "showdown",
+      "players": Array [
+        "P0 chips=900 bet=100 reconciled",
+        "P1 chips=900 bet=100 FOLDED reconciled",
+        "P2 chips=900 bet=100 FOLDED reconciled",
+      ],
+      "pot": 0,
+      "sidePots": Array [],
+    },
+  },
+  Object {
+    "seam": "showDown",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 0,
+      "communityCards": Array [
+        "9H",
+        "10H",
+        "JH",
+        "2D",
+        "QS",
+      ],
+      "highBet": 0,
+      "phase": "showdown",
+      "players": Array [
+        "P0 chips=900 bet=0",
+        "P1 chips=900 bet=0 FOLDED",
+        "P2 chips=900 bet=0 FOLDED",
+      ],
+      "pot": 300,
+      "sidePots": Array [
+        "300: [P0]",
+      ],
+    },
+  },
+  Object {
+    "seam": "(final)",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 0,
+      "communityCards": Array [
+        "9H",
+        "10H",
+        "JH",
+        "2D",
+        "QS",
+      ],
+      "highBet": 0,
+      "phase": "showdown",
+      "players": Array [
+        "P0 chips=1200 bet=0",
+        "P1 chips=900 bet=0 FOLDED",
+        "P2 chips=900 bet=0 FOLDED",
+      ],
+      "pot": 0,
+      "sidePots": Array [
+        "300: [P0]",
+      ],
+    },
+  },
+]
+`;
+
+exports[`cascade traces a river call cascades through reconciliation into the showdown 1`] = `
+Array [
+  Object {
+    "seam": "handleBet",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 0,
+      "communityCards": Array [
+        "QH",
+        "JH",
+        "10H",
+        "2S",
+        "7D",
+      ],
+      "highBet": 300,
+      "phase": "betting4",
+      "players": Array [
+        "Ann chips=700 bet=300",
+        "Ben chips=700 bet=300 reconciled",
+      ],
+      "pot": 0,
+      "sidePots": Array [],
+    },
+  },
+  Object {
+    "seam": "determineNextActivePlayer",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 0,
+      "communityCards": Array [
+        "QH",
+        "JH",
+        "10H",
+        "2S",
+        "7D",
+      ],
+      "highBet": 300,
+      "phase": "betting4",
+      "players": Array [
+        "Ann chips=700 bet=300 reconciled",
+        "Ben chips=700 bet=300 reconciled",
+      ],
+      "pot": 0,
+      "sidePots": Array [],
+    },
+  },
+  Object {
+    "seam": "handlePhaseShift",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 1,
+      "communityCards": Array [
+        "QH",
+        "JH",
+        "10H",
+        "2S",
+        "7D",
+      ],
+      "highBet": 300,
+      "phase": "betting4",
+      "players": Array [
+        "Ann chips=700 bet=300 reconciled",
+        "Ben chips=700 bet=300 reconciled",
+      ],
+      "pot": 0,
+      "sidePots": Array [],
+    },
+  },
+  Object {
+    "seam": "showDown",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 1,
+      "communityCards": Array [
+        "QH",
+        "JH",
+        "10H",
+        "2S",
+        "7D",
+      ],
+      "highBet": 0,
+      "phase": "showdown",
+      "players": Array [
+        "Ann chips=700 bet=0",
+        "Ben chips=700 bet=0",
+      ],
+      "pot": 600,
+      "sidePots": Array [
+        "600: [Ann, Ben]",
+      ],
+    },
+  },
+  Object {
+    "seam": "(final)",
+    "stateOnEntry": Object {
+      "activePlayerIndex": 1,
+      "communityCards": Array [
+        "QH",
+        "JH",
+        "10H",
+        "2S",
+        "7D",
+      ],
+      "highBet": 0,
+      "phase": "showdown",
+      "players": Array [
+        "Ann chips=1300 bet=0",
+        "Ben chips=700 bet=0",
+      ],
+      "pot": 0,
+      "sidePots": Array [
+        "600: [Ann, Ben]",
+      ],
+    },
+  },
+]
+`;
