@@ -209,9 +209,13 @@ describe('beginNextRound', () => {
 		expect(state.numPlayersAllIn).toBe(0);
 	});
 
-	it('KNOWN BUG #3 (companion): the pot is NOT reset between rounds', () => {
-		// Odd chips stranded by split pots (see cards.showdown.test.js) accumulate
-		// here forever. When fixed, expect 0.
+	it('the pot carries over between rounds (bug #3 companion)', () => {
+		// Preserving the pot is BY DESIGN — the "odd chip carries to the next
+		// hand" house rule. The defect lives elsewhere: the carried amount is
+		// never folded into a side pot, so it can never be won (see the bug #3
+		// lifecycle test in cards.showdown.test.js). Under the carryover fix
+		// this stays 7; under the card-room rule (odd chip paid out
+		// immediately) beginNextRound would start from 0.
 		expect(beginNextRound(roundState()).pot).toBe(7);
 	});
 

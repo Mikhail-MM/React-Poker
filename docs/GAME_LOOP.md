@@ -55,8 +55,9 @@ is no way to pause mid-cascade for an animation beat.
 `player.chips + player.bet` is a player's total liquid stack at any moment. Chips
 move: `chips → bet` (during a betting round) `→ pot` + `sidePots[].potValue`
 (at `reconcilePot`) `→ winner.chips` (at `payWinners`). Simulation confirmed chip
-conservation across the full pipeline, with one exception: the odd-chip remainder of
-split pots is stranded in `state.pot` forever (bug #3).
+conservation across the full pipeline, with one exception: the odd-chip remainder
+of split pots is meant to carry to the next hand but is never claimable — it
+accumulates in `state.pot` forever (bug #3).
 
 ---
 
@@ -457,11 +458,24 @@ the real code; 👁 = established by inspection.
    would still be fatal for a robot. Deliberately not papered over with silent
    clamping — that would mask upstream bugs; if hardened later, prefer a
    descriptive throw at the rejection site.
-3. ✅ **Odd-chip leak on split pots.** `payWinners` (`cards.js:625-637`) pays each
-   winner `floor(prize/n)`; the remainder is subtracted from no one and stays in
-   `state.pot`. `beginNextRound` never resets `pot`, so the remainder is carried on
-   the pot display forever and the chips leave circulation (verified: 801-chip pot
-   split two ways → 400 + 400, `state.pot === 1` at round end).
+3. ✅ **Odd-chip remainder is carried over but never claimable.** Design intent
+   (per the author): a non-splittable remainder rides into the next hand's pot —
+   a legitimate "odd chip carries" house rule, and `beginNextRound` preserving
+   `pot` is consistent with it. The defect is downstream: **payouts flow
+   exclusively through `sidePots[].potValue`**, and side pots are built from each
+   round's bets alone (`calculateSidePots` layers `sidePotStack = bet`), so the
+   carried chip is invisible to the payout machinery. Verified across two hands:
+   an 801 pot splits 400/400 leaving `pot === 1`; the *next* hand's winner is
+   paid only that hand's bets and `pot === 1` survives its showdown too. The pot
+   display drifts up monotonically and the chips permanently leave the table
+   economy. Fix options: **(a) implement the carryover** — fold the un-bucketed
+   remainder (`pot − Σ sidePots`) into the first side pot built in the next
+   round, making it claimable by the main-pot contestants (matches the original
+   intent); or **(b) the standard card-room rule** — award the odd chip(s) to
+   one winner deterministically in `payWinners` (e.g. first winner left of the
+   dealer) and never carry. Pinned in `cards.showdown.test.js` (remainder +
+   lifecycle tests, with per-option expectations) and `players.test.js` (pot
+   preserved across rounds).
 4. 👁 **Boolean-vs-number comparison in raise un-reconciliation.**
    `if (!player.folded || !player.chips === 0)` (`bet.js:43`): `!player.chips === 0`
    compares a boolean to a number — always false — so the condition is just

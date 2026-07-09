@@ -238,7 +238,7 @@ Effort: 1–2 days once fast-check is a devDependency. Independent of Stages
 |---|---|---|---|---|
 | Side-pot matrix + invariants | ✅ done | — | high | 13 scenarios, per-street ledgers |
 | Cascade seam traces | ✅ done | — | high | module-boundary blind spots documented |
-| Fix bug #3 against the pinned tests | now | hours | high | #1, #1b, and #2 (AI freeze) fixed 2026-07-09; the odd-chip leak (#3) remains, plus optional `handleBet` hardening (descriptive throw, not silent clamping) |
+| Fix bug #3 against the pinned tests | now | hours | high | #1, #1b, #2 (freeze), #6 (raise typos) fixed 2026-07-09; #3 remains — the carried odd chip is never claimable (pick: fold it into the next round's first side pot, or pay it to a fixed winner). Optional `handleBet` hardening (descriptive throw) also open |
 | `step()` transition log | 2 | ~1 day | high | names the action vocabulary |
 | Trace `showDown` interior (per-pot payouts) | 2 | hours | med | needs `step()`; closes the biggest blind spot |
 | Reducer + driver queue | 3 | 1–2 wks | very high | animation beats, time travel, retires bug classes #2/#10 |

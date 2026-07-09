@@ -148,11 +148,34 @@ describe('showdown: exact tie splits the pot', () => {
 		]);
 	});
 
-	it('KNOWN BUG #3: the odd chip is stranded in state.pot', () => {
-		// payWinners pays floor(801/2) to each winner and never distributes the
-		// remainder; beginNextRound does not reset pot, so the chip leaves
-		// circulation permanently. When fixed, expect state.pot to be 0.
+	it('KNOWN BUG #3: the odd chip stays behind in state.pot', () => {
+		// payWinners pays floor(801/2) to each winner and leaves the remainder
+		// in the pot. Leaving it there is arguably BY DESIGN — an "odd chip
+		// carries to the next hand" house rule (beginNextRound deliberately
+		// preserves pot). The actual defect is downstream: the carried chip is
+		// never claimable (see the lifecycle test below). Under a carryover fix
+		// this assertion stays 1; under the card-room rule (odd chip to a fixed
+		// winner) it becomes 0.
 		expect(play().pot).toBe(1);
+	});
+
+	it('KNOWN BUG #3 (lifecycle): the carried-over chip is never claimable in later rounds', () => {
+		// The carryover intent fails because payouts flow exclusively through
+		// sidePots[].potValue, and side pots are built from each round's BETS
+		// alone (calculateSidePots layers player.sidePotStack = player.bet).
+		// A pot seeded with a remainder pays out only the bets: the winner of
+		// the next hand does not receive the extra chip, and it rides forever.
+		// When fixed (carryover option), the winner here should get 1501.
+		const state = runShowdown(
+			[
+				mkPlayer('NextWinner', { chips: 500, bet: 500, cards: cc('AH KH') }),
+				mkPlayer('NextLoser', { chips: 500, bet: 500, cards: cc('2C 7D') }),
+			],
+			'QH JH 10H 2S 7S',
+			{ pot: 1 } // the remainder carried in from the previous hand's odd split
+		);
+		expect(state.players.find(p => p.name === 'NextWinner').chips).toBe(1500); // bets only
+		expect(state.pot).toBe(1); // still stranded, one hand later
 	});
 });
 
