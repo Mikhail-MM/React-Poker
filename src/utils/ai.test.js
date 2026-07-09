@@ -2,7 +2,13 @@
 // Math.random is pinned per test to force deterministic decision paths.
 // "KNOWN BUG" tests pin buggy behavior on purpose (see docs/GAME_LOOP.md §9) —
 // flip them when the bug is fixed.
-import { handleAI, clampBetToLegalRange } from './ai.js';
+import {
+	handleAI,
+	clampBetToLegalRange,
+	buildPreFlopDeterminant,
+	buildGeneralizedDeterminant,
+	BET_HIERARCHY,
+} from './ai.js';
 import { cc, mkPlayer, mkState } from '../testUtils/factories.js';
 
 let randomSpy;
@@ -25,6 +31,43 @@ const aiState = (aiOverrides, stateOverrides) =>
 		],
 		{ activePlayerIndex: 0, ...stateOverrides }
 	);
+
+describe('determinant integrity (the bug #6 typo class)', () => {
+	// Loose typing let `raiseChange` (sic) and the malformed tier string
+	// 'hidraw, strong' silently disable most post-flop raising. These tests
+	// make the determinant tables' shape executable: every determinant must
+	// carry a numeric raiseChance and only tiers that exist in BET_HIERARCHY.
+	const RANKS = [
+		'Royal Flush', 'Straight Flush', 'Four Of A Kind', 'Full House',
+		'Flush', 'Straight', 'Three Of A Kind', 'Two Pair', 'Pair', 'No Pair',
+	];
+
+	it('every post-flop determinant has a numeric raiseChance and legal raiseRange tiers', () => {
+		RANKS.forEach(rank => {
+			const { callLimit, raiseChance, raiseRange } = buildGeneralizedDeterminant(null, rank, null);
+			expect(BET_HIERARCHY[callLimit]).toBeDefined();
+			expect(typeof raiseChance).toBe('number');
+			raiseRange.forEach(tier => expect(BET_HIERARCHY[tier]).toBeDefined());
+		});
+	});
+
+	it('every pre-flop determinant has a numeric raiseChance and legal tiers when it can raise', () => {
+		for (let high = 1; high <= 13; high++) {
+			for (let low = 1; low <= high; low++) {
+				[true, false].forEach(suited => {
+					const { callLimit, raiseChance, raiseRange } = buildPreFlopDeterminant(
+						high, low, suited ? {} : undefined, high - low <= 4
+					);
+					expect(BET_HIERARCHY[callLimit]).toBeDefined();
+					expect(typeof raiseChance).toBe('number');
+					if (raiseChance > 0) {
+						raiseRange.forEach(tier => expect(BET_HIERARCHY[tier]).toBeDefined());
+					}
+				});
+			}
+		}
+	});
+});
 
 describe('clampBetToLegalRange', () => {
 	it('lifts a bet below the table price up to the price', () => {
@@ -149,11 +192,10 @@ describe('post-flop decisions (betting2-4)', () => {
 		expect(result.players[0].allIn).toBe(true);
 	});
 
-	it('KNOWN BUG #6: a flush can never raise (raiseChange typo)', () => {
-		// buildGeneralizedDeterminant returns `raiseChange` (sic) for Flush and
-		// below (ai.js:213), so willRaise(undefined) is always false. With the
-		// roll pinned to 0 — which would pass any defined raiseChance — the AI
-		// still just calls. When fixed, this should become a raise.
+	it('a flush can raise (bug #6 typos fixed)', () => {
+		// raiseChange -> raiseChance restored the raise roll; with the roll
+		// pinned to 0, willRaise(1) passes, the range picks 'strong' (index 0),
+		// and decideBetProportion('strong') bets 25% of the stack.
 		pinRandom(0);
 		const state = handleAI(
 			aiState(
@@ -166,8 +208,8 @@ describe('post-flop decisions (betting2-4)', () => {
 			),
 			jest.fn()
 		);
-		expect(state.players[0].bet).toBe(100); // called, did not raise
-		expect(state.highBet).toBe(100);
+		expect(state.players[0].bet).toBe(2500); // floor(0.25 * 10000) — a raise
+		expect(state.highBet).toBe(2500);
 	});
 
 	it('calls cheap bets with a marginal made hand', () => {

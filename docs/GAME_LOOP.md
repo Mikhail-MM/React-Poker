@@ -405,8 +405,9 @@ but is unused and broken). Decision inputs:
      used to freeze the game).
    - Otherwise call (capped at stack → all-in call).
 
-In practice, typo bugs #6 mean the post-flop AI **only ever raises with a full house
-or better**; everything else silently degrades to call/fold.
+(Historical note: until the bug #6 typo fixes of 2026-07-09, the post-flop AI
+could only raise with a full house or better — everything else silently degraded
+to call/fold.)
 
 The AI turn is scheduled purely by the `setState`-callback + `setTimeout(1200ms)`
 chain in `App` (`handleAI`, `handleBetInputSubmit`, `handleFold`, `runGameLoop`,
@@ -472,13 +473,17 @@ the real code; 👁 = established by inspection.
    to the default branch: pocket aces get the same (mediocre) determinant as pocket
    deuces. Same broken `switch(value) case(boolean)` pattern in the unused
    `generatePersonality` (`players.js:61`).
-6. 👁 **Post-flop AI raise logic is largely disabled by typos.** In
-   `buildGeneralizedDeterminant`, the Flush, Straight, Three of a Kind, Two Pair,
-   Pair and No Pair branches return `raiseChange` (sic) instead of `raiseChance` →
-   `willRaise(undefined)` is always false. Additionally several `raiseRange` arrays
-   contain the single malformed string `'hidraw, strong'` whose `BET_HIERARCHY`
-   lookup is `undefined`, disabling those tiers too. Net effect: only Full
-   House/quads/straight-flush hands can ever raise post-flop.
+6. ✅ **Post-flop AI raise logic was largely disabled by typos — FIXED
+   2026-07-09.** In `buildGeneralizedDeterminant`, the Flush, Straight, Three of
+   a Kind, Two Pair, Pair and No Pair branches returned `raiseChange` (sic)
+   instead of `raiseChance` → `willRaise(undefined)` was always false; several
+   `raiseRange` arrays also contained the single malformed string
+   `'hidraw, strong'` whose `BET_HIERARCHY` lookup is `undefined`, disabling
+   that tier. Net effect was that only Full House or better could ever raise
+   post-flop. Both typo families are fixed; a determinant-integrity suite in
+   `ai.test.js` now asserts every determinant carries a numeric `raiseChance`
+   and only tiers that exist in `BET_HIERARCHY`, so this bug class cannot
+   silently return. Expect noticeably more aggressive bots.
 7. ✅ **Missing braces at the pre-flop raise site — GONE 2026-07-09.** The
    braceless `if (betValue > max)` guarded only `activePlayer.canRaise = false`
    while the next two lines always ran. Removed wholesale by the bug #2 clamp

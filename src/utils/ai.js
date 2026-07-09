@@ -226,38 +226,38 @@ const buildGeneralizedDeterminant = (hand, highRank, frequencyHistogramMetaData)
 	} else if (highRank === 'Flush') {
 		return {
 			callLimit: 'beware',
-			raiseChange: 1,
+			raiseChance: 1,
 			raiseRange: ['strong', 'aggro', 'beware'],
 		}
 	} else if (highRank === 'Straight') {
 		return {
 			callLimit: 'beware',
-			raiseChange: 1,
-			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
+			raiseChance: 1,
+			raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'],
 		}
 	} else if (highRank === 'Three Of A Kind') {
 		return {
 			callLimit: 'beware',
-			raiseChange: 1,
-			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
+			raiseChance: 1,
+			raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'],
 		}
 	} else if (highRank === 'Two Pair') {
 		return {
 			callLimit: 'beware',
-			raiseChange: 0.7,
-			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
+			raiseChance: 0.7,
+			raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'],
 		}
 	} else if (highRank === 'Pair') {
 		return {
 			callLimit: 'hidraw',
-			raiseChange: 0.5,
-			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
+			raiseChance: 0.5,
+			raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'],
 		}
 	} else if (highRank === 'No Pair') {
 		return {
 			callLimit: 'meddraw',
-			raiseChange: 0.2,
-			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
+			raiseChance: 0.2,
+			raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'],
 		}
 	}
 }
@@ -442,4 +442,4 @@ const generateHistogram = (hand) => {
 	return histogram
 }
 
-export { handleAI, clampBetToLegalRange }
+export { handleAI, clampBetToLegalRange, buildPreFlopDeterminant, buildGeneralizedDeterminant, BET_HIERARCHY }
