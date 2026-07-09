@@ -264,28 +264,26 @@ const buildGeneralizedDeterminant = (hand, highRank, frequencyHistogramMetaData)
 
 const buildPreFlopDeterminant = (highCard, lowCard, suited, straightGap) => {
 	if (highCard === lowCard) {
-		switch(highCard) {
-			case(highCard > 8): {
-				return {
-					callLimit: 'beware',
-					raiseChance: 0.9,
-					raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'], // randomly determine bet based on this
-				}
+		if (highCard > 8) {
+			return {
+				callLimit: 'beware',
+				raiseChance: 0.9,
+				raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'], // randomly determine bet based on this
 			}
-			case(highCard > 5): {
-				return {
-					callLimit: 'aggro',
-					raiseChance: 0.75, // If Math.random() is < than this, select a random raiseTarget 
-					raiseRange: ['insignificant', 'lowdraw', 'meddraw'],
-				}
+		} else if (highCard > 5) {
+			return {
+				callLimit: 'aggro',
+				raiseChance: 0.75, // If Math.random() is < than this, select a random raiseTarget
+				raiseRange: ['insignificant', 'lowdraw', 'meddraw'],
 			}
-			case(highCard < 5):
-			default: {
-				return {
-					callLimit: 'aggro',
-					raiseChance: 0.5,
-					raiseRange: ['insignificant', 'lowdraw', 'meddraw'],
-				}
+		} else {
+			// Plain else, not `highCard < 5`: value 5 (a pair of SIXES) must land
+			// here too, like the original switch's default case. An `else if`
+			// left 6-6 returning undefined, which handleAI destructures — crash.
+			return {
+				callLimit: 'aggro',
+				raiseChance: 0.5,
+				raiseRange: ['insignificant', 'lowdraw', 'meddraw'],
 			}
 		}
 	} else if (highCard > 9 && lowCard > 9) {

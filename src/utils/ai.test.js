@@ -132,11 +132,12 @@ describe('pre-flop decisions (betting1)', () => {
 		expect(state.highBet).toBe(2490);
 	});
 
-	it('KNOWN BUG #5: pocket aces fold to a large bet', () => {
-		// buildPreFlopDeterminant uses switch(highCard) with boolean case labels
-		// (ai.js:251), so every pocket pair falls through to the default branch
-		// (callLimit 'aggro'). Facing 80% of stack ('beware') aces fold.
-		// When fixed, premium pairs should call here.
+	it('pocket aces call a large bet (bug #5 fixed)', () => {
+		// The broken switch(highCard) with boolean case labels sent every
+		// pocket pair to the default branch (callLimit 'aggro'), so aces used
+		// to FOLD facing 80% of stack. Premium pairs now rate 'beware' and
+		// stay in: willRaise passes but the rolled tier is below the stakes,
+		// so the AI flat-calls the 8000.
 		pinRandom(0.5);
 		const state = handleAI(
 			aiState(
@@ -145,7 +146,21 @@ describe('pre-flop decisions (betting1)', () => {
 			),
 			jest.fn()
 		);
-		expect(state.players[0].folded).toBe(true);
+		expect(state.players[0].folded).toBe(false);
+		expect(state.players[0].bet).toBe(8000);
+		expect(state.players[0].chips).toBe(2000);
+	});
+
+	it('grades pocket pairs into premium/mid/low buckets (bug #5 fixed)', () => {
+		// Boundaries on the 1-13 value scale: premium = pocket 10s+ (value > 8),
+		// mid = 7s through 9s (value 6-8), low = 2s through 6s (value <= 5).
+		expect(buildPreFlopDeterminant(13, 13)).toMatchObject({ callLimit: 'beware', raiseChance: 0.9 }); // AA
+		expect(buildPreFlopDeterminant(9, 9)).toMatchObject({ callLimit: 'beware', raiseChance: 0.9 });   // 10-10
+		expect(buildPreFlopDeterminant(8, 8)).toMatchObject({ callLimit: 'aggro', raiseChance: 0.75 });   // 9-9
+		expect(buildPreFlopDeterminant(1, 1)).toMatchObject({ callLimit: 'aggro', raiseChance: 0.5 });    // 2-2
+		// The boundary the if-conversion initially missed: a pair of SIXES
+		// (value 5) satisfied neither > 5 nor < 5 and returned undefined.
+		expect(buildPreFlopDeterminant(5, 5)).toMatchObject({ callLimit: 'aggro', raiseChance: 0.5 });    // 6-6
 	});
 });
 

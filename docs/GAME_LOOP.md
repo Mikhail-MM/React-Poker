@@ -391,8 +391,8 @@ but is unused and broken). Decision inputs:
    (`BET_HIERARCHY` gives the ordering).
 2. **Hand strength → determinant** `{callLimit, raiseChance, raiseRange}`:
    - Pre-flop (`buildPreFlopDeterminant`, `ai.js:249`): heuristics over
-     high-card/low-card/suited/connected-gap. (Pocket-pair branch is broken —
-     bug #5.)
+     high-card/low-card/suited/connected-gap, with pocket pairs graded
+     premium/mid/low (bug #5 fixed 2026-07-09).
    - Post-flop (`buildGeneralizedDeterminant`, `ai.js:185`): keyed purely on current
      made-hand rank, computed by re-running the full §6.1 evaluation battery on
      every AI turn.
@@ -481,12 +481,21 @@ the real code; 👁 = established by inspection.
    compares a boolean to a number — always false — so the condition is just
    `!player.folded`. All-in players are marked unreconciled on every raise; mostly
    masked because the turn cursor skips `chips === 0` players.
-5. 👁 **Pocket pairs mis-evaluated pre-flop.** `buildPreFlopDeterminant`
-   (`ai.js:250-274`) uses `switch(highCard)` with `case (highCard > 8)` — comparing
-   a number against a boolean case label never matches, so every pocket pair falls
-   to the default branch: pocket aces get the same (mediocre) determinant as pocket
-   deuces. Same broken `switch(value) case(boolean)` pattern in the unused
-   `generatePersonality` (`players.js:61`).
+5. ✅ **Pocket pairs mis-evaluated pre-flop — FIXED 2026-07-09.**
+   `buildPreFlopDeterminant` used `switch(highCard)` with boolean case labels
+   (`case (highCard > 8)`) — a number never matches a boolean, so every pocket
+   pair fell to the default branch and pocket aces got the same mediocre
+   determinant as deuces (verified: aces folded to an 80%-of-stack bet). Fix:
+   converted to a plain if-chain grading pairs into premium (10s+, `beware`,
+   0.9 raise chance), mid (7s–9s, `aggro`, 0.75), and low (`aggro`, 0.5)
+   buckets. Verification of the conversion caught a boundary hole: the final
+   branch was `else if (highCard < 5)`, leaving a pair of *sixes* (value 5)
+   returning `undefined`, which `handleAI` destructures — a crash roughly once
+   per ~55 hands with four bots. Closed by making it a plain `else` (the
+   original switch's `default` semantics); the determinant-integrity suite is
+   what caught it, exactly as designed. The same broken `switch(value)
+   case(boolean)` pattern still exists in the unused `generatePersonality`
+   (`players.js:61`) — dead code, see #12.
 6. ✅ **Post-flop AI raise logic was largely disabled by typos — FIXED
    2026-07-09.** In `buildGeneralizedDeterminant`, the Flush, Straight, Three of
    a Kind, Two Pair, Pair and No Pair branches returned `raiseChange` (sic)

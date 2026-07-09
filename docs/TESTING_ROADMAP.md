@@ -238,7 +238,7 @@ Effort: 1–2 days once fast-check is a devDependency. Independent of Stages
 |---|---|---|---|---|
 | Side-pot matrix + invariants | ✅ done | — | high | 13 scenarios, per-street ledgers |
 | Cascade seam traces | ✅ done | — | high | module-boundary blind spots documented |
-| Fix the pinned bug census | ✅ done | — | high | #1, #1b, #2 (freeze), #3 (odd chip → first winner), #6 (raise typos), #7 fixed 2026-07-09. Still open: #4 (all-in un-reconcile), #5 (pocket-pair switch), #9 (short-stack blinds), optional `handleBet` hardening (descriptive throw) |
+| Fix the pinned bug census | ✅ done | — | high | #1, #1b, #2 (freeze), #3 (odd chip → first winner), #5 (pocket pairs), #6 (raise typos), #7 fixed 2026-07-09. Still open: #4 (all-in un-reconcile), #9 (short-stack blinds), optional `handleBet` hardening (descriptive throw) |
 | `step()` transition log | 2 | ~1 day | high | names the action vocabulary |
 | Trace `showDown` interior (per-pot payouts) | 2 | hours | med | needs `step()`; closes the biggest blind spot |
 | Reducer + driver queue | 3 | 1–2 wks | very high | animation beats, time travel, retires bug classes #2/#10 |
