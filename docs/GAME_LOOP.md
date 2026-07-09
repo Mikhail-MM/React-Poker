@@ -399,8 +399,10 @@ but is unused and broken). Decision inputs:
    - Else roll `willRaise(raiseChance)`; on success pick a random tier from
      `raiseRange`, and if that tier still ≥ stakes, bet
      `floor(decideBetProportion(tier) × chips)` (each tier maps to a %-of-stack
-     band, e.g. `beware` → 75–100%). The bet is clamped *up* to `highBet` if below
-     it — **with no cap at `max`, which is the confirmed freeze** (bug #2).
+     band, e.g. `beware` → 75–100%). The bet is then normalized by
+     `clampBetToLegalRange` — lifted to `highBet`, capped at `max` — so an
+     unaffordable raise becomes an all-in call (bug #2 fix; the uncapped lift
+     used to freeze the game).
    - Otherwise call (capped at stack → all-in call).
 
 In practice, typo bugs #6 mean the post-flop AI **only ever raises with a full house
@@ -437,17 +439,23 @@ the real code; 👁 = established by inspection.
    array like every other rank). Verified in `cards.showdown.test.js`; all other
    snapshots passed unchanged, confirming no behavioral drift outside the
    tied-royal path.
-2. ✅ **The documented AI freeze** (`players.js:105` "final AI will freeze").
-   Mechanism, reproduced end-to-end: AI decides to raise while facing a `highBet`
-   larger than its stack → `betValue` is clamped up to `highBet` (`ai.js:163-165`)
-   with no `max` cap → `handleBet` rejects (`bet > max`) and returns `undefined`
-   (`bet.js:33-36`) → `App.handleAI` (`App.jsx:222-224`) evaluates
-   `newState.minBet` on `undefined` → TypeError inside the `setTimeout` callback →
-   no further `setState` is ever scheduled → the game silently stops. Consistent
-   with the observed "2 players left and someone is all-in" trigger. The pre-flop
-   branch has a partial guard (`ai.js:46-50`) but can still emit `betValue < min`
-   into the same `undefined` return path. Any `handleBet` validation failure for a
-   robot is fatal; for a human it's a silent no-op.
+2. ✅ **The documented AI freeze — FIXED 2026-07-09** (`players.js:105` "final AI
+   will freeze"). Mechanism, reproduced end-to-end before the fix: AI decides to
+   raise while facing a `highBet` larger than its stack → `betValue` was clamped
+   up to `highBet` with no `max` cap → `handleBet` rejects (`bet > max`) and
+   returns `undefined` (`bet.js:33-36`) → `App.handleAI` (`App.jsx:222-224`)
+   evaluates `newState.minBet` on `undefined` → TypeError inside the `setTimeout`
+   callback → no further `setState` is ever scheduled → the game silently stops.
+   Fix: both raise sites now normalize through `clampBetToLegalRange(betValue,
+   highBet, max)` (`ai.js`) — lift the bet to the table price *first*, then cap
+   it at the stack, so an unaffordable "raise" degrades into a legal all-in call
+   (`min === max` in that situation per `determineMinBet`). Order matters;
+   capping before lifting reintroduces the freeze. Verified in `ai.test.js`.
+   **Residual, open by choice:** `handleBet` still returns `undefined` for
+   out-of-range input (pinned in `bet.test.js`), so a future AI miscalculation
+   would still be fatal for a robot. Deliberately not papered over with silent
+   clamping — that would mask upstream bugs; if hardened later, prefer a
+   descriptive throw at the rejection site.
 3. ✅ **Odd-chip leak on split pots.** `payWinners` (`cards.js:625-637`) pays each
    winner `floor(prize/n)`; the remainder is subtracted from no one and stays in
    `state.pot`. `beginNextRound` never resets `pot`, so the remainder is carried on
@@ -471,9 +479,11 @@ the real code; 👁 = established by inspection.
    contain the single malformed string `'hidraw, strong'` whose `BET_HIERARCHY`
    lookup is `undefined`, disabling those tiers too. Net effect: only Full
    House/quads/straight-flush hands can ever raise post-flop.
-7. 👁 **Missing braces** at `ai.js:51-54`: `if (betValue > max)` guards only
-   `activePlayer.canRaise = false`; the following two lines always execute.
-   Currently unreachable (`betValue ≤ chips ≤ max`) and `canRaise` is dead anyway.
+7. ✅ **Missing braces at the pre-flop raise site — GONE 2026-07-09.** The
+   braceless `if (betValue > max)` guarded only `activePlayer.canRaise = false`
+   while the next two lines always ran. Removed wholesale by the bug #2 clamp
+   refactor (`canRaise` is now set unconditionally on the raise path; the flag
+   itself remains dead — see #12).
 8. 👁 **`condenseSidePots` mutates during iteration** (`bet.js:181-193`): removing
    index `n` shifts later pots down while `n++` still advances, skipping the merge
    of a third consecutive identical-contestant pot. Currently unreachable (at most
@@ -579,3 +589,5 @@ hierarchy, 400 paid to each, **1 chip stranded in `state.pot`** (bug #3).
 holding a full house, RNG forced to the raise path: `handleAI` returned `undefined`
 and the `App.handleAI` continuation threw `Cannot read properties of undefined
 (reading 'minBet')` — the exact freeze from `players.js:105` (bug #2).
+*(Fixed 2026-07-09: the same setup now produces a 1000-chip all-in call and the
+hand continues — see the flipped test in `ai.test.js`.)*

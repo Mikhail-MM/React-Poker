@@ -13,9 +13,34 @@ import {
 	buildValueSet 
 } from './cards.js'
 
-import { 
-	renderActionButtonText 
+import {
+	renderActionButtonText
 } from './ui.js';
+
+// Normalize an AI-chosen raise into the legal betting window before it
+// reaches handleBet, which rejects out-of-range bets outright (and a robot
+// submitting an illegal bet used to freeze the game — docs/GAME_LOOP.md §9
+// bug #2).
+//   highBet — the table's current price to play: the highest total bet any
+//             player has committed this street. A "raise" below it is not a
+//             legal bet, so lift it up to at least that price.
+//   max     — this player's total liquid stack for the street (chips + chips
+//             already bet this street): the most they can physically put in play.
+// ORDER MATTERS: lift to the price FIRST, then cap at the stack. When the
+// price exceeds the stack (an opponent shoved for more than we have), the two
+// clamps collapse the raise into an all-in call (betValue === max) — legal
+// input, because determineMinBet lowers the minimum to the player's total
+// stack in exactly that situation. Capping before lifting would reintroduce
+// the freeze.
+const clampBetToLegalRange = (betValue, highBet, max) => {
+	if (betValue < highBet) {
+		betValue = highBet;
+	}
+	if (betValue > max) {
+		betValue = max;
+	}
+	return betValue;
+};
 
 const handleAI = (state, pushAnimationState) => {
 	const { highBet } = state
@@ -42,16 +67,10 @@ const handleAI = (state, pushAnimationState) => {
 					const determinedRaiseRange = raiseRange[Math.floor(Math.random() * (raiseRange.length - 0)) + 0];
 					const wantRaise = (BET_HIERARCHY[stakes] <= BET_HIERARCHY[determinedRaiseRange])
 						if (wantRaise) {
-							let betValue = Math.floor(decideBetProportion(determinedRaiseRange) * activePlayer.chips)
-							if (betValue < highBet) {
-								if (highBet < max) {
-									betValue = highBet;
-								}
-							}
-							if (betValue > max)
-									activePlayer.canRaise = false
-									pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, betValue, activePlayer)} ${betValue}`);
-									return handleBet(state, betValue, min, max);
+							const betValue = clampBetToLegalRange(Math.floor(decideBetProportion(determinedRaiseRange) * activePlayer.chips), highBet, max);
+								activePlayer.canRaise = false
+								pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, betValue, activePlayer)} ${betValue}`);
+								return handleBet(state, betValue, min, max);
 						} else {
 							// Do not render the bet value if it's a "check"
 							pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, callValue, activePlayer)} ${(callValue > activePlayer.bet) ? (callValue) : ""}`);
@@ -159,10 +178,7 @@ const handleAI = (state, pushAnimationState) => {
 					const determinedRaiseRange = raiseRange[Math.floor(Math.random() * (raiseRange.length - 0)) + 0];
 					const wantRaise = (BET_HIERARCHY[stakes] <= BET_HIERARCHY[determinedRaiseRange])
 					if (wantRaise) {
-						let betValue = Math.floor(decideBetProportion(determinedRaiseRange) * activePlayer.chips)
-						if (betValue < highBet) {
-							betValue = highBet;
-						}
+						const betValue = clampBetToLegalRange(Math.floor(decideBetProportion(determinedRaiseRange) * activePlayer.chips), highBet, max);
 							activePlayer.canRaise = false
 							pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, betValue, activePlayer)} ${betValue}`);
 							return handleBet(state, betValue, min, max);
@@ -426,4 +442,4 @@ const generateHistogram = (hand) => {
 	return histogram
 }
 
-export { handleAI }
+export { handleAI, clampBetToLegalRange }

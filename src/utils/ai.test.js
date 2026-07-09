@@ -2,7 +2,7 @@
 // Math.random is pinned per test to force deterministic decision paths.
 // "KNOWN BUG" tests pin buggy behavior on purpose (see docs/GAME_LOOP.md §9) —
 // flip them when the bug is fixed.
-import { handleAI } from './ai.js';
+import { handleAI, clampBetToLegalRange } from './ai.js';
 import { cc, mkPlayer, mkState } from '../testUtils/factories.js';
 
 let randomSpy;
@@ -25,6 +25,27 @@ const aiState = (aiOverrides, stateOverrides) =>
 		],
 		{ activePlayerIndex: 0, ...stateOverrides }
 	);
+
+describe('clampBetToLegalRange', () => {
+	it('lifts a bet below the table price up to the price', () => {
+		expect(clampBetToLegalRange(300, 800, 10000)).toBe(800);
+	});
+
+	it('passes a legal raise through untouched', () => {
+		expect(clampBetToLegalRange(2500, 800, 10000)).toBe(2500);
+	});
+
+	it('caps an oversized bet at the stack', () => {
+		expect(clampBetToLegalRange(12000, 800, 10000)).toBe(10000);
+	});
+
+	it('collapses a raise into an all-in call when the price exceeds the stack', () => {
+		// The bug #2 freeze shape: lift-then-cap must land on max — never on
+		// the raw bet (illegal: below the price) or on highBet (illegal:
+		// above the stack).
+		expect(clampBetToLegalRange(950, 5000, 1000)).toBe(1000);
+	});
+});
 
 describe('pre-flop decisions (betting1)', () => {
 	it('folds junk to a large bet', () => {
@@ -103,12 +124,12 @@ describe('post-flop decisions (betting2-4)', () => {
 		expect(state.highBet).toBe(9500);
 	});
 
-	it('KNOWN BUG #2 (AI freeze): raising into a bet it cannot cover returns undefined', () => {
-		// The AI clamps its raise UP to highBet with no cap at its own stack
-		// (ai.js:163-165); handleBet rejects bet > max and returns undefined
-		// (bet.js:33-36). App.handleAI then dereferences newState.minBet and
-		// throws inside setTimeout — the game silently freezes (players.js:105).
-		// When fixed, this must return a state object (an all-in call).
+	it('clamps an unaffordable raise into an all-in call (bug #2 freeze fixed)', () => {
+		// Formerly the freeze: the AI decided to raise while facing a highBet
+		// larger than its stack, submitted betValue = highBet > max, and
+		// handleBet returned undefined (players.js:105, GAME_LOOP.md §9 #2).
+		// clampBetToLegalRange now degrades the raise into an all-in call and
+		// the hand continues.
 		pinRandom(0.8);
 		const result = handleAI(
 			aiState(
@@ -122,7 +143,10 @@ describe('post-flop decisions (betting2-4)', () => {
 			),
 			jest.fn()
 		);
-		expect(result).toBeUndefined();
+		expect(result).toBeDefined();
+		expect(result.players[0].bet).toBe(1000); // the whole stack, not 5000
+		expect(result.players[0].chips).toBe(0);
+		expect(result.players[0].allIn).toBe(true);
 	});
 
 	it('KNOWN BUG #6: a flush can never raise (raiseChange typo)', () => {

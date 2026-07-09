@@ -105,10 +105,13 @@ describe('handleBet', () => {
 		expect(state.numPlayersAllIn).toBe(1);
 	});
 
-	it('KNOWN BUG #2 (enabler): an invalid bet returns undefined instead of state', () => {
-		// This is the crash/freeze vector: App.handleAI dereferences the return
-		// value (`newState.minBet`) without checking. When fixed, handleBet should
-		// return a state object for invalid input (or never receive one).
+	it('QUIRK (bug #2 enabler): an invalid bet returns undefined instead of state', () => {
+		// App.handleAI dereferences the return value (`newState.minBet`), so an
+		// out-of-range robot bet is fatal. The known trigger was fixed on the
+		// AI side (clampBetToLegalRange, ai.js), and this footgun stays LOUD by
+		// choice: silently clamping here would mask upstream miscalculations.
+		// If hardened later, prefer a descriptive throw at the rejection site
+		// over a silent clamp.
 		expect(handleBet(threeWay(), 2000, 100, 1000)).toBeUndefined(); // above max
 		expect(handleBet(threeWay(), 50, 100, 1000)).toBeUndefined(); // below min
 	});
