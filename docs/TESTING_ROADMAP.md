@@ -236,21 +236,25 @@ Effort: 1–2 days once fast-check is a devDependency. Independent of Stages
 
 The pot-commitment wiring (2026-07-09) fixed the biggest exploit multiplier:
 stakes are now the cost-to-call (capped at the stack) measured against the
-hand-start stack via `currentRoundChipsInvested`, so bots no longer get easier
-to bluff the deeper they are invested, and they call off short stacks with
-promising hands instead of folding to the endgame shove. Remaining levers,
-ranked by challenge-per-effort:
+hand-start stack via `currentRoundChipsInvested`. Post-wiring play-testing
+surfaced the next layer — the evaluator is board-blind, and the awakened
+raise tables are untuned — analyzed in depth in
+[AI_IMPROVEMENTS.md](./AI_IMPROVEMENTS.md), with the pot-odds lever specced in
+[POT_ODDS_PLAN.md](./POT_ODDS_PLAN.md). Ranked sequence (rationale in those
+docs — notably, attribution must precede pot odds):
 
-1. **Pot odds** — the pot is still not an input anywhere; a single flop
-   overbet still folds out every bot below two pair. Feed
-   `costToCall / (pot + costToCall)` into the stakes classification.
-2. **Draw awareness** — 4-flushes and open-enders rate as 'No Pair' and fold
-   to 15% of stack; rating draws ~`hidraw` makes bots peel flops and arrive
-   at strong hands far more often (which also feeds lever 1).
-3. **Bluff-catch floor** — a small random call-anything frequency (scaled by
-   commitment) makes bluff-spam statistically unprofitable over a session.
+1. **Hole-card attribution** — discount hands the board made for everyone
+   (junk currently calls off full stacks on paired boards).
+2. **Pot odds** (option A: stakes multiplier) — the pot is not an input
+   anywhere; a single flop overbet still folds out every bot below two pair.
+3. **Aggression tuning + bluff-catch floor** — one balancing pass after 1–2.
 4. **Pre-flop bucket differentiation** — K8o currently rates `beware` (never
-   folds pre-flop) identically to AK; split the top bucket by kicker quality.
+   folds pre-flop) identically to AK.
+5. **Draw awareness + equity-threshold calling** (pot odds option B) — the
+   destination architecture for post-flop calls.
+
+*Deliberate current state: the untuned hyper-aggressive AI is being kept for
+entertainment value until this track begins.*
 
 ## Wishlist / decision table
 
