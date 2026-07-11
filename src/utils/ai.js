@@ -19,7 +19,7 @@ import {
 
 // Normalize an AI-chosen raise into the legal betting window before it
 // reaches handleBet, which rejects out-of-range bets outright (and a robot
-// submitting an illegal bet used to freeze the game — docs/GAME_LOOP.md §9
+// submitting an illegal bet used to freeze the game — docs/CHANGELOG.md
 // bug #2).
 //   highBet — the table's current price to play: the highest total bet any
 //             player has committed this street. A "raise" below it is not a

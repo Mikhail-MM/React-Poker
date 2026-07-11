@@ -1,6 +1,6 @@
 // Unit tests for players.js: table generation, turn order, round transitions,
 // and the early-showdown short circuits. "KNOWN BUG" tests pin buggy behavior
-// on purpose (see docs/GAME_LOOP.md §9) — flip them when fixed.
+// on purpose (open census: docs/GAME_LOOP.md §9; resolved: docs/CHANGELOG.md) — flip them when fixed.
 import axios from 'axios';
 import {
 	generateTable,
@@ -212,7 +212,7 @@ describe('beginNextRound', () => {
 	it('the pot resets to a clean slate between rounds (bug #3 fixed)', () => {
 		// Split remainders are paid to the first winner at showdown, so nothing
 		// legitimate can remain in the pot; the reset makes the rule explicit
-		// (anything left here would be unclaimable — see GAME_LOOP.md §9 #3).
+		// (anything left here would be unclaimable — see docs/CHANGELOG.md #3).
 		expect(beginNextRound(roundState()).pot).toBe(0);
 	});
 

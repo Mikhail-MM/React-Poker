@@ -1,6 +1,6 @@
 // Unit tests for bet.js: blinds, bet/fold handling, phase shifting, pot
 // reconciliation and side-pot construction. "KNOWN BUG" tests pin buggy
-// behavior on purpose (see docs/GAME_LOOP.md §9) — flip them when fixed.
+// behavior on purpose (open census: docs/GAME_LOOP.md §9; resolved: docs/CHANGELOG.md) — flip them when fixed.
 import {
 	determineBlindIndices,
 	anteUpBlinds,

@@ -4,7 +4,7 @@ Companion to [GAME_LOOP.md](./GAME_LOOP.md) §8 (how the AI works today) and
 [POT_ODDS_PLAN.md](./POT_ODDS_PLAN.md) (the detailed plan for the pot-odds
 lever). Analysis only — no code changes are prescribed for the current branch.
 
-## 1. Where the AI stands (post the 2026-07-09 fixes)
+## 1. Where the AI stands (post the bug-census fixes — see [CHANGELOG.md](./CHANGELOG.md))
 
 The decision pipeline per turn:
 

@@ -1,11 +1,13 @@
 # React-Poker — Game Loop & Showdown Design Doc
 
-This document maps the runtime logic of the game: how the loop is driven, how betting
-and pots are reconciled, and — in the most detail — how the showdown/side-pot system
-resolves multi-way, capped-stack pots. Everything described here was verified by
-executing the actual source modules against mocked state (see
-[Appendix A](#appendix-a--simulation-verified-behavior)). Bugs discovered along the
-way are catalogued in [§9](#9-bugs--quirks-verified-unless-noted).
+This document maps the **current** runtime logic of the game: how the loop is
+driven, how betting and pots are reconciled, and — in the most detail — how the
+showdown/side-pot system resolves multi-way, capped-stack pots. Everything
+described here was verified by executing the actual source modules against
+mocked state (see [Appendix A](#appendix-a--simulation-verified-behavior)).
+The open bug/quirk census lives in [§9](#9-open-bugs--quirks); resolved
+entries, and the full history of fixes and features, live in
+[CHANGELOG.md](./CHANGELOG.md) (numbering is shared and never reused).
 
 Source layout:
 
@@ -55,10 +57,9 @@ is no way to pause mid-cascade for an animation beat.
 `player.chips + player.bet` is a player's total liquid stack at any moment. Chips
 move: `chips → bet` (during a betting round) `→ pot` + `sidePots[].potValue`
 (at `reconcilePot`) `→ winner.chips` (at `payWinners`). Chip conservation holds
-across the full pipeline, verified by simulation and enforced by the test
-suites. (Historically the odd-chip remainder of split pots accumulated in
-`state.pot` forever — bug #3, fixed 2026-07-09: the first winner takes the
-remainder and every pot drains to 0.)
+unconditionally across the full pipeline, verified by simulation and enforced
+by the test suites; every pot drains to exactly 0 by the end of a hand (split
+remainders go to the first winner — house rule, CHANGELOG #3).
 
 ---
 
@@ -99,8 +100,8 @@ remainder and every pot drains to 0.)
 | `betReconciled` | **The betting-round terminator flag** — see §4 |
 | `sidePotStack` | Scratch field: copy of `bet` consumed by `calculateSidePots` |
 | `roundStartChips`, `roundEndChips` | For the ± earnings display on the showdown screen |
-| `currentRoundChipsInvested` | Chips committed on *prior streets* of this hand (accumulated in `reconcilePot`, reset each hand). Read by the AI's pot-commitment stakes math since 2026-07-09 |
-| `stackInvestment` | **Dead** — the reserved slot for the pot-commitment feature, superseded by `currentRoundChipsInvested` (which was already tracking it); never written, no longer read |
+| `currentRoundChipsInvested` | Chips committed on *prior streets* of this hand (accumulated in `reconcilePot`, reset each hand). Read by the AI's pot-commitment stakes math |
+| `stackInvestment` | **Dead** — reserved slot for pot commitment, superseded by `currentRoundChipsInvested`; never written, never read (§9 #12) |
 | `canRaise` | Written by AI, **never read** (dead) |
 | `showDownHand` | `{hand, descendingSortHand, heldRankHierarchy, bestHandRank, bestHand, bools}` — filled by `showDown()` |
 
@@ -259,8 +260,7 @@ ignored — over the 7-card set (2 hole + 5 community), sorted descending:
 1. **Histograms**: `frequencyHistogram` (by card face) and `suitHistogram` (by suit).
 2. **Boolean battery**:
    - `checkFlush` — any suit count ≥ 5; keeps the flushed suit's cards (descending).
-   - `checkRoyalFlush` — top five flush cards are exactly A-K-Q-J-10
-     (*fixed 2026-07-09 — see bug #1*).
+   - `checkRoyalFlush` — top five flush cards are exactly A-K-Q-J-10.
    - `checkStraightFlush` — `checkStraight` run over only the flush-suit cards.
    - `checkStraight` (`cards.js:948`) — scans the descending *unique-value set* for a
      run of 5; the ace-low wheel is handled by `checkLowStraight` (ace 13 → 0,
@@ -308,9 +308,6 @@ that decides that rank:
 | Pair | 4: pair, kicker 1, kicker 2, kicker 3 |
 | Flush / No Pair | 5: every card |
 
-(A malformed Royal Flush special case used to bypass this table entirely and
-crashed on tied royals — removed 2026-07-09, see bug #1b.)
-
 ### 6.4 `determineContestedHierarchy` — full ordering with loser queue
 
 Processes a comparator frame-by-frame ("rounds"):
@@ -342,7 +339,7 @@ distributeSidePots(state)
  │    │         1 player  → payWinners (uncontested)
  │    │         2+ players → determineWinner(buildComparator(...)) → payWinners
  │    └─ payWinners: winner.chips += prize; state.pot -= prize
- │         ties: each gets floor(prize/n); the first winner takes the remainder (bug #3 fix)
+ │         ties: each gets floor(prize/n); the first winner takes the remainder (house rule)
  └─ every player: roundEndChips = chips                            // for ± display
 ```
 
@@ -364,8 +361,8 @@ and Dave lose their stakes; folded Eve's 100 was dead money inside the main pot.
 1. `setState({clearCards: true})` — unmounts card components so deal animations
    re-trigger next round.
 2. `beginNextRound` (`players.js:223`): resets community cards, `sidePots`,
-   `playerHierarchy`, `showDownMessages`, and `pot` (clean slate — bug #3 fix);
-   fresh shuffled deck; blinds/bet markers back to 20.
+   `playerHierarchy`, `showDownMessages`, and `pot` (clean slate); fresh
+   shuffled deck; blinds/bet markers back to 20.
 3. `passDealerChip` (`players.js:152`): advance dealer to next player who still has
    chips, then `filterBrokePlayers`:
    - **removes** players with 0 chips from the array (indices shift — dealer index is
@@ -386,20 +383,18 @@ but is unused and broken). Decision inputs:
 
 1. **Stakes**: `min(highBet − bet, chips) / (chips + bet +
    currentRoundChipsInvested) × 100` — the *cost to call*, capped at the stack,
-   as a % of the *hand-start* stack (pot commitment, wired 2026-07-09).
-   Historically this was the full `highBet` over the shrinking remaining stack,
-   which both overstated the price when partially in and made bots easier to
-   bluff the deeper they were invested. `classifyStakes` buckets this into a
-   9-tier ladder:
+   as a % of the *hand-start* stack (pot commitment — CHANGELOG "Pot commitment
+   wired into AI stakes"). `classifyStakes` buckets this into a 9-tier ladder:
    `blind < insignificant < lowdraw < meddraw < hidraw < strong < major < aggro < beware`
    (`BET_HIERARCHY` gives the ordering).
 2. **Hand strength → determinant** `{callLimit, raiseChance, raiseRange}`:
-   - Pre-flop (`buildPreFlopDeterminant`, `ai.js:249`): heuristics over
+   - Pre-flop (`buildPreFlopDeterminant`, `ai.js`): heuristics over
      high-card/low-card/suited/connected-gap, with pocket pairs graded
-     premium/mid/low (bug #5 fixed 2026-07-09).
-   - Post-flop (`buildGeneralizedDeterminant`, `ai.js:185`): keyed purely on current
+     premium/mid/low.
+   - Post-flop (`buildGeneralizedDeterminant`, `ai.js`): keyed purely on current
      made-hand rank, computed by re-running the full §6.1 evaluation battery on
-     every AI turn.
+     every AI turn. Note the rank is **board-blind** — see
+     [AI_IMPROVEMENTS.md](./AI_IMPROVEMENTS.md).
 3. **Decision**:
    - Fold if `stakes > callLimit`.
    - Else roll `willRaise(raiseChance)`; on success pick a random tier from
@@ -407,13 +402,11 @@ but is unused and broken). Decision inputs:
      `floor(decideBetProportion(tier) × chips)` (each tier maps to a %-of-stack
      band, e.g. `beware` → 75–100%). The bet is then normalized by
      `clampBetToLegalRange` — lifted to `highBet`, capped at `max` — so an
-     unaffordable raise becomes an all-in call (bug #2 fix; the uncapped lift
-     used to freeze the game).
+     unaffordable raise becomes a legal all-in call.
    - Otherwise call (capped at stack → all-in call).
 
-(Historical note: until the bug #6 typo fixes of 2026-07-09, the post-flop AI
-could only raise with a full house or better — everything else silently degraded
-to call/fold.)
+The current tuning is deliberately hyper-aggressive (see AI_IMPROVEMENTS.md for
+the analysis and the improvement track).
 
 The AI turn is scheduled purely by the `setState`-callback + `setTimeout(1200ms)`
 chain in `App` (`handleAI`, `handleBetInputSubmit`, `handleFold`, `runGameLoop`,
@@ -421,101 +414,25 @@ chain in `App` (`handleAI`, `handleBetInputSubmit`, `handleFold`, `runGameLoop`,
 
 ---
 
-## 9. Bugs & quirks (verified unless noted)
+## 9. Open bugs & quirks
 
-Numbered for cross-reference from the sections above. ✅ = reproduced by executing
-the real code; 👁 = established by inspection.
+The census numbering is shared with [CHANGELOG.md](./CHANGELOG.md), which holds
+the resolved entries (#1, #1b, #2, #3, #5, #6, #7) in full; numbers are stable
+and never reused. ✅ = verified by executing the real code; 👁 = established by
+inspection.
 
-1. ✅ **Royal flushes were never detected — detection FIXED 2026-07-09.**
-   `checkRoyalFlush` (`cards.js:864`) required `flushCards[4].value === 10`, but in
-   `VALUE_MAP` a Ten is `9` (J=10) — unsatisfiable, so royals classified as
-   "Straight Flush". The check now expects `[13, 12, 11, 10, 9]`; royals are
-   detected, ranked, and reported correctly (single-royal payout verified in
-   `showdown.test.js`).
-   **1b. ✅ Residual — tied royals crashed the showdown — FIXED 2026-07-09.**
-   The #1 fix unmasked this: `buildComparator`'s 'Royal Flush' branch seeded its
-   winners list with `Array.from({length: 1})` = `[undefined]`, `determineWinner`
-   returned it verbatim, and `payWinners` dereferenced `undefined.name` → a
-   **board royal** (community A-K-Q-J-10 suited — every live player ties) killed
-   the hand and would have miscounted the split (prize ÷ 3 for 2 winners). Fix:
-   the Royal Flush special cases were **removed** rather than repaired — royals
-   now flow through the standard Straight/Straight Flush comparator (single
-   frame, top card; all royals hold the ace, so they always tie and split), the
-   standard `determineWinner` loop (early return deleted), and the standard
-   grouping in `buildAbsolutePlayerRankings` (tied royals now nest as a tie
-   array like every other rank). Verified in `showdown.test.js`; all other
-   snapshots passed unchanged, confirming no behavioral drift outside the
-   tied-royal path.
-2. ✅ **The documented AI freeze — FIXED 2026-07-09** (`players.js:105` "final AI
-   will freeze"). Mechanism, reproduced end-to-end before the fix: AI decides to
-   raise while facing a `highBet` larger than its stack → `betValue` was clamped
-   up to `highBet` with no `max` cap → `handleBet` rejects (`bet > max`) and
-   returns `undefined` (`bet.js:33-36`) → `App.handleAI` (`App.jsx:222-224`)
-   evaluates `newState.minBet` on `undefined` → TypeError inside the `setTimeout`
-   callback → no further `setState` is ever scheduled → the game silently stops.
-   Fix: both raise sites now normalize through `clampBetToLegalRange(betValue,
-   highBet, max)` (`ai.js`) — lift the bet to the table price *first*, then cap
-   it at the stack, so an unaffordable "raise" degrades into a legal all-in call
-   (`min === max` in that situation per `determineMinBet`). Order matters;
-   capping before lifting reintroduces the freeze. Verified in `ai.test.js`.
-   **Residual, open by choice:** `handleBet` still returns `undefined` for
-   out-of-range input (pinned in `bet.test.js`), so a future AI miscalculation
-   would still be fatal for a robot. Deliberately not papered over with silent
-   clamping — that would mask upstream bugs; if hardened later, prefer a
-   descriptive throw at the rejection site.
-3. ✅ **Odd-chip remainder was carried over but never claimable — FIXED
-   2026-07-09.** Original design intent: a non-splittable remainder rides into
-   the next hand's pot (an "odd chip carries" house rule), and `beginNextRound`
-   preserved `pot` accordingly. The defect was downstream: payouts flow
-   exclusively through `sidePots[].potValue`, which are built from each round's
-   bets alone, so the carried chip was invisible to the payout machinery —
-   verified across two consecutive hands, the remainder was never paid to
-   anyone and the pot display drifted up monotonically while chips permanently
-   left the table economy. **Fix (card-room rule, chosen for simplicity over
-   implementing the carryover):** `payWinners` now awards the indivisible
-   remainder to the first winner at split time, so every pot fully drains to 0
-   at the end of the hand, and `beginNextRound` explicitly resets `pot = 0`
-   (clean slate — anything left there would be unclaimable by construction).
-   Chip conservation now holds unconditionally. Verified in
-   `showdown.test.js` (two- and three-way odd splits) and
-   `players.test.js`. Note: the split showdown message reports the per-winner
-   floor share; the extra chip is not called out in the UI.
+2-residual. 👁 **`handleBet` returns `undefined` for out-of-range input**
+   (`bet.js:33-36`; the enabler behind the fixed freeze, CHANGELOG #2).
+   `App.handleAI` dereferences the return value, so a future AI miscalculation
+   would still be fatal for a robot; for a human it is a silent no-op. Kept
+   loud **by choice** — silent clamping would mask upstream bugs. If hardened
+   later, prefer a descriptive throw at the rejection site. Pinned in
+   `bet.test.js`.
 4. 👁 **Boolean-vs-number comparison in raise un-reconciliation.**
    `if (!player.folded || !player.chips === 0)` (`bet.js:43`): `!player.chips === 0`
    compares a boolean to a number — always false — so the condition is just
    `!player.folded`. All-in players are marked unreconciled on every raise; mostly
    masked because the turn cursor skips `chips === 0` players.
-5. ✅ **Pocket pairs mis-evaluated pre-flop — FIXED 2026-07-09.**
-   `buildPreFlopDeterminant` used `switch(highCard)` with boolean case labels
-   (`case (highCard > 8)`) — a number never matches a boolean, so every pocket
-   pair fell to the default branch and pocket aces got the same mediocre
-   determinant as deuces (verified: aces folded to an 80%-of-stack bet). Fix:
-   converted to a plain if-chain grading pairs into premium (10s+, `beware`,
-   0.9 raise chance), mid (7s–9s, `aggro`, 0.75), and low (`aggro`, 0.5)
-   buckets. Verification of the conversion caught a boundary hole: the final
-   branch was `else if (highCard < 5)`, leaving a pair of *sixes* (value 5)
-   returning `undefined`, which `handleAI` destructures — a crash roughly once
-   per ~55 hands with four bots. Closed by making it a plain `else` (the
-   original switch's `default` semantics); the determinant-integrity suite is
-   what caught it, exactly as designed. The same broken `switch(value)
-   case(boolean)` pattern still exists in the unused `generatePersonality`
-   (`players.js:61`) — dead code, see #12.
-6. ✅ **Post-flop AI raise logic was largely disabled by typos — FIXED
-   2026-07-09.** In `buildGeneralizedDeterminant`, the Flush, Straight, Three of
-   a Kind, Two Pair, Pair and No Pair branches returned `raiseChange` (sic)
-   instead of `raiseChance` → `willRaise(undefined)` was always false; several
-   `raiseRange` arrays also contained the single malformed string
-   `'hidraw, strong'` whose `BET_HIERARCHY` lookup is `undefined`, disabling
-   that tier. Net effect was that only Full House or better could ever raise
-   post-flop. Both typo families are fixed; a determinant-integrity suite in
-   `ai.test.js` now asserts every determinant carries a numeric `raiseChance`
-   and only tiers that exist in `BET_HIERARCHY`, so this bug class cannot
-   silently return. Expect noticeably more aggressive bots.
-7. ✅ **Missing braces at the pre-flop raise site — GONE 2026-07-09.** The
-   braceless `if (betValue > max)` guarded only `activePlayer.canRaise = false`
-   while the next two lines always ran. Removed wholesale by the bug #2 clamp
-   refactor (`canRaise` is now set unconditionally on the raise path; the flag
-   itself remains dead — see #12).
 8. 👁 **`condenseSidePots` mutates during iteration** (`bet.js:181-193`): removing
    index `n` shifts later pots down while `n++` still advances, skipping the merge
    of a third consecutive identical-contestant pot. Currently unreachable (at most
@@ -536,11 +453,12 @@ the real code; 👁 = established by inspection.
     el)` copies before sorting); `popCards` returns a lone object for 1 card but an
     array otherwise, which is why the duplicate `popShowdownCards` exists
     (acknowledged at `cards.js:83-88`).
-12. 👁 **Dead state**: `stackInvestment` (superseded 2026-07-09 — the AI's
-    pot-commitment math now reads `currentRoundChipsInvested`, which is no
-    longer dead), `canRaise`, `playActionMessages`, `generatePersonality`, and
-    the player `id` (names are the real join key — duplicate names from
-    randomuser.me would corrupt payouts and refunds).
+12. 👁 **Dead state**: `stackInvestment` (superseded — the AI's pot-commitment
+    math reads `currentRoundChipsInvested`), `canRaise`, `playActionMessages`,
+    `generatePersonality` (also carries the broken `switch(value)
+    case(boolean)` pattern), and the player `id` (names are the real join
+    key — duplicate names from randomuser.me would corrupt payouts and
+    refunds).
 13. 👁 `shuffle` (`cards.js:45`) is O(n²) rejection sampling rather than
     Fisher-Yates. Uniform, just wasteful.
 14. 👁 Folded players still get full hand evaluation in `showDown` (wasted work),
@@ -553,26 +471,28 @@ the real code; 👁 = established by inspection.
 
 Restating the known weaknesses with what this mapping implies about each:
 
-**Loose typing.** The bug census above is a strong TypeScript sales pitch: #2
-(functions that return `state | undefined`), #6 (`raiseChange` typo — unknown
-property on a return type), #6b (`'hidraw, strong'` — not a member of a
-`BetTier` union), #11 (`popCards`' union return shape), #4 (boolean/number
-comparison) are all compile-time catches. The `VALUE_MAP` off-by-face confusion
-behind #1 (Ten = 9) is exactly the kind of thing a branded `CardValue` type plus
-tests would have surfaced.
+**Loose typing.** The bug census — the resolved half now lives in
+[CHANGELOG.md](./CHANGELOG.md) — is a strong TypeScript sales pitch: #2
+(functions that return `state | undefined` — the enabler is still open as
+#2-residual), #6 (`raiseChange` typo — unknown property on a return type;
+`'hidraw, strong'` — not a member of a `BetTier` union), #11 (`popCards`'
+union return shape), #4 (boolean/number comparison) are all compile-time
+catches. The `VALUE_MAP` off-by-face confusion behind #1 (Ten = 9) is exactly
+the kind of thing a branded `CardValue` type plus tests would have surfaced.
 
-**No tests.** *(Since addressed — see below.)* The state transformers are already
-*nearly pure* — `App` clones state and the utils mutate only the clone — so the
-simulation harness used for this doc required zero refactoring, only stubbing
-`axios`/`uuid` imports. That harness has been converted into characterization
-suites (grouped under `src/utils/__tests__/{unit,integration}/`, factories in
-`src/testUtils/factories.js`, run via
-`CI=true yarn test`): every scenario in Appendix A and every bug in §9 marked
-`KNOWN BUG` is pinned by a test asserting *current* behavior. When a bug is fixed,
-its test is meant to be flipped intentionally in the same change. The plan for
-evolving this further — cascade seam tracing, an explicit transition log, a
-reducer/driver architecture, Immer patch-level time travel, and property-based
-pot testing — lives in [TESTING_ROADMAP.md](./TESTING_ROADMAP.md).
+**Testing.** The state transformers are *nearly pure* — `App` clones state and
+the utils mutate only the clone — so the whole pipeline is testable without
+refactoring, needing only stubbed `axios`/`uuid` imports. Characterization
+suites live under per-area `__tests__/` directories (unit suites per module,
+integration suites for the cross-module pipelines; factories in
+`src/testUtils/factories.js`; run via `CI=true yarn test`). Every open quirk
+in §9 with a `KNOWN BUG`/`QUIRK` label is pinned by a test asserting *current*
+behavior; when one is fixed, its test is flipped intentionally in the same
+change (see CHANGELOG.md for the fixes that already followed this
+discipline). The plan for evolving further — an explicit transition log, a
+reducer/driver architecture, Immer patch-level time travel, and
+property-based pot testing — lives in
+[TESTING_ROADMAP.md](./TESTING_ROADMAP.md).
 
 **Implicit render-loop state machine.** Because each action is
 `(state) → newState` already, migrating to a reducer is mostly mechanical:
@@ -598,31 +518,32 @@ layer can key off.
 ## Appendix A — Simulation-verified behavior
 
 The actual `bet.js`/`cards.js`/`players.js` modules were executed under Node
-(imports shimmed, logic untouched) against mocked pre-showdown states.
+(imports shimmed, logic untouched) against mocked pre-showdown states. These
+scenarios now live permanently as fixtures in the integration suites
+(`src/utils/__tests__/integration/`); outcomes below are current behavior.
+(Several of these scenarios originally reproduced bugs — the buggy outcomes
+they exposed are recorded under the matching numbers in
+[CHANGELOG.md](./CHANGELOG.md).)
 
 **Scenario 1 — capped all-in, dead money, 3 side pots** (the canonical example).
-Board 10♥ J♥ Q♥ 2♠ 7♦. Alice A♥K♥ all-in 200 (royal flush — reported as Straight
-Flush until the bug #1 fix, now detected correctly); Bob 8♥3♥ (flush, 8 kicker) bet
-800; Carol 5♥4♥ (flush, 5 kicker) bet 800; Dave 2♦7♣ (two pair) all-in 600; Eve
-folded 100.
+Board 10♥ J♥ Q♥ 2♠ 7♦. Alice A♥K♥ all-in 200 (royal flush); Bob 8♥3♥ (flush,
+8 kicker) bet 800; Carol 5♥4♥ (flush, 5 kicker) bet 800; Dave 2♦7♣ (two pair)
+all-in 600; Eve folded 100.
 
 - Pots built: `[{900: Alice,Dave,Bob,Carol}, {1200: Dave,Bob,Carol}, {400: Bob,Carol}]` — layer trace in §5.
-- Payouts: Alice +900 (net **+700** on a 200 stake despite the nut hand — correctly capped), Bob +1600 (net +800), Carol −800, Dave −600, Eve −100. `state.pot` drained to exactly 0.
+- Payouts: Alice +900 (net **+700** on a 200 stake despite the nut hand — correctly capped), Bob +1600 (net +800), Carol −800, Dave −600, Eve −100. `state.pot` drains to exactly 0.
 - Hierarchy: Alice > Bob > Carol > Dave (Eve excluded as folded).
 
 **Scenario 2 — kicker cascade.** Three flushes sharing Q♥J♥10♥, split on 4th/5th
-cards. Hierarchy resolved `Carol > Bob > Dan` via the loser-queue recursion (§6.4);
-Carol took the whole 1500 pot.
+cards. Hierarchy resolves `Carol > Bob > Dan` via the loser-queue recursion (§6.4);
+Carol takes the whole 1500 pot.
 
 **Scenario 3 — exact tie + odd chip.** Both live players play the board straight
-9-8-7-6-5; pot 801 (51 dead money from a folder). Result: tie detected, nested-array
-hierarchy, 400 paid to each, **1 chip stranded in `state.pot`** (bug #3).
-*(Fixed 2026-07-09: the first winner now takes the odd chip — 401/400 — and the
-pot drains to 0.)*
+9-8-7-6-5; pot 801 (51 dead money from a folder). Result: tie detected,
+nested-array hierarchy, 401/400 paid (the first winner takes the odd chip —
+house rule), pot drains to 0.
 
-**Scenario 4 — AI freeze repro.** Heads-up, opponent all-in for 5000, AI stack 1000
-holding a full house, RNG forced to the raise path: `handleAI` returned `undefined`
-and the `App.handleAI` continuation threw `Cannot read properties of undefined
-(reading 'minBet')` — the exact freeze from `players.js:105` (bug #2).
-*(Fixed 2026-07-09: the same setup now produces a 1000-chip all-in call and the
-hand continues — see the flipped test in `ai.test.js`.)*
+**Scenario 4 — all-in call under pressure.** Heads-up, opponent all-in for 5000,
+AI stack 1000 holding a full house, RNG forced to the raise path: the
+unaffordable raise is clamped into a 1000-chip all-in call and the hand
+continues (this fixture originally reproduced the AI freeze — CHANGELOG #2).

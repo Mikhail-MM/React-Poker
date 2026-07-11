@@ -1,6 +1,6 @@
 // Black-box tests for the AI decision engine (ai.js exports only handleAI).
 // Math.random is pinned per test to force deterministic decision paths.
-// "KNOWN BUG" tests pin buggy behavior on purpose (see docs/GAME_LOOP.md §9) —
+// "KNOWN BUG" tests pin buggy behavior on purpose (open census: docs/GAME_LOOP.md §9; resolved: docs/CHANGELOG.md) —
 // flip them when the bug is fixed.
 import {
 	handleAI,
@@ -185,7 +185,7 @@ describe('post-flop decisions (betting2-4)', () => {
 	it('clamps an unaffordable raise into an all-in call (bug #2 freeze fixed)', () => {
 		// Formerly the freeze: the AI decided to raise while facing a highBet
 		// larger than its stack, submitted betValue = highBet > max, and
-		// handleBet returned undefined (players.js:105, GAME_LOOP.md §9 #2).
+		// handleBet returned undefined (players.js:105, docs/CHANGELOG.md #2).
 		// clampBetToLegalRange now degrades the raise into an all-in call and
 		// the hand continues.
 		pinRandom(0.8);

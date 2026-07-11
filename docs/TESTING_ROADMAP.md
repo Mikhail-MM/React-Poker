@@ -145,10 +145,11 @@ Notes anchored in the current code:
   "active player is a robot" and enqueues `AI_DECIDE` (whose *output* is a
   `BET`/`FOLD` action). `pushAnimationState` stops being threaded into
   `ai.js` — animations subscribe to committed actions instead.
-- **Bug classes retired wholesale:** the freeze (bug #2) becomes impossible
-  as a hang — an invalid `BET` reduces to `{ state, next: [ERROR_EFFECT] }`
-  instead of `undefined` propagating into `setState`; the React 18 batching
-  trap (bug #10) disappears because nothing reads `this.state` mid-flight.
+- **Bug classes retired wholesale:** the #2-residual class (invalid bet →
+  `undefined` → dead loop; see GAME_LOOP.md §9) becomes impossible as a hang —
+  an invalid `BET` reduces to `{ state, next: [ERROR_EFFECT] }` instead of
+  `undefined` propagating into `setState`; the React 18 batching trap (#10)
+  disappears because nothing reads `this.state` mid-flight.
 - Time travel arrives here for free: the driver keeps
   `[{action, state}, ...]` — step back = pointer decrement.
 
@@ -224,8 +225,8 @@ fc.assert(fc.property(arbitraryBettingHistory(), history => {
 The `playStreets` runner and its three invariants in `sidePots.matrix.test.js`
 were written to be lifted directly into properties. Additional properties
 worth encoding: *paying* the generated pots (through `showDown`) never mints
-or destroys chips (modulo bug #3 until fixed — a perfect example of a property
-that documents a bug precisely: conservation error is always `< winners.length`).
+or destroys chips — conservation holds unconditionally since the odd-chip fix
+(CHANGELOG #3), so this property is now clean to state.
 
 Effort: 1–2 days once fast-check is a devDependency. Independent of Stages
 2–4 — could be done tomorrow.
@@ -234,7 +235,8 @@ Effort: 1–2 days once fast-check is a devDependency. Independent of Stages
 
 ## AI challenge track
 
-The pot-commitment wiring (2026-07-09) fixed the biggest exploit multiplier:
+The pot-commitment wiring (CHANGELOG.md, feature entry) fixed the biggest
+exploit multiplier:
 stakes are now the cost-to-call (capped at the stack) measured against the
 hand-start stack via `currentRoundChipsInvested`. Post-wiring play-testing
 surfaced the next layer — the evaluator is board-blind, and the awakened
@@ -262,22 +264,24 @@ entertainment value until this track begins.*
 |---|---|---|---|---|
 | Side-pot matrix + invariants | ✅ done | — | high | 13 scenarios, per-street ledgers |
 | Cascade seam traces | ✅ done | — | high | module-boundary blind spots documented |
-| Fix the pinned bug census | ✅ done | — | high | #1, #1b, #2 (freeze), #3 (odd chip → first winner), #5 (pocket pairs), #6 (raise typos), #7 fixed 2026-07-09. Still open: #4 (all-in un-reconcile), #9 (short-stack blinds), optional `handleBet` hardening (descriptive throw) |
+| Fix the pinned bug census | ✅ done | — | high | Resolved entries live in [CHANGELOG.md](./CHANGELOG.md). Still open (GAME_LOOP.md §9): #2-residual (`handleBet` hardening), #4 (all-in un-reconcile), #9 (short-stack blinds) |
 | `step()` transition log | 2 | ~1 day | high | names the action vocabulary |
 | Trace `showDown` interior (per-pot payouts) | 2 | hours | med | needs `step()`; closes the biggest blind spot |
 | Reducer + driver queue | 3 | 1–2 wks | very high | animation beats, time travel, retires bug classes #2/#10 |
 | Immer + patch log | 4 | days | high | keeps mutative style; `cloneDeep` retires |
 | fast-check pot properties | 5 | 1–2 days | high | independent; can precede Stage 2 |
 | Seeded RNG injection (deck + AI) | any | ~1 day | med | full-game golden replays need determinism |
-| AI challenge track (pot odds, draws, bluff-catch floor) | any | days | high | see §AI challenge track; pot commitment wired 2026-07-09 |
+| AI challenge track (attribution, pot odds, draws, bluff-catch floor) | any | days | high | see §AI challenge track; pot commitment already wired (CHANGELOG.md) |
 | TypeScript migration | any | ongoing | high | see GAME_LOOP.md §10 — catches bug classes #2/#4/#6 at compile time |
 
 ## Suggested order
 
-1. ~~Fix the freeze (bug #2)~~ — **done 2026-07-09** (along with #1/#1b),
-   exactly as intended: the pinned tests were flipped in the same change.
-2. Stage 5 properties for the pot system (independent, cheap, directly serves
+*(The pinned bug census has already been fixed following exactly this
+playbook — tests first, flips in the same change; see
+[CHANGELOG.md](./CHANGELOG.md).)*
+
+1. Stage 5 properties for the pot system (independent, cheap, directly serves
    the "many variants" goal beyond any hand-written matrix).
-3. Stage 2 `step()` log — small, and its labels de-risk Stage 3.
-4. Stage 3 reducer/driver — the architectural payoff.
-5. Stage 4 Immer patches — micro-mutation time travel on top.
+2. Stage 2 `step()` log — small, and its labels de-risk Stage 3.
+3. Stage 3 reducer/driver — the architectural payoff.
+4. Stage 4 Immer patches — micro-mutation time travel on top.

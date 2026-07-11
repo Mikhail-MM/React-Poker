@@ -1,6 +1,6 @@
 // Characterization tests for deck handling and hand-evaluation primitives in cards.js.
 // These pin CURRENT behavior. Tests labeled "KNOWN BUG" assert buggy output on
-// purpose (see docs/GAME_LOOP.md §9) — flip them when the bug is fixed.
+// purpose (open census: docs/GAME_LOOP.md §9; resolved: docs/CHANGELOG.md) — flip them when the bug is fixed.
 import {
 	generateDeckOfCards,
 	shuffle,
