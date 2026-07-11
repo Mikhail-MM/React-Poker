@@ -431,7 +431,7 @@ the real code; 👁 = established by inspection.
    `VALUE_MAP` a Ten is `9` (J=10) — unsatisfiable, so royals classified as
    "Straight Flush". The check now expects `[13, 12, 11, 10, 9]`; royals are
    detected, ranked, and reported correctly (single-royal payout verified in
-   `cards.showdown.test.js`).
+   `showdown.test.js`).
    **1b. ✅ Residual — tied royals crashed the showdown — FIXED 2026-07-09.**
    The #1 fix unmasked this: `buildComparator`'s 'Royal Flush' branch seeded its
    winners list with `Array.from({length: 1})` = `[undefined]`, `determineWinner`
@@ -443,7 +443,7 @@ the real code; 👁 = established by inspection.
    frame, top card; all royals hold the ace, so they always tie and split), the
    standard `determineWinner` loop (early return deleted), and the standard
    grouping in `buildAbsolutePlayerRankings` (tied royals now nest as a tie
-   array like every other rank). Verified in `cards.showdown.test.js`; all other
+   array like every other rank). Verified in `showdown.test.js`; all other
    snapshots passed unchanged, confirming no behavioral drift outside the
    tied-royal path.
 2. ✅ **The documented AI freeze — FIXED 2026-07-09** (`players.js:105` "final AI
@@ -477,7 +477,7 @@ the real code; 👁 = established by inspection.
    at the end of the hand, and `beginNextRound` explicitly resets `pot = 0`
    (clean slate — anything left there would be unclaimable by construction).
    Chip conservation now holds unconditionally. Verified in
-   `cards.showdown.test.js` (two- and three-way odd splits) and
+   `showdown.test.js` (two- and three-way odd splits) and
    `players.test.js`. Note: the split showdown message reports the per-winner
    floor share; the extra chip is not called out in the UI.
 4. 👁 **Boolean-vs-number comparison in raise un-reconciliation.**
@@ -565,7 +565,8 @@ tests would have surfaced.
 *nearly pure* — `App` clones state and the utils mutate only the clone — so the
 simulation harness used for this doc required zero refactoring, only stubbing
 `axios`/`uuid` imports. That harness has been converted into characterization
-suites (`src/utils/*.test.js`, factories in `src/testUtils/factories.js`, run via
+suites (grouped under `src/utils/__tests__/{unit,integration}/`, factories in
+`src/testUtils/factories.js`, run via
 `CI=true yarn test`): every scenario in Appendix A and every bug in §9 marked
 `KNOWN BUG` is pinned by a test asserting *current* behavior. When a bug is fixed,
 its test is meant to be flipped intentionally in the same change. The plan for

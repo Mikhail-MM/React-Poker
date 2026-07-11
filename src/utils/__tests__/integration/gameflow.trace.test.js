@@ -3,8 +3,8 @@
 // React never renders. Each snapshot is an ordered log of the state as it
 // crossed every module seam (see testUtils/trace.js for how and for the
 // same-module blind spots).
-import { traceGameFlow, betModule } from '../testUtils/trace.js';
-import { cc, mkPlayer, mkState } from '../testUtils/factories.js';
+import { traceGameFlow, betModule } from '../../../testUtils/trace.js';
+import { cc, mkPlayer, mkState } from '../../../testUtils/factories.js';
 
 describe('cascade traces', () => {
 	it('a call that closes pre-flop betting cascades through the flop deal', () => {

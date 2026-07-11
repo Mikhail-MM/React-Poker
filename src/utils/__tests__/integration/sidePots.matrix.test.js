@@ -10,8 +10,8 @@
 //   3. chips are conserved end-to-end (bets -> pot -> refunds)
 //
 // Street notation: { PlayerName: bet } or { PlayerName: { bet, folds: true } }.
-import { reconcilePot } from './bet.js';
-import { mkPlayer, mkState } from '../testUtils/factories.js';
+import { reconcilePot } from '../../bet.js';
+import { mkPlayer, mkState } from '../../../testUtils/factories.js';
 
 const playStreets = (roster, streets) => {
 	let state = mkState(

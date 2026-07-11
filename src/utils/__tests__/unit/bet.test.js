@@ -9,9 +9,9 @@ import {
 	handleFold,
 	handlePhaseShift,
 	reconcilePot,
-} from './bet.js';
+} from '../../bet.js';
 
-import { cc, mkPlayer, mkState } from '../testUtils/factories.js';
+import { cc, mkPlayer, mkState } from '../../../testUtils/factories.js';
 
 describe('determineBlindIndices', () => {
 	it('puts the small blind left of the dealer and the big blind after', () => {

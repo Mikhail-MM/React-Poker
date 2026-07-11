@@ -16,9 +16,9 @@ import {
 	checkStraight,
 	analyzeHistogram,
 	buildValueSet,
-} from './cards.js';
+} from '../../cards.js';
 
-import { c, cc, mkPlayer, mkState } from '../testUtils/factories.js';
+import { c, cc, mkPlayer, mkState } from '../../../testUtils/factories.js';
 
 const descending = (cards) => [...cards].sort((a, b) => b.value - a.value);
 

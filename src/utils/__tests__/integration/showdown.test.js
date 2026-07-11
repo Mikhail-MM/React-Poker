@@ -2,9 +2,9 @@
 // reconcilePot -> calculateSidePots -> showDown -> distributeSidePots -> payWinners.
 // Scenarios mirror docs/GAME_LOOP.md Appendix A. "KNOWN BUG" tests pin buggy
 // behavior on purpose — flip them when the bug is fixed.
-import { showDown } from './cards.js';
-import { reconcilePot } from './bet.js';
-import { cc, mkPlayer, mkState, totalChipsInPlay } from '../testUtils/factories.js';
+import { showDown } from '../../cards.js';
+import { reconcilePot } from '../../bet.js';
+import { cc, mkPlayer, mkState, totalChipsInPlay } from '../../../testUtils/factories.js';
 
 const runShowdown = (players, communityCodes, overrides = {}) => {
 	let state = mkState(players, {

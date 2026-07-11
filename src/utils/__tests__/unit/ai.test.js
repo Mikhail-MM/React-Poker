@@ -8,8 +8,8 @@ import {
 	buildPreFlopDeterminant,
 	buildGeneralizedDeterminant,
 	BET_HIERARCHY,
-} from './ai.js';
-import { cc, mkPlayer, mkState } from '../testUtils/factories.js';
+} from '../../ai.js';
+import { cc, mkPlayer, mkState } from '../../../testUtils/factories.js';
 
 let randomSpy;
 const pinRandom = (value) => {

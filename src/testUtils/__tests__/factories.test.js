@@ -4,9 +4,9 @@
 // production code produces (the generated deck, generateTable's players,
 // determineBlindIndices).
 import axios from 'axios';
-import { generateDeckOfCards } from '../utils/cards.js';
-import { generateTable } from '../utils/players.js';
-import { determineBlindIndices } from '../utils/bet.js';
+import { generateDeckOfCards } from '../../utils/cards.js';
+import { generateTable } from '../../utils/players.js';
+import { determineBlindIndices } from '../../utils/bet.js';
 import {
 	VALUE_MAP,
 	c,
@@ -16,7 +16,7 @@ import {
 	mkPlayer,
 	mkState,
 	totalChipsInPlay,
-} from './factories.js';
+} from '../factories.js';
 
 jest.mock('axios', () => ({ get: jest.fn() }));
 

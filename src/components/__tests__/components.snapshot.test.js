@@ -6,13 +6,13 @@
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 
-import Card from './cards/Card';
-import HiddenCard from './cards/HiddenCard';
-import ShowdownPlayer from './players/ShowdownPlayer';
-import PlayerStatusNotificationBox from './players/PlayerStatusNotificationBox';
-import Player from './players/Player';
+import Card from '../cards/Card';
+import HiddenCard from '../cards/HiddenCard';
+import ShowdownPlayer from '../players/ShowdownPlayer';
+import PlayerStatusNotificationBox from '../players/PlayerStatusNotificationBox';
+import Player from '../players/Player';
 
-import { c, cc, mkPlayer } from '../testUtils/factories';
+import { c, cc, mkPlayer } from '../../testUtils/factories';
 
 const markup = (element) => ReactDOMServer.renderToStaticMarkup(element);
 

@@ -8,7 +8,7 @@ import {
 	renderActionButtonText,
 	renderNetPlayerEarnings,
 	renderShowdownMessages,
-} from './ui.js';
+} from '../../ui.js';
 
 describe('renderPhaseStatement', () => {
 	it('maps phases to banner text', () => {

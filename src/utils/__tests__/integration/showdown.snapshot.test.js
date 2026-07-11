@@ -3,12 +3,12 @@
 // rank (including the ace-low edge cases) and the full sanitized outcome of
 // the canonical showdown scenarios. Cards serialize as compact codes ('AH').
 //
-// These complement the targeted assertions in cards.showdown.test.js: a
+// These complement the targeted assertions in showdown.test.js: a
 // behavior change anywhere in evaluation, ranking, side-pot math, or message
 // building shows up here as a snapshot diff.
-import { showDown } from './cards.js';
-import { reconcilePot } from './bet.js';
-import { cc, codes, mkPlayer, mkState } from '../testUtils/factories.js';
+import { showDown } from '../../cards.js';
+import { reconcilePot } from '../../bet.js';
+import { cc, codes, mkPlayer, mkState } from '../../../testUtils/factories.js';
 
 // Evaluate a single hand: no pots to pay, just the evaluator's verdict.
 const evaluate = (holeCodes, boardCodes) => {

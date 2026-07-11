@@ -9,9 +9,9 @@ import {
 	determinePhaseStartActivePlayer,
 	beginNextRound,
 	checkWin,
-} from './players.js';
+} from '../../players.js';
 
-import { cc, mkPlayer, mkState } from '../testUtils/factories.js';
+import { cc, mkPlayer, mkState } from '../../../testUtils/factories.js';
 
 jest.mock('axios', () => ({ get: jest.fn() }));
 

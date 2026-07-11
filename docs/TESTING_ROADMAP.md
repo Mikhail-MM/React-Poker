@@ -32,8 +32,8 @@ What exists today (all zero-source-change):
 
 | Layer | Where | What it pins |
 |---|---|---|
-| Characterization units | `src/utils/*.test.js` | Endpoint behavior of every exported transformer, incl. `KNOWN BUG` pins |
-| Logic snapshots | `cards.snapshot.test.js` | Exact best-hand construction per rank; full showdown outcomes |
+| Characterization units | `src/utils/__tests__/unit/` | Endpoint behavior of every exported transformer, incl. `KNOWN BUG` pins |
+| Logic snapshots | `showdown.snapshot.test.js` | Exact best-hand construction per rank; full showdown outcomes |
 | Component snapshots | `components.snapshot.test.js` | Presentational markup states |
 | **Seam traces** | `gameflow.trace.test.js` + `testUtils/trace.js` | **The intermediate states of a cascade**, captured at every module boundary |
 | **Side-pot matrix** | `sidePots.matrix.test.js` | 13 bet/fold/all-in/dead-money/refund configurations with per-street ledgers |
