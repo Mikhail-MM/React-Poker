@@ -13,17 +13,54 @@ import {
 	buildValueSet 
 } from './cards.js'
 
-import { 
-	renderActionButtonText 
+import {
+	renderActionButtonText
 } from './ui.js';
+
+// Normalize an AI-chosen raise into the legal betting window before it
+// reaches handleBet, which rejects out-of-range bets outright (and a robot
+// submitting an illegal bet used to freeze the game — docs/CHANGELOG.md
+// bug #2).
+//   highBet — the table's current price to play: the highest total bet any
+//             player has committed this street. A "raise" below it is not a
+//             legal bet, so lift it up to at least that price.
+//   max     — this player's total liquid stack for the street (chips + chips
+//             already bet this street): the most they can physically put in play.
+// ORDER MATTERS: lift to the price FIRST, then cap at the stack. When the
+// price exceeds the stack (an opponent shoved for more than we have), the two
+// clamps collapse the raise into an all-in call (betValue === max) — legal
+// input, because determineMinBet lowers the minimum to the player's total
+// stack in exactly that situation. Capping before lifting would reintroduce
+// the freeze.
+const clampBetToLegalRange = (betValue, highBet, max) => {
+	if (betValue < highBet) {
+		betValue = highBet;
+	}
+	if (betValue > max) {
+		betValue = max;
+	}
+	return betValue;
+};
 
 const handleAI = (state, pushAnimationState) => {
 	const { highBet } = state
 	const activePlayer = state.players[state.activePlayerIndex];
 	const min = determineMinBet(highBet, activePlayer.chips, activePlayer.bet)
     const max = activePlayer.chips + activePlayer.bet
-	const totalInvestment = activePlayer.chips + activePlayer.bet + activePlayer.stackInvestment; // NOTE: StackInvestment must be incremented at each level of BETTING
-	const investmentRequiredToRemain = (highBet / totalInvestment) * 100; 
+	// Pot-commitment weighting (the "stackInvestment" feature, finally wired):
+	// reconcilePot accumulates each street's bets into currentRoundChipsInvested
+	// (reset every hand), so the denominator is the bot's HAND-START stack.
+	// Measuring against the remaining stack instead made every chip already
+	// invested shrink the denominator — bots got easier to bluff out of exactly
+	// the pots they were deepest in (inverse pot commitment).
+	const totalInvestment = activePlayer.chips + activePlayer.bet + activePlayer.currentRoundChipsInvested;
+	// The price of staying in is the cost TO CALL: highBet minus what is already
+	// in front of the bot this street (using the full highBet overstated the
+	// pressure whenever the bot was partially in — blinds, every re-raised
+	// street), capped at the stack, since an oversized shove can only take what
+	// the bot actually has behind.
+	const costToRemain = Math.min(highBet - activePlayer.bet, activePlayer.chips);
+	const investmentRequiredToRemain = (costToRemain / totalInvestment) * 100;
 	const descendingSortHand = activePlayer.cards.concat(state.communityCards).sort((a, b) => b.value - a.value)
 	const { frequencyHistogram, suitHistogram } =  generateHistogram(descendingSortHand)
 	const stakes = classifyStakes(investmentRequiredToRemain);
@@ -42,16 +79,10 @@ const handleAI = (state, pushAnimationState) => {
 					const determinedRaiseRange = raiseRange[Math.floor(Math.random() * (raiseRange.length - 0)) + 0];
 					const wantRaise = (BET_HIERARCHY[stakes] <= BET_HIERARCHY[determinedRaiseRange])
 						if (wantRaise) {
-							let betValue = Math.floor(decideBetProportion(determinedRaiseRange) * activePlayer.chips)
-							if (betValue < highBet) {
-								if (highBet < max) {
-									betValue = highBet;
-								}
-							}
-							if (betValue > max)
-									activePlayer.canRaise = false
-									pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, betValue, activePlayer)} ${betValue}`);
-									return handleBet(state, betValue, min, max);
+							const betValue = clampBetToLegalRange(Math.floor(decideBetProportion(determinedRaiseRange) * activePlayer.chips), highBet, max);
+								activePlayer.canRaise = false
+								pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, betValue, activePlayer)} ${betValue}`);
+								return handleBet(state, betValue, min, max);
 						} else {
 							// Do not render the bet value if it's a "check"
 							pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, callValue, activePlayer)} ${(callValue > activePlayer.bet) ? (callValue) : ""}`);
@@ -159,10 +190,7 @@ const handleAI = (state, pushAnimationState) => {
 					const determinedRaiseRange = raiseRange[Math.floor(Math.random() * (raiseRange.length - 0)) + 0];
 					const wantRaise = (BET_HIERARCHY[stakes] <= BET_HIERARCHY[determinedRaiseRange])
 					if (wantRaise) {
-						let betValue = Math.floor(decideBetProportion(determinedRaiseRange) * activePlayer.chips)
-						if (betValue < highBet) {
-							betValue = highBet;
-						}
+						const betValue = clampBetToLegalRange(Math.floor(decideBetProportion(determinedRaiseRange) * activePlayer.chips), highBet, max);
 							activePlayer.canRaise = false
 							pushAnimationState(state.activePlayerIndex, `${renderActionButtonText(highBet, betValue, activePlayer)} ${betValue}`);
 							return handleBet(state, betValue, min, max);
@@ -210,66 +238,64 @@ const buildGeneralizedDeterminant = (hand, highRank, frequencyHistogramMetaData)
 	} else if (highRank === 'Flush') {
 		return {
 			callLimit: 'beware',
-			raiseChange: 1,
+			raiseChance: 1,
 			raiseRange: ['strong', 'aggro', 'beware'],
 		}
 	} else if (highRank === 'Straight') {
 		return {
 			callLimit: 'beware',
-			raiseChange: 1,
-			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
+			raiseChance: 1,
+			raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'],
 		}
 	} else if (highRank === 'Three Of A Kind') {
 		return {
 			callLimit: 'beware',
-			raiseChange: 1,
-			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
+			raiseChance: 1,
+			raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'],
 		}
 	} else if (highRank === 'Two Pair') {
 		return {
 			callLimit: 'beware',
-			raiseChange: 0.7,
-			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
+			raiseChance: 0.7,
+			raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'],
 		}
 	} else if (highRank === 'Pair') {
 		return {
 			callLimit: 'hidraw',
-			raiseChange: 0.5,
-			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
+			raiseChance: 0.5,
+			raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'],
 		}
 	} else if (highRank === 'No Pair') {
 		return {
 			callLimit: 'meddraw',
-			raiseChange: 0.2,
-			raiseRange: ['lowdraw', 'meddraw', 'hidraw, strong'],
+			raiseChance: 0.2,
+			raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'],
 		}
 	}
 }
 
 const buildPreFlopDeterminant = (highCard, lowCard, suited, straightGap) => {
 	if (highCard === lowCard) {
-		switch(highCard) {
-			case(highCard > 8): {
-				return {
-					callLimit: 'beware',
-					raiseChance: 0.9,
-					raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'], // randomly determine bet based on this
-				}
+		if (highCard > 8) {
+			return {
+				callLimit: 'beware',
+				raiseChance: 0.9,
+				raiseRange: ['lowdraw', 'meddraw', 'hidraw', 'strong'], // randomly determine bet based on this
 			}
-			case(highCard > 5): {
-				return {
-					callLimit: 'aggro',
-					raiseChance: 0.75, // If Math.random() is < than this, select a random raiseTarget 
-					raiseRange: ['insignificant', 'lowdraw', 'meddraw'],
-				}
+		} else if (highCard > 5) {
+			return {
+				callLimit: 'aggro',
+				raiseChance: 0.75, // If Math.random() is < than this, select a random raiseTarget
+				raiseRange: ['insignificant', 'lowdraw', 'meddraw'],
 			}
-			case(highCard < 5):
-			default: {
-				return {
-					callLimit: 'aggro',
-					raiseChance: 0.5,
-					raiseRange: ['insignificant', 'lowdraw', 'meddraw'],
-				}
+		} else {
+			// Plain else, not `highCard < 5`: value 5 (a pair of SIXES) must land
+			// here too, like the original switch's default case. An `else if`
+			// left 6-6 returning undefined, which handleAI destructures — crash.
+			return {
+				callLimit: 'aggro',
+				raiseChance: 0.5,
+				raiseRange: ['insignificant', 'lowdraw', 'meddraw'],
 			}
 		}
 	} else if (highCard > 9 && lowCard > 9) {
@@ -426,4 +452,4 @@ const generateHistogram = (hand) => {
 	return histogram
 }
 
-export { handleAI }
+export { handleAI, clampBetToLegalRange, buildPreFlopDeterminant, buildGeneralizedDeterminant, BET_HIERARCHY }

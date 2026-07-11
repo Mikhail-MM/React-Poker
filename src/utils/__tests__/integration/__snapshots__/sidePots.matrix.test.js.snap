@@ -1,0 +1,282 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`side-pot scenario matrix a checked-through street adds no pots 1`] = `
+Array [
+  Object {
+    "pot": 300,
+    "sidePots": Array [
+      "300: [A, B, C]",
+    ],
+    "stacks": Array [
+      "A=900",
+      "B=900",
+      "C=900",
+    ],
+    "street": 1,
+  },
+  Object {
+    "pot": 300,
+    "sidePots": Array [
+      "300: [A, B, C]",
+    ],
+    "stacks": Array [
+      "A=900",
+      "B=900",
+      "C=900",
+    ],
+    "street": 2,
+  },
+]
+`;
+
+exports[`side-pot scenario matrix abandoned small blind is dead money across both layers 1`] = `
+Array [
+  Object {
+    "pot": 50,
+    "sidePots": Array [
+      "50: [BigBlind, Caller]",
+    ],
+    "stacks": Array [
+      "SmallBlind=990 FOLDED",
+      "BigBlind=980",
+      "Caller=980",
+    ],
+    "street": 1,
+  },
+]
+`;
+
+exports[`side-pot scenario matrix contestants shrinking across streets keep pots separate 1`] = `
+Array [
+  Object {
+    "pot": 300,
+    "sidePots": Array [
+      "300: [A, B, C]",
+    ],
+    "stacks": Array [
+      "A=900",
+      "B=900",
+      "C=900",
+    ],
+    "street": 1,
+  },
+  Object {
+    "pot": 700,
+    "sidePots": Array [
+      "300: [A, B, C]",
+      "400: [B, C]",
+    ],
+    "stacks": Array [
+      "A=900 FOLDED",
+      "B=700",
+      "C=700",
+    ],
+    "street": 2,
+  },
+]
+`;
+
+exports[`side-pot scenario matrix dead money below the lowest all-in stays in the main pot 1`] = `
+Array [
+  Object {
+    "pot": 250,
+    "sidePots": Array [
+      "250: [A, B]",
+    ],
+    "stacks": Array [
+      "Folder=950 FOLDED",
+      "A=0",
+      "B=900",
+    ],
+    "street": 1,
+  },
+]
+`;
+
+exports[`side-pot scenario matrix dead money spanning multiple all-in layers 1`] = `
+Array [
+  Object {
+    "pot": 1200,
+    "sidePots": Array [
+      "600: [A, B]",
+      "600: [B]",
+    ],
+    "stacks": Array [
+      "Folder=500 FOLDED",
+      "A=0",
+      "B=500",
+    ],
+    "street": 1,
+  },
+]
+`;
+
+exports[`side-pot scenario matrix everyone calls the same amount -> one pot 1`] = `
+Array [
+  Object {
+    "pot": 300,
+    "sidePots": Array [
+      "300: [A, B, C]",
+    ],
+    "stacks": Array [
+      "A=900",
+      "B=900",
+      "C=900",
+    ],
+    "street": 1,
+  },
+]
+`;
+
+exports[`side-pot scenario matrix everyone folds to the aggressor -> single-contestant pot of dead money 1`] = `
+Array [
+  Object {
+    "pot": 300,
+    "sidePots": Array [
+      "300: [A]",
+    ],
+    "stacks": Array [
+      "A=900",
+      "B=900 FOLDED",
+      "C=900 FOLDED",
+    ],
+    "street": 1,
+  },
+]
+`;
+
+exports[`side-pot scenario matrix kitchen sink: multi-street ladder, dead money, and condensation 1`] = `
+Array [
+  Object {
+    "pot": 1050,
+    "sidePots": Array [
+      "550: [A, B, C]",
+      "500: [B, C]",
+    ],
+    "stacks": Array [
+      "A=0",
+      "B=600",
+      "C=600",
+      "Folder=900 FOLDED",
+    ],
+    "street": 1,
+  },
+  Object {
+    "pot": 1650,
+    "sidePots": Array [
+      "550: [A, B, C]",
+      "1100: [B, C]",
+    ],
+    "stacks": Array [
+      "A=0",
+      "B=300",
+      "C=300",
+      "Folder=900 FOLDED",
+    ],
+    "street": 2,
+  },
+]
+`;
+
+exports[`side-pot scenario matrix odd un-round amounts layer and refund exactly 1`] = `
+Array [
+  Object {
+    "pot": 187,
+    "sidePots": Array [
+      "99: [A, B, C]",
+      "88: [B, C]",
+    ],
+    "stacks": Array [
+      "A=0",
+      "B=0",
+      "C=923",
+    ],
+    "street": 1,
+  },
+]
+`;
+
+exports[`side-pot scenario matrix one short all-in below the field -> main pot + side pot 1`] = `
+Array [
+  Object {
+    "pot": 700,
+    "sidePots": Array [
+      "300: [A, B, C]",
+      "400: [B, C]",
+    ],
+    "stacks": Array [
+      "A=0",
+      "B=700",
+      "C=700",
+    ],
+    "street": 1,
+  },
+]
+`;
+
+exports[`side-pot scenario matrix the bet.js comment ladder (100/200/300/500/1000) with final refund 1`] = `
+Array [
+  Object {
+    "pot": 1600,
+    "sidePots": Array [
+      "500: [A, B, C, D, E]",
+      "400: [B, C, D, E]",
+      "300: [C, D, E]",
+      "400: [D, E]",
+    ],
+    "stacks": Array [
+      "A=0",
+      "B=0",
+      "C=0",
+      "D=0",
+      "E=1000",
+    ],
+    "street": 1,
+  },
+]
+`;
+
+exports[`side-pot scenario matrix two streets with identical contestants condense into one pot 1`] = `
+Array [
+  Object {
+    "pot": 300,
+    "sidePots": Array [
+      "300: [A, B, C]",
+    ],
+    "stacks": Array [
+      "A=900",
+      "B=900",
+      "C=900",
+    ],
+    "street": 1,
+  },
+  Object {
+    "pot": 1050,
+    "sidePots": Array [
+      "1050: [A, B, C]",
+    ],
+    "stacks": Array [
+      "A=650",
+      "B=650",
+      "C=650",
+    ],
+    "street": 2,
+  },
+]
+`;
+
+exports[`side-pot scenario matrix uncalled raise is refunded to the raiser 1`] = `
+Array [
+  Object {
+    "pot": 400,
+    "sidePots": Array [
+      "400: [Caller, Raiser]",
+    ],
+    "stacks": Array [
+      "Raiser=800",
+      "Caller=0",
+    ],
+    "street": 1,
+  },
+]
+`;

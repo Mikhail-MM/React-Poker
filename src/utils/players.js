@@ -225,6 +225,7 @@ const beginNextRound = (state) => {
 	state.sidePots = [];
 	state.playerHierarchy = [];
 	state.showDownMessages = [];
+	state.pot = 0; // Clean slate: payWinners fully drains every pot (split remainders go to the first winner), so anything left here would be unclaimable.
 	state.deck = shuffle(generateDeckOfCards())
 	state.highBet = 20;
 	state.betInputValue = 20;
