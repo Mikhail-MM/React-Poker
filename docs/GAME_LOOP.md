@@ -421,7 +421,7 @@ the resolved entries (#1, #1b, #2, #3, #5, #6, #7) in full; numbers are stable
 and never reused. ✅ = verified by executing the real code; 👁 = established by
 inspection.
 
-2-residual. 👁 **`handleBet` returns `undefined` for out-of-range input**
+2. (__Residual__) 👁 **`handleBet` returns `undefined` for out-of-range input**
    (`bet.js:33-36`; the enabler behind the fixed freeze, CHANGELOG #2).
    `App.handleAI` dereferences the return value, so a future AI miscalculation
    would still be fatal for a robot; for a human it is a silent no-op. Kept
