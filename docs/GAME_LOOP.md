@@ -9,6 +9,20 @@ The open bug/quirk census lives in [§9](#9-open-bugs--quirks); resolved
 entries, and the full history of fixes and features, live in
 [CHANGELOG.md](./CHANGELOG.md) (numbering is shared and never reused).
 
+**Contents**
+
+- [§1 — Architecture at a glance](#1-architecture-at-a-glance) *(the self-scheduling loop · key invariant)*
+- [§2 — State shape](#2-state-shape) *(app state · player object · phase machine)*
+- [§3 — Bootstrap](#3-bootstrap-appcomponentdidmount-appjsx90)
+- [§4 — The betting round](#4-the-betting-round) *(`betReconciled` semantics · the turn cursor)*
+- [§5 — Pot reconciliation & the side-pot system](#5-pot-reconciliation--the-side-pot-system) *(recursive bucketing · condensing)*
+- [§6 — Showdown](#6-showdown) *(hand evaluation · comparators · hierarchy · paying the pots)*
+- [§7 — Round transition & win condition](#7-round-transition--win-condition)
+- [§8 — The AI](#8-the-ai-aijs20) *(stakes · determinants · decision)*
+- [§9 — Open bugs & quirks](#9-open-bugs--quirks)
+- [§10 — Architectural weaknesses & refactor notes](#10-architectural-weaknesses--refactor-notes)
+- [Appendix A — Simulation-verified behavior](#appendix-a--simulation-verified-behavior)
+
 Source layout:
 
 | File | Role |
